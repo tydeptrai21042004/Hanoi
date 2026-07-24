@@ -1,0 +1,67 @@
+{
+  "old": {
+    "host_psnr": 45.049789,
+    "clean_nc": 1.0,
+    "mean_nc": 0.971913,
+    "min_nc": 0.675831,
+    "mean_ber": 0.028548
+  },
+  "new": {
+    "host_psnr": 54.061855095429465,
+    "host_ssim": 0.998193184825816,
+    "clean_nc": 1.0,
+    "mean_nc": 0.9722874982382727,
+    "min_nc": 0.7650847524907716,
+    "mean_ber": 0.027685546875,
+    "original_host_nc": 0.5043951048423988,
+    "embedding_det_nonzero": true,
+    "embedding_min_abs_det": 0.4999999999999946,
+    "pilot_votes_clean": 79,
+    "pilot_votes_original": 0,
+    "unit_tests": "9 passed"
+  },
+  "delta": {
+    "psnr": 9.012066095429468,
+    "mean_nc": 0.00037449823827262474,
+    "min_nc": 0.08925375249077161,
+    "mean_ber": -0.0008624531249999991
+  },
+  "embedding_report": {
+    "clean_bit_errors": 0,
+    "clean_pilot_votes": 79,
+    "clean_pilot_detected": true,
+    "original_host_pilot_votes": 0,
+    "original_host_pilot_detected": false,
+    "original_host_bit_agreement": 0.50390625,
+    "original_host_hamming_errors": 2032,
+    "all_selected_component_determinants_nonzero": true,
+    "minimum_abs_component_determinant": 0.4999999999999946,
+    "minimum_abs_payload_difference": 1.9999999999999132,
+    "minimum_abs_pilot_difference": 7.99999999999989,
+    "mean_payload_amplitude": 0.208984375,
+    "median_payload_amplitude": 0.0,
+    "maximum_payload_amplitude": 2,
+    "zero_payload_amplitude_fraction": 0.796875,
+    "mean_pilot_amplitude": 2.8607594936708862,
+    "maximum_pilot_amplitude": 4,
+    "pilot_count": 79,
+    "activated_singular_payload_blocks": 0,
+    "clipped_channel_values": 0
+  },
+  "stress": {
+    "attack_count": 12,
+    "mean_nc": 0.7825481654186461,
+    "min_nc": 0.4874514661120537,
+    "mean_ber": 0.21826171875,
+    "max_ber": 0.513427734375,
+    "pilot_failures": 2
+  },
+  "multihost": {
+    "host_count": 13,
+    "successful": 13,
+    "psnr_min": 51.583517303537214,
+    "psnr_max": 56.018234575640655,
+    "all_clean_nc_one": true,
+    "all_embedding_det_nonzero": true
+  }
+}

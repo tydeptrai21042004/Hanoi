@@ -1,0 +1,27 @@
+{
+  "method_id": "spatial_cd_detqr",
+  "configuration": {
+    "target_margin": 2.0,
+    "boundary_penalty": 0.01,
+    "max_patterns": 10,
+    "determinant_floor": 1e-06,
+    "embedded_determinant_margin": 0.5,
+    "mask_seed": 918273,
+    "pilot_seed": 202607,
+    "pilot_count": 79,
+    "pilot_margin": 8.0
+  },
+  "host_psnr": 54.061855095429465,
+  "host_ssim": 0.998193184825816,
+  "clean_nc": 1.0,
+  "mean_nc": 0.9722874982382727,
+  "mean_ncc": 0.9446444723641919,
+  "mean_ber": 0.027685546875,
+  "embedding_det_nonzero": true,
+  "embedding_min_abs_det": 0.4999999999999946,
+  "all_attacked_det_nonzero": false,
+  "all_det_nonzero": false,
+  "attack_count": 15,
+  "fully_blind": true,
+  "stage": "after_pso"
+}

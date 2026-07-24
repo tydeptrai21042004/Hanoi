@@ -1,0 +1,122 @@
+{
+  "dct_qr": {
+    "method_id": "dct_qr",
+    "configuration": {
+      "seed": 2026,
+      "step": 16.0,
+      "rho_frac": 0.45,
+      "pilot_count": 128,
+      "pilot_step": 10.0,
+      "pilot_rho_frac": 0.49,
+      "eta": 0.07,
+      "certificate_mode": "qr",
+      "qr_lift": 1.0,
+      "qr_det_epsilon": 1e-12,
+      "adaptive_step_enabled": true,
+      "adaptive_step_ratios": [
+        1.28125,
+        1.0,
+        0.8125
+      ],
+      "adaptive_step_fractions": [
+        0.2,
+        0.6
+      ],
+      "exact_confidence_gate": 0.79,
+      "qr_map_lambda": 0.33,
+      "qr_map_iters": 12,
+      "evidence_conf_floor": 0.15,
+      "evidence_conf_scale": 1.4,
+      "evidence_conf_power": 2.111312219196586,
+      "evidence_certificate_floor": 0.7,
+      "evidence_certificate_scale": 0.3,
+      "sync_quick_accept": 0.72,
+      "sync_improvement_threshold": 0.05,
+      "sync_certificate_weight": 0.08,
+      "sync_geometry_penalty": 0.04,
+      "translation_radius": 8,
+      "translation_subset": 96,
+      "watermark_size": 64
+    },
+    "host_psnr": 45.6880329041219,
+    "host_ssim": 0.9910879160332082,
+    "clean_nc": 1.0,
+    "mean_nc": 0.9946964205630238,
+    "q10_nc": 0.988482033341423,
+    "min_nc": 0.9783331901145308,
+    "mean_ncc": 0.9893649738185214,
+    "mean_ber": 0.005322265625,
+    "embedding_det_nonzero": true,
+    "embedding_min_abs_det": "",
+    "all_attacked_det_nonzero": true,
+    "all_det_nonzero": true,
+    "attack_count": 15,
+    "fully_blind": true
+  },
+  "spatial_cd_detqr": {
+    "psnr": 54.27180970411986,
+    "clean": {
+      "nc": 1.0,
+      "pilot_detected": true,
+      "sync": {
+        "sync_accepted": false,
+        "sync_candidate": "identity",
+        "proposed_candidate": "identity",
+        "identity_pilot_score": 0.7302692480933621,
+        "best_pilot_score": 0.7302692480933621,
+        "pilot_score_gain": 0.0,
+        "acceptance_threshold": 0.3,
+        "minimum_accepted_pilot_score": 0.5
+      }
+    },
+    "rotation_2": {
+      "nc": 0.992688299231402,
+      "pilot_detected": true,
+      "sync": {
+        "sync_accepted": true,
+        "sync_candidate": "rotation_-2.0",
+        "proposed_candidate": "rotation_-2.0",
+        "identity_pilot_score": 0.023690134504885742,
+        "best_pilot_score": 0.739110114936276,
+        "pilot_score_gain": 0.7154199804313902,
+        "acceptance_threshold": 0.3,
+        "minimum_accepted_pilot_score": 0.5
+      }
+    },
+    "shear_0_08": {
+      "nc": 0.979906026121415,
+      "pilot_detected": true,
+      "sync": {
+        "sync_accepted": true,
+        "sync_candidate": "shear_-0.08",
+        "proposed_candidate": "shear_-0.08",
+        "identity_pilot_score": -0.07774628788398229,
+        "best_pilot_score": 0.7275783903425256,
+        "pilot_score_gain": 0.8053246782265079,
+        "acceptance_threshold": 0.3,
+        "minimum_accepted_pilot_score": 0.5
+      }
+    },
+    "unwatermarked_host": {
+      "nc": 0.5043951048423988,
+      "pilot_detected": false,
+      "sync": {
+        "sync_accepted": false,
+        "sync_candidate": "identity",
+        "proposed_candidate": "rotation_-3.0",
+        "identity_pilot_score": -0.6354223459436147,
+        "best_pilot_score": 0.1144731218622979,
+        "pilot_score_gain": 0.7498954678059125,
+        "acceptance_threshold": 0.3,
+        "minimum_accepted_pilot_score": 0.5
+      }
+    }
+  },
+  "dct_schur_rescue": {
+    "psnr": 47.089774234917414,
+    "fused_clean_nc": 1.0,
+    "independent_schur_clean_accuracy": 0.609375,
+    "acceptance_target": 0.99,
+    "accepted": false
+  }
+}

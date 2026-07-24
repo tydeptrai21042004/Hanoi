@@ -1,0 +1,194 @@
+[
+  {
+    "method_id": "dct_dm_qim_chen2001",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 43.85987356082542,
+    "embed_seconds": 0.024595335999947565,
+    "extract_seconds": 0.009232635999978811
+  },
+  {
+    "method_id": "dct_stdm_qim_chen2001",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 45.728380218971125,
+    "embed_seconds": 0.024627512999927603,
+    "extract_seconds": 0.008375849999993079
+  },
+  {
+    "method_id": "dct_iss_malvar2003",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 46.992239303932294,
+    "embed_seconds": 0.016621615000076417,
+    "extract_seconds": 0.009824668999954156
+  },
+  {
+    "method_id": "ca_qim_a2_mao2024",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 45.08583234824918,
+    "embed_seconds": 0.03378974500003551,
+    "extract_seconds": 0.015620413999954508
+  },
+  {
+    "method_id": "dct_spread_spectrum_cox1997",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 0.999755859375,
+    "psnr_db": 35.059014318905035,
+    "embed_seconds": 0.01746919799995794,
+    "extract_seconds": 0.007274789000007331
+  },
+  {
+    "method_id": "dew_langelaar2001",
+    "status": "ok",
+    "watermark_shape": [
+      16,
+      16
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 35.07997492929927,
+    "embed_seconds": 0.017514665000021523,
+    "extract_seconds": 0.007476159000020743
+  },
+  {
+    "method_id": "kumar2021",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 51.80421438097931,
+    "embed_seconds": 0.018945408000035968,
+    "extract_seconds": 0.004837737999991987
+  },
+  {
+    "method_id": "guo2017_dwt_qr_fa",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 51.141103565318915,
+    "embed_seconds": 0.10536954400004106,
+    "extract_seconds": 0.1267413079999642
+  },
+  {
+    "method_id": "gaata2022_dwt_hess_fwa",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 0.999755859375,
+    "psnr_db": 51.36866238681542,
+    "embed_seconds": 1.166179290999935,
+    "extract_seconds": 1.050950907000015
+  },
+  {
+    "method_id": "dwt_hd_svd_2025",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 0.99462890625,
+    "psnr_db": 55.61869634453495,
+    "embed_seconds": 0.008561006000036286,
+    "extract_seconds": 0.00563764900005026
+  },
+  {
+    "method_id": "hess_nha2023",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 50.69135534125445,
+    "embed_seconds": 0.5403057700000318,
+    "extract_seconds": 0.48594055399996705
+  },
+  {
+    "method_id": "roy2018_dwt_svd",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 41.680144961124846,
+    "embed_seconds": 0.03293314899997313,
+    "extract_seconds": 0.01801578200002041
+  },
+  {
+    "method_id": "dwt_wht_svd_2024",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 38.285116062002324,
+    "embed_seconds": 0.027811817999918276,
+    "extract_seconds": 0.020726060000015423
+  },
+  {
+    "method_id": "qwt_qsvd_zhang2022_blind",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 0.9970703125,
+    "psnr_db": 43.18417874156794,
+    "embed_seconds": 0.3504129709999688,
+    "extract_seconds": 0.24471007400006783
+  },
+  {
+    "method_id": "qwt_qsvd_zhang2022_semiblind",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 0.999755859375,
+    "psnr_db": 43.18417874156794,
+    "embed_seconds": 0.32024832199999764,
+    "extract_seconds": 0.15865581800005657
+  },
+  {
+    "method_id": "zhu2021_iwt_svd_adapted",
+    "status": "ok",
+    "watermark_shape": [
+      64,
+      64
+    ],
+    "clean_accuracy": 1.0,
+    "psnr_db": 46.329825899979475,
+    "embed_seconds": 0.3843953219999321,
+    "extract_seconds": 0.20551070500005153
+  }
+]

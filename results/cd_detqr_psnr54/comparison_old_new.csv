@@ -1,0 +1,3 @@
+version,host_psnr,clean_nc,mean_nc,min_nc,mean_ber,host_ssim,original_host_nc,embedding_det_nonzero,embedding_min_abs_det,pilot_votes_clean,pilot_votes_original
+original_after_pso,45.049789,1.0,0.971913,0.675831,0.028548,,,,,,
+blind_cd_detqr_v2_psnr54,54.061855095429465,1.0,0.9722874982382727,0.7650847524907716,0.027685546875,0.998193184825816,0.5043951048423988,True,0.4999999999999946,79,0

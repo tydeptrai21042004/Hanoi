@@ -1,0 +1,147 @@
+{
+  "protocol": {
+    "hosts": 13,
+    "moderate_attacks": 15,
+    "geometry_attacks": [
+      "rotation_2deg",
+      "shear_0p08"
+    ],
+    "watermark": "64x64",
+    "host_size": "512x512"
+  },
+  "dct_qr": {
+    "status": "accepted",
+    "change": {
+      "step_classes": {
+        "weakest_20_percent": 20.5,
+        "middle_40_percent": 16.0,
+        "strongest_40_percent": 13.0
+      },
+      "qr_map_lambda": 0.33,
+      "clean_exact_gate_mean_confidence": 0.79
+    },
+    "metrics": {
+      "psnr": {
+        "before": 45.63587514130183,
+        "after": 45.68459925608935,
+        "delta": 0.048724114787514865,
+        "wins": 10,
+        "losses": 3
+      },
+      "clean_nc": {
+        "before": 0.9999813180138294,
+        "after": 1.0,
+        "delta": 1.868198617060147e-05,
+        "wins": 1,
+        "losses": 0
+      },
+      "mean_nc": {
+        "before": 0.9905195925479187,
+        "after": 0.9909904524195929,
+        "delta": 0.00047085987167434676,
+        "wins": 9,
+        "losses": 4
+      },
+      "min_nc": {
+        "before": 0.9597428355973427,
+        "after": 0.9629647624724392,
+        "delta": 0.003221926875096302,
+        "wins": 8,
+        "losses": 5
+      }
+    }
+  },
+  "dct_schur_rescue": {
+    "status": "rejected",
+    "change": {
+      "rescue_count": 64,
+      "schur_step": 0.15,
+      "joint_iterations": 5,
+      "fusion_weight": 0.4
+    },
+    "metrics": {
+      "psnr": {
+        "before": 46.93703106713354,
+        "after": 47.03128500219982,
+        "delta": 0.0942539350662841,
+        "wins": 12,
+        "losses": 1
+      },
+      "clean_nc": {
+        "before": 0.9999813270838557,
+        "after": 1.0,
+        "delta": 1.8672916144281725e-05,
+        "wins": 1,
+        "losses": 0
+      },
+      "mean_nc": {
+        "before": 0.9888500675540237,
+        "after": 0.9888017443664446,
+        "delta": -4.832318757902892e-05,
+        "wins": 5,
+        "losses": 8
+      },
+      "min_nc": {
+        "before": 0.953918087851412,
+        "after": 0.9575386866477774,
+        "delta": 0.0036205987963652433,
+        "wins": 10,
+        "losses": 3
+      }
+    },
+    "secondary_selected_clean_accuracy_mean": 0.8581730769230769,
+    "secondary_selected_clean_accuracy_min": 0.65625,
+    "baseline_full_schur_clean_nc_mean": 0.6592830203733298
+  },
+  "spatial_cd_detqr": {
+    "status": "accepted_for_geometry",
+    "change": {
+      "pilot_count_before": 79,
+      "pilot_count_after": 71,
+      "pilot_margin": 8.0,
+      "affine_candidates": {
+        "rotation_degrees": [
+          -2,
+          0,
+          2
+        ],
+        "shear_x": [
+          -0.08,
+          0,
+          0.08
+        ]
+      },
+      "acceptance_pilot_score_gain": 0.3
+    },
+    "metrics": {
+      "psnr": {
+        "before": 53.45465254399608,
+        "after": 53.63600084220988,
+        "delta": 0.1813482982137984
+      },
+      "moderate_mean_nc": {
+        "before": 0.974359260407284,
+        "after": 0.974351171752491,
+        "delta": -8.088654793070305e-06
+      },
+      "geometry_mean_nc": {
+        "before": 0.5464624654983434,
+        "after": 0.9866696414549583,
+        "delta": 0.44020717595661485
+      },
+      "rotation_2deg_nc": {
+        "before": 0.5684661713439353,
+        "after": 0.9925741502965941
+      },
+      "shear_0p08_nc": {
+        "before": 0.5244587596527513,
+        "after": 0.9807651326133228
+      },
+      "combined_17_attack_mean_nc": {
+        "before": 0.9240184610062322,
+        "after": 0.975800403482193,
+        "delta": 0.051781942475960796
+      }
+    }
+  }
+}

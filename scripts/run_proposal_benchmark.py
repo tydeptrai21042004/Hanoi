@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from qr64_certified import DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
+from three_method_utils import evaluate_method, read_config, write_rows
+from qr64_certified.common.io import load_host_rgb, load_watermark_binary, save_image
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Benchmark one of the three proposal methods on one host and 15 attacks.")
+    parser.add_argument("--method", choices=[DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR], required=True)
+    parser.add_argument("--stage", choices=["before", "after_pso"], default="after_pso")
+    parser.add_argument("--host", default=str(ROOT / "data" / "host" / "lenna.bmp"))
+    parser.add_argument("--watermark", default=str(ROOT / "data" / "watermark" / "wm.png"))
+    parser.add_argument("--output-dir", default=None)
+    parser.add_argument("--save-images", action="store_true")
+    args = parser.parse_args()
+    os.environ.setdefault("JILP_NUM_THREADS", "1")
+    cfg = read_config(ROOT / "configs" / f"{args.method}_{args.stage}.json", args.method)
+    host = load_host_rgb(args.host)
+    wm = load_watermark_binary(args.watermark, size=64)
+    summary, rows, watermarked, _key, clean = evaluate_method(args.method, cfg, host, wm)
+    summary["stage"] = args.stage
+    out = Path(args.output_dir) if args.output_dir else ROOT / "results" / "single" / args.method / args.stage
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    write_rows(out / "per_attack.csv", rows)
+    if args.save_images:
+        save_image(out / "watermarked.png", watermarked)
+        save_image(out / "clean_extracted.png", clean)
+    print(json.dumps(summary, indent=2))
+
+
+if __name__ == "__main__":
+    main()
