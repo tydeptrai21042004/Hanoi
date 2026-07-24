@@ -1,0 +1,199 @@
+from __future__ import annotations
+
+"""Public registry exposing exactly three proposal methods."""
+
+from dataclasses import replace
+from typing import Any, Mapping
+
+import numpy as np
+
+from .cd_detqr import (
+    CDDetQRConfig,
+    CDDetQRKey,
+    embed_cd_detqr,
+    extract_cd_detqr,
+)
+from .config import QR64Config
+from .direct_schur_rescue import (
+    DirectSchurRescueConfig,
+    DirectSchurRescueKey,
+    embed as embed_direct_schur_rescue,
+    extract as extract_direct_schur_rescue,
+)
+from .method import QR64Key, embed as embed_certified, extract as extract_certified
+
+DCT_QR = "dct_qr"
+DCT_SCHUR_RESCUE = "dct_schur_rescue"
+SPATIAL_CD_DETQR = "spatial_cd_detqr"
+
+# Compatibility aliases retained for old commands, but only three methods are listed.
+QR_CERTIFIED = DCT_QR
+DIRECT_SCHUR_RESCUE = DCT_SCHUR_RESCUE
+
+SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
+    DCT_QR: {
+        "id": DCT_QR,
+        "display_name": "DCT-QR Reliability-Conditioned Watermarking",
+        "domain": "DCT-QIM with QR stability allocation",
+        "scientific_status": "validated improvement",
+        "description": (
+            "QR reliability allocates local QIM separation: weak matrices receive stronger "
+            "protection and stable matrices receive lower distortion."
+        ),
+    },
+    DCT_SCHUR_RESCUE: {
+        "id": DCT_SCHUR_RESCUE,
+        "display_name": "DCT-Schur Invariant Rescue Hypothesis",
+        "domain": "DCT primary + spectrum-preserving Schur secondary statistic",
+        "scientific_status": "exploratory; independent clean criterion not yet met",
+        "description": (
+            "Tests whether a spectrum-preserving change in Schur departure from normality can "
+            "provide independent evidence for uncertain DCT decisions."
+        ),
+    },
+    SPATIAL_CD_DETQR: {
+        "id": SPATIAL_CD_DETQR,
+        "display_name": "Spatial CD-DetQR with Determinant Synchronization",
+        "domain": "Channel-differential spatial QR determinants",
+        "scientific_status": "validated geometric improvement",
+        "description": (
+            "An exact antisymmetric determinant update carries the payload, while the same "
+            "determinant domain supplies an affine synchronization statistic."
+        ),
+    },
+}
+
+METHOD_ALIASES = {
+    "qr": DCT_QR,
+    "qr64": DCT_QR,
+    "qr_certified": DCT_QR,
+    "dct_qr": DCT_QR,
+    "schur": DCT_SCHUR_RESCUE,
+    "schur_rescue": DCT_SCHUR_RESCUE,
+    "direct_schur": DCT_SCHUR_RESCUE,
+    "direct_schur_rescue": DCT_SCHUR_RESCUE,
+    "dct_schur_rescue": DCT_SCHUR_RESCUE,
+    "cd_detqr": SPATIAL_CD_DETQR,
+    "detqr": SPATIAL_CD_DETQR,
+    "spatial_cd_detqr": SPATIAL_CD_DETQR,
+}
+
+
+def normalize_proposal_method_id(method_id: str) -> str:
+    normalized = METHOD_ALIASES.get(str(method_id).strip().lower())
+    if normalized is None:
+        valid = ", ".join(SUPPORTED_PROPOSAL_METHODS)
+        raise KeyError(f"Unknown proposal method '{method_id}'. Valid methods: {valid}")
+    return normalized
+
+
+def list_supported_methods() -> list[dict[str, Any]]:
+    return [dict(SUPPORTED_PROPOSAL_METHODS[key]) for key in SUPPORTED_PROPOSAL_METHODS]
+
+
+def default_config_for_method(method_id: str):
+    method = normalize_proposal_method_id(method_id)
+    if method == DCT_QR:
+        return QR64Config(certificate_mode="qr").validated()
+    if method == DCT_SCHUR_RESCUE:
+        return DirectSchurRescueConfig().validated()
+    return CDDetQRConfig()
+
+
+def embed_proposal(
+    method_id: str,
+    host_rgb: np.ndarray,
+    watermark_binary: np.ndarray,
+    *,
+    config: QR64Config | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
+    return_metadata: bool = False,
+):
+    method = normalize_proposal_method_id(method_id)
+    if method == DCT_SCHUR_RESCUE:
+        result = embed_direct_schur_rescue(
+            host_rgb,
+            watermark_binary,
+            config=DirectSchurRescueConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
+        if return_metadata:
+            watermarked, key, metadata = result
+            metadata = dict(metadata)
+            metadata["method_id"] = DCT_SCHUR_RESCUE
+            return watermarked, key, metadata
+        return result
+    if method == SPATIAL_CD_DETQR:
+        return embed_cd_detqr(
+            host_rgb,
+            watermark_binary,
+            config=config,
+            return_metadata=return_metadata,
+        )
+
+    if isinstance(config, QR64Config):
+        cfg = config
+    else:
+        cfg = QR64Config.from_mapping(config)
+    if cfg.certificate_mode != "qr":
+        cfg = replace(cfg, certificate_mode="qr")
+    cfg = cfg.validated()
+    watermarked, key = embed_certified(host_rgb, watermark_binary, config=cfg)
+    if return_metadata:
+        metadata = {
+            "method_id": DCT_QR,
+            "certificate_mode": "qr",
+            "direct_schur_carrier": False,
+            "configuration": cfg.to_dict(),
+        }
+        return watermarked, key, metadata
+    return watermarked, key
+
+
+def extract_proposal(
+    possibly_attacked_rgb: np.ndarray,
+    key: QR64Key | DirectSchurRescueKey | CDDetQRKey,
+    *,
+    return_metadata: bool = False,
+):
+    if isinstance(key, DirectSchurRescueKey):
+        result = extract_direct_schur_rescue(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
+        if return_metadata:
+            recovered, metadata = result
+            metadata = dict(metadata)
+            metadata["method_id"] = DCT_SCHUR_RESCUE
+            return recovered, metadata
+        return result
+    if isinstance(key, CDDetQRKey):
+        return extract_cd_detqr(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
+    return extract_certified(
+        possibly_attacked_rgb, key, return_metadata=return_metadata
+    )
+
+
+def method_id_from_key(key: QR64Key | DirectSchurRescueKey | CDDetQRKey) -> str:
+    if isinstance(key, DirectSchurRescueKey):
+        return DCT_SCHUR_RESCUE
+    if isinstance(key, CDDetQRKey):
+        return SPATIAL_CD_DETQR
+    return DCT_QR
+
+
+__all__ = [
+    "DCT_QR",
+    "DCT_SCHUR_RESCUE",
+    "SPATIAL_CD_DETQR",
+    "QR_CERTIFIED",
+    "DIRECT_SCHUR_RESCUE",
+    "SUPPORTED_PROPOSAL_METHODS",
+    "METHOD_ALIASES",
+    "normalize_proposal_method_id",
+    "list_supported_methods",
+    "default_config_for_method",
+    "embed_proposal",
+    "extract_proposal",
+    "method_id_from_key",
+]
