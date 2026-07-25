@@ -43,6 +43,7 @@ class QR64Config:
     # QR mode uses canonical-R diagonal energy; Schur mode uses spectral energy
     # plus a weighted Henrici departure term.
     gain_normalization_enabled: bool = True
+    qr_gain_mode: str = "diag_l2"
     gain_gamma: float = 0.75
     gain_clip: tuple[float, float] = (0.55, 1.45)
     schur_departure_weight: float = 0.50
@@ -89,6 +90,8 @@ class QR64Config:
             )
         if not 0 <= self.exact_confidence_gate <= 1:
             raise ValueError("exact_confidence_gate must be in [0,1].")
+        if str(self.qr_gain_mode).lower() not in {"diag_l2", "carrier_r11"}:
+            raise ValueError("qr_gain_mode must be 'diag_l2' or 'carrier_r11'.")
         if self.gain_gamma < 0:
             raise ValueError("gain_gamma must be nonnegative.")
         gain_clip = tuple(float(x) for x in self.gain_clip)

@@ -216,22 +216,29 @@ def qr_gain_scale(
     *,
     eta: float = 0.07,
     lift: float = 1.0,
+    mode: str = "diag_l2",
 ) -> np.ndarray:
-    """Return a positive QR scale for local multiplicative-gain estimation.
+    """Return a positive QR scale for local attack-gain estimation.
 
-    For the canonical factorization ``A_b = Q_b R_b``, the scale is
+    ``diag_l2`` reproduces the original global scale
+    ``||diag(R)||_2`` on the lifted analysis matrix.
 
-        s_b^QR = ||diag(R_b)||_2.
-
-    It is invariant to the sign ambiguity of QR and responds smoothly to local
-    contrast attenuation.  The value is used only as a blind reference ratio;
-    it is not an additional watermark carrier.
+    ``carrier_r11`` uses the canonical first diagonal factor of an unlifted
+    analysis matrix. Since ``r_11 = ||A[:,0]||_2``, it measures attenuation in
+    the low-frequency column that contains the DCT-QIM carrier rather than
+    averaging over unrelated QR directions.
     """
+    normalized = str(mode).strip().lower()
+    if normalized == "carrier_r11":
+        matrices = analysis_matrices(rgb, eta=eta, lift=0.0)
+        _q, r = canonical_qr(matrices)
+        return np.abs(r[:, 0, 0]) + 1e-12
+    if normalized != "diag_l2":
+        raise ValueError("QR gain mode must be 'diag_l2' or 'carrier_r11'.")
     matrices = analysis_matrices(rgb, eta=eta, lift=lift)
     _q, r = canonical_qr(matrices)
     diagonal = np.abs(np.diagonal(r, axis1=-2, axis2=-1))
     return np.sqrt(np.sum(diagonal * diagonal, axis=1) + 1e-12)
-
 
 def schur_gain_scale(
     rgb: np.ndarray,

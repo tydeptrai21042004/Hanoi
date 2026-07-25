@@ -23,6 +23,7 @@ from .proposal_registry import (
     default_config_for_method,
     method_id_from_key,
 )
+from .flags import ABLATION_FLAGS, HYPERPARAMETER_FLAGS, apply_proposal_flags
 
 __all__ = [
     "QR64Config",
@@ -32,6 +33,9 @@ __all__ = [
     "CDDetQRConfig",
     "CDDetQRKey",
     "BlindCDDetQR",
+    "ABLATION_FLAGS",
+    "HYPERPARAMETER_FLAGS",
+    "apply_proposal_flags",
     "DCT_QR",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",

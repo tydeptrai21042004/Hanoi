@@ -142,8 +142,8 @@ def minimum_integer_amplitude(
     if not 0 < mu < np.sqrt(2.0):
         raise ValueError("normalized_margin must lie in (0, sqrt(2))")
     delta = float(determinant_margin)
-    if delta <= 0:
-        raise ValueError("determinant_margin must be positive")
+    if delta < 0:
+        raise ValueError("determinant_margin must be nonnegative")
     u = np.asarray(u, dtype=np.float64)
     v = np.asarray(v, dtype=np.float64)
     sign = np.asarray(sign, dtype=np.float64)
@@ -165,10 +165,14 @@ class CDDetQRConfig:
     target_margin: float = 0.005
     boundary_penalty: float = 0.0002
     max_patterns: int = 10
+    payload_pattern_search_enabled: bool = True
+    fixed_payload_pattern: int = 0
     determinant_floor: float = 1e-6
     embedded_determinant_margin: float = 0.10
+    determinant_safety_enabled: bool = True
 
     mask_seed: int = 918273
+    payload_mask_enabled: bool = True
     pilot_seed: int = 202607
     pilot_count: int = 31
     pilot_margin: float = 0.005
@@ -193,6 +197,8 @@ class CDDetQRConfig:
             raise ValueError("boundary_penalty must be nonnegative")
         if not 1 <= self.max_patterns <= len(_PATTERNS):
             raise ValueError(f"max_patterns must be in [1, {len(_PATTERNS)}]")
+        if not 0 <= self.fixed_payload_pattern < self.max_patterns:
+            raise ValueError("fixed_payload_pattern must be in [0, max_patterns).")
         if self.determinant_floor <= 0:
             raise ValueError("determinant_floor must be positive")
         if self.embedded_determinant_margin <= self.determinant_floor:
@@ -280,12 +286,17 @@ class BlindCDDetQR:
             host, self.config.max_patterns
         )
         sign = np.where(coded_bits > 0, 1, -1).astype(np.int64)
+        determinant_margin = (
+            self.config.embedded_determinant_margin
+            if self.config.determinant_safety_enabled
+            else 0.0
+        )
         amplitudes = minimum_integer_amplitude(
             u,
             v,
             sign,
             self.config.target_margin,
-            self.config.embedded_determinant_margin,
+            determinant_margin,
         )
         cost = (
             amplitudes.astype(np.float64) ** 2
@@ -293,7 +304,14 @@ class BlindCDDetQR:
             * _BOUNDARIES[: self.config.max_patterns][None, :]
             - 1e-6 * sign[:, None] * normalized
         )
-        selected = np.argmin(cost, axis=1).astype(np.int64)
+        if self.config.payload_pattern_search_enabled:
+            selected = np.argmin(cost, axis=1).astype(np.int64)
+        else:
+            selected = np.full(
+                coded_bits.size,
+                int(self.config.fixed_payload_pattern),
+                dtype=np.int64,
+            )
         idx = np.arange(coded_bits.size)
         return selected, amplitudes[idx, selected], determinant[idx, selected], sign
 
@@ -304,12 +322,17 @@ class BlindCDDetQR:
             image, self.config.max_patterns
         )
         sign = np.ones(determinant.shape[0], dtype=np.int64)
+        determinant_margin = (
+            self.config.embedded_determinant_margin
+            if self.config.determinant_safety_enabled
+            else 0.0
+        )
         amplitudes = minimum_integer_amplitude(
             u,
             v,
             sign,
             self.config.pilot_margin,
-            self.config.embedded_determinant_margin,
+            determinant_margin,
         )
         permutation = np.random.default_rng(self.config.pilot_seed).permutation(
             determinant.shape[0]
@@ -321,9 +344,13 @@ class BlindCDDetQR:
             choices = np.arange(self.config.max_patterns, dtype=np.int64)
             choices = choices[choices != int(payload_patterns[block])]
             # The original host pilot must represent the negative hypothesis.
+            pilot_det_margin = (
+                self.config.embedded_determinant_margin
+                if self.config.determinant_safety_enabled
+                else 0.0
+            )
             choices = choices[
-                determinant[block, choices]
-                < -self.config.embedded_determinant_margin
+                determinant[block, choices] < -pilot_det_margin
             ]
             if choices.size == 0:
                 continue
@@ -358,12 +385,17 @@ class BlindCDDetQR:
         u, v, _det, _z = qr_residual_features(output, self.config.max_patterns)
         selected_u = u[blocks, patterns][:, None]
         selected_v = v[blocks, patterns][:, None]
+        determinant_margin = (
+            self.config.embedded_determinant_margin
+            if self.config.determinant_safety_enabled
+            else 0.0
+        )
         amplitude = minimum_integer_amplitude(
             selected_u,
             selected_v,
             signs,
             margin,
-            self.config.embedded_determinant_margin,
+            determinant_margin,
         )[:, 0]
         clipped = 0
         updates = 0
@@ -453,9 +485,12 @@ class BlindCDDetQR:
         if watermark.shape != (64, 64):
             raise ValueError(f"Watermark must be 64x64; got {watermark.shape}")
         bits = watermark.ravel()
-        mask = np.random.default_rng(self.config.mask_seed).integers(
-            0, 2, bits.size, dtype=np.uint8
-        )
+        if self.config.payload_mask_enabled:
+            mask = np.random.default_rng(self.config.mask_seed).integers(
+                0, 2, bits.size, dtype=np.uint8
+            )
+        else:
+            mask = np.zeros(bits.size, dtype=np.uint8)
         coded = bits ^ mask
         payload_patterns, payload_amplitudes, original_det, signs = self._select_payload(
             host, coded
@@ -546,12 +581,20 @@ class BlindCDDetQR:
             "image_shape": list(host.shape),
             "watermark_shape": list(watermark.shape),
             "max_patterns": int(self.config.max_patterns),
+            "payload_pattern_search_enabled": bool(
+                self.config.payload_pattern_search_enabled
+            ),
+            "fixed_payload_pattern": int(self.config.fixed_payload_pattern),
             "target_margin": float(self.config.target_margin),
             "determinant_floor": float(self.config.determinant_floor),
             "embedded_determinant_margin": float(
                 self.config.embedded_determinant_margin
             ),
+            "determinant_safety_enabled": bool(
+                self.config.determinant_safety_enabled
+            ),
             "mask_seed": int(self.config.mask_seed),
+            "payload_mask_enabled": bool(self.config.payload_mask_enabled),
             "pilot_seed": int(self.config.pilot_seed),
             "payload_pattern": payload_patterns.astype(np.uint8).tolist(),
             "pilot_blocks": pilot_blocks.astype(np.uint16).tolist(),
@@ -591,6 +634,13 @@ class BlindCDDetQR:
             "mean_pilot_amplitude": float(np.mean(pilot_amplitudes)),
             "maximum_pilot_amplitude": int(np.max(pilot_amplitudes)),
             "pilot_count": int(pilot_blocks.size),
+            "payload_pattern_search_enabled": bool(
+                self.config.payload_pattern_search_enabled
+            ),
+            "determinant_safety_enabled": bool(
+                self.config.determinant_safety_enabled
+            ),
+            "payload_mask_enabled": bool(self.config.payload_mask_enabled),
             "activated_singular_payload_blocks": activated_singular,
             "closure_integer_updates": int(closure_updates),
             "clipped_channel_values": int(clipped),
@@ -621,15 +671,19 @@ class BlindCDDetQR:
         coded = (payload_det > 0).astype(np.uint8)
         pilot_votes = int(np.count_nonzero(pilot_det > 0))
         pilot_detected = pilot_votes > pilot_blocks.size // 2
-        if pilot_detected:
+        payload_mask_enabled = bool(key.get("payload_mask_enabled", True))
+        if pilot_detected and payload_mask_enabled:
             mask = np.random.default_rng(int(key["mask_seed"])).integers(
                 0, 2, n, dtype=np.uint8
             )
             bits = coded ^ mask
             path = "qr_determinant_pilot_then_unmask"
+        elif pilot_detected:
+            bits = coded
+            path = "qr_determinant_pilot_no_mask"
         else:
             bits = coded
-            path = "pilot_absent_keep_masked_payload"
+            path = "pilot_absent_keep_coded_payload"
         selected_abs = np.abs(np.concatenate([payload_det, pilot_det]))
         floor = float(key["determinant_floor"])
         metadata = {

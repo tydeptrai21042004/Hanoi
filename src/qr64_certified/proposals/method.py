@@ -273,7 +273,7 @@ def _decomposition_gain_scale(image: np.ndarray, cfg: QR64Config) -> np.ndarray:
             lift=cfg.qr_lift,
             departure_weight=cfg.schur_departure_weight,
         )
-    return qr_gain_scale(image, eta=cfg.eta, lift=cfg.qr_lift)
+    return qr_gain_scale(image, eta=cfg.eta, lift=cfg.qr_lift, mode=cfg.qr_gain_mode)
 
 
 def _extract_gain_normalized_payload(
@@ -571,6 +571,7 @@ def embed(
         )
         base_key.params["decomposition_gain_mode"] = str(cfg.certificate_mode).lower()
         base_key.params["decomposition_gain_gamma"] = float(cfg.gain_gamma)
+        base_key.params["qr_gain_mode"] = str(cfg.qr_gain_mode)
         base_key.params["decomposition_gain_clip"] = [float(x) for x in cfg.gain_clip]
         base_key.params["decomposition_gain_rule"] = (
             "DCT carrier divided by a QR/Schur block-gain ratio raised to gamma"

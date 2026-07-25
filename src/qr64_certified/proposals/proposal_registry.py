@@ -33,12 +33,13 @@ DIRECT_SCHUR_RESCUE = DCT_SCHUR_RESCUE
 SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
     DCT_QR: {
         "id": DCT_QR,
-        "display_name": "DCT-QR Gain-Normalized Reliability QIM",
-        "domain": "DCT-QIM with QR reliability allocation and QR gain compensation",
+        "display_name": "DCT-QR Carrier-Subspace Gain-Normalized QIM",
+        "domain": "DCT-QIM with QR reliability allocation and carrier-specific QR gain compensation",
         "scientific_status": "validated proposal",
         "description": (
-            "QR reliability selects local QIM spacing and canonical-R diagonal energy "
-            "compensates blockwise attenuation during blind extraction."
+            "QR reliability selects local QIM spacing, while the canonical first QR "
+            "diagonal r11 of the carrier-bearing DCT column estimates local attenuation "
+            "for regularized blind gain compensation."
         ),
     },
     DCT_SCHUR_RESCUE: {
@@ -96,14 +97,15 @@ def default_config_for_method(method_id: str):
     if method == DCT_QR:
         return QR64Config(
             certificate_mode="qr",
-            step=15.0,
+            step=13.25,
             pilot_step=6.0,
             adaptive_step_enabled=True,
-            adaptive_step_ratios=(20.0 / 15.0, 1.0, 12.0 / 15.0),
+            adaptive_step_ratios=(18.25 / 13.25, 1.0, 10.25 / 13.25),
             adaptive_step_fractions=(0.20, 0.60),
             evidence_conf_power=2.1,
             gain_normalization_enabled=True,
-            gain_gamma=0.75,
+            qr_gain_mode="carrier_r11",
+            gain_gamma=0.90,
         ).validated()
     if method == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig().validated()
