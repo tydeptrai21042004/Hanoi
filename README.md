@@ -8,7 +8,7 @@ This repository contains three redesigned 64×64 blind-watermark proposals,
 
 | Canonical ID | Domain constraint | Redesigned contribution |
 |---|---|---|
-| `dct_qr` | DCT + QR | QR reliability-conditioned DCT-QIM with canonical-`R` gain normalization |
+| `dct_qr` | DCT + QR | carrier-subspace QR transfer normalization with reliability-conditioned DCT-QIM |
 | `dct_schur_rescue` | DCT + Schur | Schur spectral-reliability DCT-QIM with eigenvalue/departure gain compensation |
 | `spatial_cd_detqr` | Spatial QR and `det(A) != 0` | normalized QR-residual carrier with a closed-form minimum integer update and hard determinant floor |
 
@@ -23,7 +23,7 @@ moderate attacks, and 39 clean round-trips.
 
 | Method | Mean PSNR | Clean NC | Mean attacked NC | Mean worst NC/host |
 |---|---:|---:|---:|---:|
-| DCT–QR | 46.213584 dB | 1.000000 | 0.997246 | 0.982613 |
+| DCT–QR | **47.250421 dB** | 1.000000 | **0.997867** | **0.986162** |
 | DCT–Schur | 48.014086 dB | 1.000000 | 0.996058 | 0.975353 |
 | Spatial DetQR | 56.670744 dB | 1.000000 | 0.991345 | 0.942829 |
 
@@ -35,7 +35,9 @@ version; see the report for the exact limitation.
 Detailed mathematics, novelty boundaries, proof sketches, experiment protocol,
 and limitations:
 
+- [`docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md`](docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md)
 - [`docs/REDESIGNED_PROPOSALS_VI.md`](docs/REDESIGNED_PROPOSALS_VI.md)
+- [`results/dct_qr_previous_vs_carrier_r11.json`](results/dct_qr_previous_vs_carrier_r11.json)
 - [`results/redesigned_comparison.json`](results/redesigned_comparison.json)
 - [`results/redesigned_13host_validation.json`](results/redesigned_13host_validation.json)
 
@@ -104,11 +106,26 @@ python scripts/list_baselines.py
 python scripts/list_attacks.py
 ```
 
-Expected test result for this package:
+Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `37 passed`.
 
-```text
-29 passed
+
+### Reproduce the focused DCT–QR comparison
+
+Quick one-host comparison:
+
+```bash
+python scripts/run_dct_qr_carrier_comparison.py --host-limit 1
 ```
+
+Full 13-host comparison:
+
+```bash
+python scripts/run_dct_qr_carrier_comparison.py
+```
+
+The previous global QR configuration is preserved in
+`configs/dct_qr_previous_global_qr.json`; the validated carrier-specific
+configuration is `configs/dct_qr_after_pso.json`.
 
 ## Reproduce the redesigned validation
 
@@ -134,3 +151,43 @@ it is not yet a final publication benchmark. A paper-grade study still needs
 multiple watermark patterns and seeds, a held-out parameter-selection protocol,
 statistical significance testing, runtime/key-size reporting, and comparison
 with independent state-of-the-art implementations under the same attacks.
+
+## Ablation and hyperparameter flags
+
+All three proposals now expose repeatable scientific ablations and direct
+hyperparameter overrides:
+
+```bash
+python scripts/list_proposal_flags.py
+python scripts/run_proposal_benchmark.py --help
+```
+
+Example DCT-QR ablation and override:
+
+```bash
+python scripts/run_proposal_benchmark.py \
+  --method dct_qr \
+  --ablation global_qr_gain \
+  --gain-gamma 0.90 \
+  --step 13.25
+```
+
+Generate one-component-at-a-time ablation tables:
+
+```bash
+python scripts/run_ablation_study.py --method dct_qr
+python scripts/run_ablation_study.py --method dct_schur_rescue
+python scripts/run_ablation_study.py --method spatial_cd_detqr
+```
+
+Run a deterministic hyperparameter grid:
+
+```bash
+python scripts/run_hyperparameter_sweep.py \
+  --method dct_qr \
+  --grid 'step=12.75|13.0|13.25' \
+  --grid 'gain_gamma=0.8|0.9|1.0'
+```
+
+See [`docs/ABLATION_AND_HYPERPARAMETER_FLAGS.md`](docs/ABLATION_AND_HYPERPARAMETER_FLAGS.md)
+for the complete method-specific flag tables and examples.
