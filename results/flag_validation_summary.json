@@ -1,0 +1,33 @@
+{
+  "release": "2.1.0",
+  "pytest": {
+    "passed": 37,
+    "failed": 0
+  },
+  "default_clean_smoke": [
+    {
+      "method_id": "dct_qr",
+      "psnr": 47.24778949003212,
+      "clean_nc": 1.0,
+      "det_nonzero": true
+    },
+    {
+      "method_id": "dct_schur_rescue",
+      "psnr": 47.94200057340662,
+      "clean_nc": 1.0,
+      "det_nonzero": true
+    },
+    {
+      "method_id": "spatial_cd_detqr",
+      "psnr": 55.87221086928059,
+      "clean_nc": 1.0,
+      "det_nonzero": true
+    }
+  ],
+  "ablation_reports": {
+    "dct_qr": "results/ablation/dct_qr/ablation_summary.json",
+    "dct_schur_rescue": "results/ablation/dct_schur_rescue/ablation_summary.json",
+    "spatial_cd_detqr": "results/ablation/spatial_cd_detqr/ablation_summary.json"
+  },
+  "spatial_ablation_protocol": "clean_only (full affine attack search remains available without --clean-only)"
+}

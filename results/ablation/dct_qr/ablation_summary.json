@@ -1,0 +1,466 @@
+{
+  "method_id": "dct_qr",
+  "host": "lenna.bmp",
+  "watermark": "wm.png",
+  "configuration_source": "/mnt/data/Hanoi-main-flags/Hanoi-main-dctqr-carrier-subspace/configs/dct_qr_after_pso.json",
+  "variants": [
+    {
+      "variant": "full",
+      "ablations": [],
+      "psnr": 47.24778949003212,
+      "ssim": 0.9937910246265114,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9986870447193364,
+      "q10_nc": 0.9960159971184244,
+      "min_nc": 0.9905075702802169,
+      "mean_ber": 0.001318359375,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": true,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": true,
+        "qr_gain_mode": "carrier_r11",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.33,
+        "qr_map_iters": 12,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 0.7,
+        "evidence_certificate_scale": 0.3,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.08,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    },
+    {
+      "variant": "uniform_step",
+      "ablations": [
+        "uniform_step"
+      ],
+      "psnr": 47.280438500891336,
+      "ssim": 0.9935807866728879,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9987685738930393,
+      "q10_nc": 0.9968404047722985,
+      "min_nc": 0.9905186020739009,
+      "mean_ber": 0.0012369791666666666,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [
+          "uniform_step"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": false,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": true,
+        "qr_gain_mode": "carrier_r11",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.33,
+        "qr_map_iters": 12,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 0.7,
+        "evidence_certificate_scale": 0.3,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.08,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    },
+    {
+      "variant": "no_gain_normalization",
+      "ablations": [
+        "no_gain_normalization"
+      ],
+      "psnr": 47.24778949003212,
+      "ssim": 0.9937910246265114,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9931888819016452,
+      "q10_nc": 0.9862327457605763,
+      "min_nc": 0.9758879630609792,
+      "mean_ber": 0.0068359375,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [
+          "no_gain_normalization"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": true,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": false,
+        "qr_gain_mode": "carrier_r11",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.33,
+        "qr_map_iters": 12,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 0.7,
+        "evidence_certificate_scale": 0.3,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.08,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    },
+    {
+      "variant": "global_qr_gain",
+      "ablations": [
+        "global_qr_gain"
+      ],
+      "psnr": 47.24778949003212,
+      "ssim": 0.9937910246265114,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9978601463252373,
+      "q10_nc": 0.9919061152631345,
+      "min_nc": 0.9863311820442058,
+      "mean_ber": 0.0021484375,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [
+          "global_qr_gain"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": true,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": true,
+        "qr_gain_mode": "diag_l2",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.33,
+        "qr_map_iters": 12,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 0.7,
+        "evidence_certificate_scale": 0.3,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.08,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    },
+    {
+      "variant": "no_spatial_map",
+      "ablations": [
+        "no_spatial_map"
+      ],
+      "psnr": 47.24778949003212,
+      "ssim": 0.9937910246265114,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9886200382439384,
+      "q10_nc": 0.9677994553588287,
+      "min_nc": 0.913940709880684,
+      "mean_ber": 0.011442057291666667,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [
+          "no_spatial_map"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": true,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": true,
+        "qr_gain_mode": "carrier_r11",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.0,
+        "qr_map_iters": 0,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 0.7,
+        "evidence_certificate_scale": 0.3,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.08,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    },
+    {
+      "variant": "no_certificate_evidence",
+      "ablations": [
+        "no_certificate_evidence"
+      ],
+      "psnr": 47.24778949003212,
+      "ssim": 0.9937910246265114,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9985236913133959,
+      "q10_nc": 0.9961133084923525,
+      "min_nc": 0.9870848038007692,
+      "mean_ber": 0.0014811197916666666,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [
+          "no_certificate_evidence"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": true,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": true,
+        "qr_gain_mode": "carrier_r11",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.33,
+        "qr_map_iters": 12,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 1.0,
+        "evidence_certificate_scale": 0.0,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.08,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    },
+    {
+      "variant": "no_sync_certificate",
+      "ablations": [
+        "no_sync_certificate"
+      ],
+      "psnr": 47.24778949003212,
+      "ssim": 0.9937910246265114,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9986870447193364,
+      "q10_nc": 0.9960159971184244,
+      "min_nc": 0.9905075702802169,
+      "mean_ber": 0.001318359375,
+      "flag_report": {
+        "method_id": "dct_qr",
+        "ablations": [
+          "no_sync_certificate"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "step": 13.25,
+        "rho_frac": 0.45,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "eta": 0.07,
+        "certificate_mode": "qr",
+        "qr_lift": 1.0,
+        "qr_det_epsilon": 1e-12,
+        "adaptive_step_enabled": true,
+        "adaptive_step_ratios": [
+          1.3773584905660377,
+          1.0,
+          0.7735849056603774
+        ],
+        "adaptive_step_fractions": [
+          0.2,
+          0.6
+        ],
+        "exact_confidence_gate": 0.79,
+        "gain_normalization_enabled": true,
+        "qr_gain_mode": "carrier_r11",
+        "gain_gamma": 0.9,
+        "gain_clip": [
+          0.55,
+          1.45
+        ],
+        "schur_departure_weight": 0.5,
+        "clean_identity_tolerance": 1e-10,
+        "qr_map_lambda": 0.33,
+        "qr_map_iters": 12,
+        "evidence_conf_floor": 0.15,
+        "evidence_conf_scale": 1.4,
+        "evidence_conf_power": 2.1,
+        "evidence_certificate_floor": 0.7,
+        "evidence_certificate_scale": 0.3,
+        "sync_quick_accept": 0.72,
+        "sync_improvement_threshold": 0.05,
+        "sync_certificate_weight": 0.0,
+        "sync_geometry_penalty": 0.04,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "watermark_size": 64
+      }
+    }
+  ]
+}

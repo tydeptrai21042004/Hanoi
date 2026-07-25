@@ -1,0 +1,446 @@
+{
+  "method_id": "spatial_cd_detqr",
+  "host": "lenna.bmp",
+  "watermark": "wm.png",
+  "configuration_source": "/mnt/data/Hanoi-main-flags/Hanoi-main-dctqr-carrier-subspace/configs/spatial_cd_detqr_after_pso.json",
+  "protocol": "clean_only",
+  "variants": [
+    {
+      "variant": "full",
+      "ablations": [],
+      "psnr": 55.87221086928059,
+      "ssim": 0.9989564836564117,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0002,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": true,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": true,
+        "mask_seed": 918273,
+        "payload_mask_enabled": true,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": true,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 3
+      }
+    },
+    {
+      "variant": "fixed_payload_pattern",
+      "ablations": [
+        "fixed_payload_pattern"
+      ],
+      "psnr": 30.681986477754823,
+      "ssim": 0.921054375181671,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [
+          "fixed_payload_pattern"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0002,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": false,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": true,
+        "mask_seed": 918273,
+        "payload_mask_enabled": true,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": true,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 3
+      }
+    },
+    {
+      "variant": "no_boundary_penalty",
+      "ablations": [
+        "no_boundary_penalty"
+      ],
+      "psnr": 55.87221086928059,
+      "ssim": 0.9988907792507762,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [
+          "no_boundary_penalty"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": true,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": true,
+        "mask_seed": 918273,
+        "payload_mask_enabled": true,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": true,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 3
+      }
+    },
+    {
+      "variant": "minimal_det_safety",
+      "ablations": [
+        "minimal_det_safety"
+      ],
+      "psnr": 55.87221086928059,
+      "ssim": 0.9989566567738167,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [
+          "minimal_det_safety"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0002,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": true,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": false,
+        "mask_seed": 918273,
+        "payload_mask_enabled": true,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": true,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 3
+      }
+    },
+    {
+      "variant": "no_payload_mask",
+      "ablations": [
+        "no_payload_mask"
+      ],
+      "psnr": 56.013144749191355,
+      "ssim": 0.9989565882819078,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [
+          "no_payload_mask"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0002,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": true,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": true,
+        "mask_seed": 918273,
+        "payload_mask_enabled": false,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": true,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 3
+      }
+    },
+    {
+      "variant": "no_affine_sync",
+      "ablations": [
+        "no_affine_sync"
+      ],
+      "psnr": 55.87221086928059,
+      "ssim": 0.9989564836564117,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [
+          "no_affine_sync"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0002,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": true,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": true,
+        "mask_seed": 918273,
+        "payload_mask_enabled": true,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": false,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 3
+      }
+    },
+    {
+      "variant": "single_closure",
+      "ablations": [
+        "single_closure"
+      ],
+      "psnr": 55.87221086928059,
+      "ssim": 0.9989564836564117,
+      "clean_nc": 1.0,
+      "mean_nc": 1.0,
+      "q10_nc": 1.0,
+      "min_nc": 1.0,
+      "mean_ber": 0.0,
+      "flag_report": {
+        "method_id": "spatial_cd_detqr",
+        "ablations": [
+          "single_closure"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "target_margin": 0.005,
+        "boundary_penalty": 0.0002,
+        "max_patterns": 10,
+        "payload_pattern_search_enabled": true,
+        "fixed_payload_pattern": 0,
+        "determinant_floor": 1e-06,
+        "embedded_determinant_margin": 0.1,
+        "determinant_safety_enabled": true,
+        "mask_seed": 918273,
+        "payload_mask_enabled": true,
+        "pilot_seed": 202607,
+        "pilot_count": 31,
+        "pilot_margin": 0.005,
+        "affine_sync_enabled": true,
+        "sync_acceptance_gain": 0.3,
+        "sync_min_pilot_score": 0.5,
+        "rotation_grid": [
+          -3,
+          -2.5,
+          -2,
+          -1.5,
+          -1,
+          -0.5,
+          0.5,
+          1,
+          1.5,
+          2,
+          2.5,
+          3
+        ],
+        "shear_grid": [
+          -0.1,
+          -0.08,
+          -0.06,
+          -0.04,
+          0.04,
+          0.06,
+          0.08,
+          0.1
+        ],
+        "closure_rounds": 1
+      }
+    }
+  ]
+}
