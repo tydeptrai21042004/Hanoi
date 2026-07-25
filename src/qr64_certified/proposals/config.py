@@ -38,6 +38,16 @@ class QR64Config:
     adaptive_step_fractions: tuple[float, float] = (0.20, 0.60)
     exact_confidence_gate: float = 0.79
 
+    # Decomposition-gain normalization.  The reference is computed from the
+    # final watermarked image and contains no original-host coefficients.
+    # QR mode uses canonical-R diagonal energy; Schur mode uses spectral energy
+    # plus a weighted Henrici departure term.
+    gain_normalization_enabled: bool = True
+    gain_gamma: float = 0.75
+    gain_clip: tuple[float, float] = (0.55, 1.45)
+    schur_departure_weight: float = 0.50
+    clean_identity_tolerance: float = 1e-10
+
     qr_map_lambda: float = 0.33
     qr_map_iters: int = 12
     evidence_conf_floor: float = 0.15
@@ -79,6 +89,15 @@ class QR64Config:
             )
         if not 0 <= self.exact_confidence_gate <= 1:
             raise ValueError("exact_confidence_gate must be in [0,1].")
+        if self.gain_gamma < 0:
+            raise ValueError("gain_gamma must be nonnegative.")
+        gain_clip = tuple(float(x) for x in self.gain_clip)
+        if len(gain_clip) != 2 or not 0 < gain_clip[0] < 1 < gain_clip[1]:
+            raise ValueError("gain_clip must be (lower, upper) with 0 < lower < 1 < upper.")
+        if self.schur_departure_weight < 0:
+            raise ValueError("schur_departure_weight must be nonnegative.")
+        if self.clean_identity_tolerance < 0:
+            raise ValueError("clean_identity_tolerance must be nonnegative.")
 
         if self.qr_map_iters < 0:
             raise ValueError("qr_map_iters cannot be negative.")
@@ -107,4 +126,6 @@ class QR64Config:
             raw["adaptive_step_ratios"] = tuple(raw["adaptive_step_ratios"])
         if "adaptive_step_fractions" in raw:
             raw["adaptive_step_fractions"] = tuple(raw["adaptive_step_fractions"])
+        if "gain_clip" in raw:
+            raw["gain_clip"] = tuple(raw["gain_clip"])
         return cls(**raw).validated()

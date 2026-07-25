@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+from scipy.fft import dctn
 
 from qr64_certified.common.types import WatermarkKey
 from qr64_certified.common.core import arnold_transform
@@ -24,7 +25,13 @@ from qr64_certified._jilp_core.method import (
     embed as _base_embed,
 )
 
-from .certificate import MatrixCertificate, compute_certificate
+from .certificate import (
+    MatrixCertificate,
+    compute_certificate,
+    opponent_field,
+    qr_gain_scale,
+    schur_gain_scale,
+)
 from .config import QR64Config
 
 
@@ -243,6 +250,77 @@ def _extract_reliability_conditioned_payload(
         bits[logical] = group_bits
         confidence[logical] = group_confidence
     return bits, confidence
+
+
+def _dct_qim_carrier(image: np.ndarray, eta: float) -> np.ndarray:
+    """Return the blockwise carrier used by the underlying DCT-QIM rule."""
+    field = opponent_field(np.asarray(image, dtype=np.uint8), eta=float(eta))
+    h, w = field.shape
+    blocks = (
+        field.reshape(h // 8, 8, w // 8, 8)
+        .transpose(0, 2, 1, 3)
+        .reshape(-1, 8, 8)
+    )
+    coefficients = dctn(blocks, type=2, norm="ortho", axes=(-2, -1))
+    return 0.5 * (coefficients[:, 0, 1] - coefficients[:, 1, 0])
+
+
+def _decomposition_gain_scale(image: np.ndarray, cfg: QR64Config) -> np.ndarray:
+    if str(cfg.certificate_mode).lower() == "schur":
+        return schur_gain_scale(
+            image,
+            eta=cfg.eta,
+            lift=cfg.qr_lift,
+            departure_weight=cfg.schur_departure_weight,
+        )
+    return qr_gain_scale(image, eta=cfg.eta, lift=cfg.qr_lift)
+
+
+def _extract_gain_normalized_payload(
+    image: np.ndarray,
+    key_params: dict[str, Any],
+    cfg: QR64Config,
+) -> tuple[np.ndarray, np.ndarray, dict[str, float]]:
+    """Decode QIM after decomposition-based local gain compensation.
+
+    The final watermarked image supplies a blind blockwise reference scale
+    ``s_b^0``.  For a questioned image, ``alpha_b=s_b/s_b^0`` estimates local
+    multiplicative attenuation and the carrier is corrected as
+
+        v_tilde_b = v_b / alpha_b^gamma.
+
+    The reference contains no host coefficients and the original image is not
+    needed during extraction.
+    """
+    payload_indices, *_ = _schedules_from_key(key_params)
+    if "adaptive_step_by_payload" in key_params:
+        steps = np.asarray(key_params["adaptive_step_by_payload"], dtype=np.float64)
+    else:
+        steps = np.full(payload_indices.size, float(key_params["step"]), dtype=np.float64)
+
+    reference = np.asarray(
+        key_params["decomposition_gain_reference"], dtype=np.float64
+    )
+    current = _decomposition_gain_scale(image, cfg)
+    if reference.shape != current.shape:
+        raise ValueError("Decomposition gain reference does not match image capacity.")
+    lower, upper = (float(x) for x in cfg.gain_clip)
+    ratio = np.clip(current / np.maximum(reference, 1e-12), lower, upper)
+    carrier = _dct_qim_carrier(image, cfg.eta)
+    corrected = carrier[payload_indices] / np.power(
+        ratio[payload_indices], float(cfg.gain_gamma)
+    )
+    units = corrected / steps
+    lattice = np.rint(units)
+    bits = (lattice.astype(np.int64) & 1).astype(np.uint8)
+    confidence = np.clip(1.0 - 2.0 * np.abs(units - lattice), 0.0, 1.0)
+    log_ratio = np.abs(np.log(np.maximum(ratio, 1e-12)))
+    stats = {
+        "gain_ratio_mean": float(np.mean(ratio[payload_indices])),
+        "gain_ratio_std": float(np.std(ratio[payload_indices])),
+        "gain_identity_error": float(np.max(log_ratio[payload_indices])),
+    }
+    return bits, confidence.astype(np.float64), stats
 
 
 def _icm_map(data: np.ndarray, lam: float, iterations: int) -> np.ndarray:
@@ -486,6 +564,18 @@ def embed(
         )
         embedding_role = "uniform QIM reference model"
 
+    if cfg.gain_normalization_enabled:
+        reference_scale = _decomposition_gain_scale(watermarked, cfg)
+        base_key.params["decomposition_gain_reference"] = (
+            reference_scale.astype(float).tolist()
+        )
+        base_key.params["decomposition_gain_mode"] = str(cfg.certificate_mode).lower()
+        base_key.params["decomposition_gain_gamma"] = float(cfg.gain_gamma)
+        base_key.params["decomposition_gain_clip"] = [float(x) for x in cfg.gain_clip]
+        base_key.params["decomposition_gain_rule"] = (
+            "DCT carrier divided by a QR/Schur block-gain ratio raised to gamma"
+        )
+
     base_key.params["qr64"] = {
         "role": embedding_role,
         "certificate_mode": cfg.certificate_mode,
@@ -530,7 +620,17 @@ def extract(
     payload_len = int(np.prod(wm_shape))
     bit_array = np.zeros(payload_len, dtype=np.uint8)
     conf_array = np.zeros(payload_len, dtype=np.float64)
-    if "adaptive_step_by_payload" in key_params:
+    gain_stats = {
+        "gain_ratio_mean": 1.0,
+        "gain_ratio_std": 0.0,
+        "gain_identity_error": float("inf"),
+    }
+    if cfg.gain_normalization_enabled and "decomposition_gain_reference" in key_params:
+        scrambled_bits, qim_conf, gain_stats = _extract_gain_normalized_payload(
+            aligned, key_params, cfg
+        )
+        positions = np.arange(payload_len, dtype=np.int32)
+    elif "adaptive_step_by_payload" in key_params:
         scrambled_bits, qim_conf = _extract_reliability_conditioned_payload(
             aligned, key_params
         )
@@ -557,7 +657,10 @@ def extract(
 
     # Integer-lattice embedding is exact on a clean image. Avoid modifying
     # already-certain bits only because of the spatial prior.
-    if float(sync_meta.get("score", 0.0)) >= 0.999 and float(np.mean(conf_map)) >= cfg.exact_confidence_gate:
+    if float(gain_stats["gain_identity_error"]) <= cfg.clean_identity_tolerance:
+        recovered = (bit_map > 0).astype(np.uint8) * 255
+        inference_path = "exact_decomposition_identity"
+    elif float(sync_meta.get("score", 0.0)) >= 0.999 and float(np.mean(conf_map)) >= cfg.exact_confidence_gate:
         recovered = (bit_map > 0).astype(np.uint8) * 255
         inference_path = "exact_high_confidence"
     else:
@@ -578,5 +681,10 @@ def extract(
         # Backward-compatible field name for old benchmark readers.
         "mean_qr_reliability": float(np.mean(certificate_map)),
         "inference_path": inference_path,
+        "gain_normalization_enabled": bool(
+            cfg.gain_normalization_enabled
+            and "decomposition_gain_reference" in key_params
+        ),
+        **gain_stats,
     }
     return (recovered, metadata) if return_metadata else recovered

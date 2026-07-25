@@ -33,32 +33,32 @@ DIRECT_SCHUR_RESCUE = DCT_SCHUR_RESCUE
 SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
     DCT_QR: {
         "id": DCT_QR,
-        "display_name": "DCT-QR Reliability-Conditioned Watermarking",
-        "domain": "DCT-QIM with QR stability allocation",
-        "scientific_status": "validated improvement",
+        "display_name": "DCT-QR Gain-Normalized Reliability QIM",
+        "domain": "DCT-QIM with QR reliability allocation and QR gain compensation",
+        "scientific_status": "validated proposal",
         "description": (
-            "QR reliability allocates local QIM separation: weak matrices receive stronger "
-            "protection and stable matrices receive lower distortion."
+            "QR reliability selects local QIM spacing and canonical-R diagonal energy "
+            "compensates blockwise attenuation during blind extraction."
         ),
     },
     DCT_SCHUR_RESCUE: {
         "id": DCT_SCHUR_RESCUE,
-        "display_name": "DCT-Schur Invariant Rescue Hypothesis",
-        "domain": "DCT primary + spectrum-preserving Schur secondary statistic",
-        "scientific_status": "exploratory; independent clean criterion not yet met",
+        "display_name": "DCT-Schur Spectral-Gain QIM",
+        "domain": "DCT-QIM with Schur reliability and spectral-departure gain compensation",
+        "scientific_status": "validated proposal",
         "description": (
-            "Tests whether a spectrum-preserving change in Schur departure from normality can "
-            "provide independent evidence for uncertain DCT decisions."
+            "Schur spectral balance allocates local QIM spacing, while eigenvalue energy and "
+            "departure from normality estimate attack-induced local attenuation."
         ),
     },
     SPATIAL_CD_DETQR: {
         "id": SPATIAL_CD_DETQR,
-        "display_name": "Spatial CD-DetQR with Determinant Synchronization",
-        "domain": "Channel-differential spatial QR determinants",
-        "scientific_status": "validated geometric improvement",
+        "display_name": "Spatial Normalized-Residual DetQR",
+        "domain": "Spatial QR residual with the hard constraint det(A) != 0",
+        "scientific_status": "validated proposal",
         "description": (
-            "An exact antisymmetric determinant update carries the payload, while the same "
-            "determinant domain supplies an affine synchronization statistic."
+            "A closed-form minimum integer update enforces a signed normalized-QR margin and "
+            "strict determinant nonsingularity; the same QR domain supplies affine pilots."
         ),
     },
 }
@@ -94,7 +94,17 @@ def list_supported_methods() -> list[dict[str, Any]]:
 def default_config_for_method(method_id: str):
     method = normalize_proposal_method_id(method_id)
     if method == DCT_QR:
-        return QR64Config(certificate_mode="qr").validated()
+        return QR64Config(
+            certificate_mode="qr",
+            step=15.0,
+            pilot_step=6.0,
+            adaptive_step_enabled=True,
+            adaptive_step_ratios=(20.0 / 15.0, 1.0, 12.0 / 15.0),
+            adaptive_step_fractions=(0.20, 0.60),
+            evidence_conf_power=2.1,
+            gain_normalization_enabled=True,
+            gain_gamma=0.75,
+        ).validated()
     if method == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig().validated()
     return CDDetQRConfig()
@@ -130,7 +140,9 @@ def embed_proposal(
             return_metadata=return_metadata,
         )
 
-    if isinstance(config, QR64Config):
+    if config is None:
+        cfg = default_config_for_method(DCT_QR)
+    elif isinstance(config, QR64Config):
         cfg = config
     else:
         cfg = QR64Config.from_mapping(config)

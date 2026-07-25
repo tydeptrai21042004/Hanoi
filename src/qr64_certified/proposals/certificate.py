@@ -209,3 +209,59 @@ def compute_certificate(
     if normalized == "schur":
         return compute_schur_certificate(rgb, eta=eta, lift=lift, det_epsilon=det_epsilon)
     raise ValueError("mode must be 'qr' or 'schur'.")
+
+
+def qr_gain_scale(
+    rgb: np.ndarray,
+    *,
+    eta: float = 0.07,
+    lift: float = 1.0,
+) -> np.ndarray:
+    """Return a positive QR scale for local multiplicative-gain estimation.
+
+    For the canonical factorization ``A_b = Q_b R_b``, the scale is
+
+        s_b^QR = ||diag(R_b)||_2.
+
+    It is invariant to the sign ambiguity of QR and responds smoothly to local
+    contrast attenuation.  The value is used only as a blind reference ratio;
+    it is not an additional watermark carrier.
+    """
+    matrices = analysis_matrices(rgb, eta=eta, lift=lift)
+    _q, r = canonical_qr(matrices)
+    diagonal = np.abs(np.diagonal(r, axis1=-2, axis2=-1))
+    return np.sqrt(np.sum(diagonal * diagonal, axis=1) + 1e-12)
+
+
+def schur_gain_scale(
+    rgb: np.ndarray,
+    *,
+    eta: float = 0.07,
+    lift: float = 1.0,
+    departure_weight: float = 0.50,
+) -> np.ndarray:
+    """Return the Schur spectral-departure scale used for DCT compensation.
+
+    Let ``lambda_i(A_b)`` be the eigenvalues of the lifted DCT analysis matrix
+    and let the Henrici departure satisfy
+
+        dep(A_b)^2 = ||A_b||_F^2 - sum_i |lambda_i(A_b)|^2.
+
+    The scale
+
+        s_b^S = sqrt(sum_i |lambda_i|^2 + omega dep(A_b)^2)
+
+    combines diagonal Schur energy with strict-upper Schur energy.  It therefore
+    remains genuinely Schur-based while avoiding the unreliable independent
+    secondary-bit channel used by the exploratory predecessor.
+    """
+    if departure_weight < 0:
+        raise ValueError("departure_weight must be nonnegative")
+    matrices = analysis_matrices(rgb, eta=eta, lift=lift)
+    eigenvalues = np.linalg.eigvals(matrices)
+    eigenvalue_energy = np.sum(np.abs(eigenvalues) ** 2, axis=1)
+    frobenius_energy = np.sum(np.abs(matrices) ** 2, axis=(1, 2))
+    departure_sq = np.maximum(frobenius_energy - eigenvalue_energy, 0.0)
+    return np.sqrt(
+        eigenvalue_energy + float(departure_weight) * departure_sq + 1e-12
+    )

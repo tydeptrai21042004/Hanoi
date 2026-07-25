@@ -44,7 +44,6 @@ from .method import (
     _icm_map,
     _inverse_arnold_array,
     embed as _certified_embed,
-    extract as _certified_extract,
 )
 
 METHOD_ID = "direct_schur_rescue"
@@ -72,15 +71,7 @@ class DirectSchurRescueConfig:
     # secondary channel from changes in the primary DCT reference model.
     base_config: QR64Config = field(
         default_factory=lambda: QR64Config(
-            certificate_mode="schur",
-            adaptive_step_enabled=True,
-            step=12.5,
-            pilot_step=6.0,
-            adaptive_step_ratios=(1.32, 1.0, 0.72),
-            adaptive_step_fractions=(0.20, 0.60),
-            gain_normalization_enabled=True,
-            gain_gamma=0.75,
-            schur_departure_weight=0.50,
+            certificate_mode="schur", adaptive_step_enabled=False
         )
     )
     schur_step: float = 0.04
@@ -778,104 +769,6 @@ def extract(
     }
     return (recovered, metadata) if return_metadata else recovered
 
-
-
-# ---------------------------------------------------------------------------
-# Proposal-ready Schur spectral-gain implementation
-# ---------------------------------------------------------------------------
-
-
-def embed(
-    host_rgb: np.ndarray,
-    watermark_binary: np.ndarray,
-    *,
-    config: DirectSchurRescueConfig | Mapping[str, Any] | None = None,
-    return_metadata: bool = False,
-):
-    """Embed DCT-QIM with Schur spectral-gain conditioned allocation.
-
-    The former independent Schur rescue bit channel is retained above only as
-    an ablation/negative-result implementation.  The public proposal now uses
-    Schur decomposition for two active and reproducible roles:
-
-    1. Schur reliability allocates the three local DCT-QIM spacings.
-    2. A Schur spectral/departure scale compensates local gain at extraction.
-
-    Hence every embedded bit is governed by DCT and Schur, while the clean QIM
-    lattice remains exact and no unreliable secondary vote is needed.
-    """
-    cfg = DirectSchurRescueConfig.from_mapping(config)
-    host = np.asarray(host_rgb, dtype=np.uint8)
-    watermark = (np.asarray(watermark_binary, dtype=np.uint8) > 0).astype(np.uint8) * 255
-    if host.shape != (512, 512, 3):
-        raise ValueError(
-            f"DCT-Schur proposal currently requires a 512x512 RGB host; got {host.shape}."
-        )
-    if watermark.shape != (64, 64):
-        raise ValueError(
-            f"DCT-Schur proposal keeps the watermark at 64x64; got {watermark.shape}."
-        )
-
-    watermarked, base_key = _certified_embed(
-        host, watermark, config=cfg.base_config
-    )
-    certificate = compute_schur_certificate(
-        watermarked,
-        eta=cfg.base_config.eta,
-        lift=cfg.base_config.qr_lift,
-        det_epsilon=cfg.direct_det_epsilon,
-    )
-    schur_params = {
-        "method_id": METHOD_ID,
-        "method": "DCT-QIM with Schur spectral-gain compensation",
-        "embedding_rule": (
-            "Schur reliability selects Delta_b; extraction uses "
-            "v_b/(s_b^S/s_b^{S,0})^gamma"
-        ),
-        "schur_scale": (
-            "sqrt(sum|lambda_i(A_b)|^2 + omega*dep(A_b)^2)"
-        ),
-        "departure_weight": float(cfg.base_config.schur_departure_weight),
-        "gain_gamma": float(cfg.base_config.gain_gamma),
-        "scientific_status": "validated proposal",
-        "legacy_secondary_channel": "available only for ablation; not fused publicly",
-    }
-    base_key.base_key.params["dct_schur_spectral_gain"] = schur_params
-    key = DirectSchurRescueKey(
-        base=base_key,
-        config=cfg.to_dict(),
-        schur_params=schur_params,
-    )
-    metadata = {
-        "method_id": METHOD_ID,
-        "certificate_mode": "schur",
-        "direct_schur_all_det_nonzero": bool(certificate.all_nonsingular),
-        "direct_schur_min_abs_det": float(np.min(certificate.determinant)),
-        "direct_schur_median_abs_det": float(np.median(certificate.determinant)),
-        "legacy_secondary_embedded": False,
-        "embedding_rule": schur_params["embedding_rule"],
-    }
-    return (watermarked, key, metadata) if return_metadata else (watermarked, key)
-
-
-def extract(
-    possibly_attacked_rgb: np.ndarray,
-    key: DirectSchurRescueKey,
-    *,
-    return_metadata: bool = False,
-):
-    """Fully blind Schur-gain compensated DCT-QIM extraction."""
-    recovered, metadata = _certified_extract(
-        possibly_attacked_rgb, key.base, return_metadata=True
-    )
-    metadata = {
-        **metadata,
-        "method_id": METHOD_ID,
-        "certificate_mode": "schur",
-        "legacy_secondary_used": False,
-        "inference_model": "Schur spectral-gain compensated DCT-QIM",
-    }
-    return (recovered, metadata) if return_metadata else recovered
 
 __all__ = [
     "METHOD_ID",
