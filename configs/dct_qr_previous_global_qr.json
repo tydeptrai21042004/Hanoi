@@ -1,6 +1,6 @@
 {
   "seed": 2026,
-  "step": 13.25,
+  "step": 15.0,
   "rho_frac": 0.45,
   "pilot_count": 128,
   "pilot_step": 6.0,
@@ -11,16 +11,16 @@
   "qr_det_epsilon": 1e-12,
   "adaptive_step_enabled": true,
   "adaptive_step_ratios": [
-    1.3773584905660377,
+    1.3333333333333333,
     1.0,
-    0.7735849056603774
+    0.8
   ],
   "adaptive_step_fractions": [
     0.2,
     0.6
   ],
   "gain_normalization_enabled": true,
-  "gain_gamma": 0.9,
+  "gain_gamma": 0.75,
   "gain_clip": [
     0.55,
     1.45
@@ -40,5 +40,5 @@
   "translation_radius": 8,
   "translation_subset": 96,
   "watermark_size": 64,
-  "qr_gain_mode": "carrier_r11"
+  "qr_gain_mode": "diag_l2"
 }

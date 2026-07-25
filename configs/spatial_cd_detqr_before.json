@@ -30,5 +30,9 @@
     0.08,
     0.1
   ],
-  "sync_min_pilot_score": 0.5
+  "sync_min_pilot_score": 0.5,
+  "payload_pattern_search_enabled": true,
+  "fixed_payload_pattern": 0,
+  "determinant_safety_enabled": true,
+  "payload_mask_enabled": true
 }
