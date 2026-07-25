@@ -1,0 +1,146 @@
+{
+  "protocol": {
+    "host_count": 1,
+    "hosts": [
+      "airplane.bmp"
+    ],
+    "watermark": "/mnt/data/Hanoi-main-redesigned/data/watermark/wm.png",
+    "watermark_size": [
+      64,
+      64
+    ],
+    "attack_suite": "moderate_attacks (15 deterministic attacks)",
+    "jilp_num_threads": "1"
+  },
+  "methods": {
+    "dct_qr": {
+      "configuration_file": "configs/dct_qr_after_pso.json",
+      "hosts": [
+        {
+          "host": "airplane.bmp",
+          "psnr": 46.01815309144201,
+          "ssim": 0.9890185222851501,
+          "clean_nc": 1.0,
+          "mean_nc": 0.998233197796754,
+          "q10_nc": 0.993874720566645,
+          "min_nc": 0.9907494820118201,
+          "worst_attack": "gaussian_blur_r1",
+          "attacks": {
+            "jpeg_q90": 1.0,
+            "jpeg_q70": 0.9995143273433708,
+            "gaussian_noise_sigma1": 1.0,
+            "salt_pepper_0p005": 0.9922189551004923,
+            "median_3x3": 0.9963583687658742,
+            "gaussian_blur_r1": 0.9907494820118201,
+            "rotation_back_1deg": 0.9982997622640682,
+            "gamma_0p8": 0.9995142093470912,
+            "gamma_1p2": 0.9992716973295172,
+            "brightness_0p9": 0.9992713435412108,
+            "brightness_1p1": 0.9995142093470912,
+            "contrast_0p9": 0.9992713435412108,
+            "contrast_1p1": 0.9997571341797822,
+            "resize_0p75": 1.0,
+            "resize_1p5": 0.9997571341797822
+          },
+          "seconds": 1.3632819029999155
+        }
+      ],
+      "aggregate": {
+        "host_count": 1,
+        "psnr": 46.01815309144201,
+        "ssim": 0.9890185222851501,
+        "clean_nc": 1.0,
+        "mean_nc": 0.998233197796754,
+        "mean_worst_nc": 0.9907494820118201,
+        "global_worst_nc": 0.9907494820118201,
+        "seconds": 1.3632819029999155
+      }
+    },
+    "dct_schur_rescue": {
+      "configuration_file": "configs/dct_schur_rescue_after_pso.json",
+      "hosts": [
+        {
+          "host": "airplane.bmp",
+          "psnr": 47.85892605956928,
+          "ssim": 0.9929594221461143,
+          "clean_nc": 1.0,
+          "mean_nc": 0.9977154507622986,
+          "q10_nc": 0.9925147636607532,
+          "min_nc": 0.9875956909997134,
+          "worst_attack": "gaussian_blur_r1",
+          "attacks": {
+            "jpeg_q90": 1.0,
+            "jpeg_q70": 0.999028300640554,
+            "gaussian_noise_sigma1": 1.0,
+            "salt_pepper_0p005": 0.9917293726280323,
+            "median_3x3": 0.9936928502098346,
+            "gaussian_blur_r1": 0.9875956909997134,
+            "rotation_back_1deg": 0.9980573093734825,
+            "gamma_0p8": 0.9997571341797822,
+            "gamma_1p2": 0.9995146808741092,
+            "brightness_0p9": 0.999028300640554,
+            "brightness_1p1": 0.9992713435412108,
+            "contrast_0p9": 0.999028300640554,
+            "contrast_1p1": 0.9995142093470912,
+            "resize_0p75": 0.9997571341797822,
+            "resize_1p5": 0.9997571341797822
+          },
+          "seconds": 1.4825443909999194
+        }
+      ],
+      "aggregate": {
+        "host_count": 1,
+        "psnr": 47.85892605956928,
+        "ssim": 0.9929594221461143,
+        "clean_nc": 1.0,
+        "mean_nc": 0.9977154507622986,
+        "mean_worst_nc": 0.9875956909997134,
+        "global_worst_nc": 0.9875956909997134,
+        "seconds": 1.4825443909999194
+      }
+    },
+    "spatial_cd_detqr": {
+      "configuration_file": "configs/spatial_cd_detqr_after_pso.json",
+      "hosts": [
+        {
+          "host": "airplane.bmp",
+          "psnr": 53.179618156056215,
+          "ssim": 0.9965911986270815,
+          "clean_nc": 1.0,
+          "mean_nc": 0.9944433965611044,
+          "q10_nc": 0.991150106729898,
+          "min_nc": 0.9470454885610271,
+          "worst_attack": "salt_pepper_0p005",
+          "attacks": {
+            "jpeg_q90": 1.0,
+            "jpeg_q70": 0.9973294782870886,
+            "gaussian_noise_sigma1": 1.0,
+            "salt_pepper_0p005": 0.9470454885610271,
+            "median_3x3": 0.9924579659496432,
+            "gaussian_blur_r1": 0.9902865468674116,
+            "rotation_back_1deg": 0.9924454465236277,
+            "gamma_0p8": 1.0,
+            "gamma_1p2": 0.9992716973295172,
+            "brightness_0p9": 1.0,
+            "brightness_1p1": 1.0,
+            "contrast_0p9": 1.0,
+            "contrast_1p1": 0.9995146808741092,
+            "resize_0p75": 0.9985423919340168,
+            "resize_1p5": 0.9997572520901243
+          },
+          "seconds": 11.208662974000163
+        }
+      ],
+      "aggregate": {
+        "host_count": 1,
+        "psnr": 53.179618156056215,
+        "ssim": 0.9965911986270815,
+        "clean_nc": 1.0,
+        "mean_nc": 0.9944433965611044,
+        "mean_worst_nc": 0.9470454885610271,
+        "global_worst_nc": 0.9470454885610271,
+        "seconds": 11.208662974000163
+      }
+    }
+  }
+}

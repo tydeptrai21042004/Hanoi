@@ -1,0 +1,84 @@
+{
+  "protocol": {
+    "hosts": 13,
+    "watermark": "64x64",
+    "host_size": "512x512",
+    "moderate_attacks": 15,
+    "clean_roundtrips": 39
+  },
+  "dct_qr": {
+    "old": {
+      "psnr": 45.68459925608935,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9909904524195929,
+      "mean_worst_nc": 0.9629647624724392
+    },
+    "new": {
+      "host_count": 13,
+      "psnr": 46.21358445338735,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9972460264305296,
+      "mean_worst_nc": 0.9826132361477592,
+      "global_worst_nc": 0.9482638709347228
+    },
+    "delta": {
+      "psnr": 0.5289851972979989,
+      "clean_nc": 0.0,
+      "mean_nc": 0.006255574010936682,
+      "mean_worst_nc": 0.019648473675319966
+    }
+  },
+  "dct_schur_rescue": {
+    "old": {
+      "psnr": 47.03128500219982,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9888017443664446,
+      "mean_worst_nc": 0.9575386866477774
+    },
+    "new": {
+      "host_count": 13,
+      "psnr": 48.014085973250765,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9960580262267916,
+      "mean_worst_nc": 0.9753531771536395,
+      "global_worst_nc": 0.9230184768766029
+    },
+    "delta": {
+      "psnr": 0.982800971050942,
+      "clean_nc": 0.0,
+      "mean_nc": 0.007256281860346991,
+      "mean_worst_nc": 0.017814490505862035
+    }
+  },
+  "spatial_cd_detqr": {
+    "old": {
+      "psnr": 53.63600084220988,
+      "clean_nc": 1.0,
+      "mean_nc": 0.974351171752491,
+      "mean_worst_nc": 0.7565911268740203,
+      "geometry_mean_nc": 0.9866696414549583,
+      "rotation_2deg_nc": 0.9925741502965941,
+      "shear_0p08_nc": 0.9807651326133228
+    },
+    "new": {
+      "host_count": 13,
+      "psnr": 56.670743539526335,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9913450713194965,
+      "mean_worst_nc": 0.9428291252994888,
+      "global_worst_nc": 0.9152581007523256,
+      "rotation_2deg_nc": 0.9853656689440501,
+      "shear_0p08_nc": 0.976092106362347,
+      "geometry_mean_nc": 0.9807288876531985
+    },
+    "delta": {
+      "psnr": 3.034742697316453,
+      "clean_nc": 0.0,
+      "mean_nc": 0.016993899567005477,
+      "mean_worst_nc": 0.1862379984254685,
+      "geometry_mean_nc": -0.005940753801759735,
+      "rotation_2deg_nc": -0.007208481352544038,
+      "shear_0p08_nc": -0.004673026250975765
+    }
+  }
+}
