@@ -1,28 +1,37 @@
 # Scientific revision changelog
 
-## DCT-QR
+## 2026 redesigned proposal release
 
-- Added QR reliability-conditioned QIM levels using the validated ratios `(1.28125, 1.0, 0.8125)` and reliability partitions `(0.20, 0.60)`.
-- Retained integer-lattice closure and blind extraction.
-- Set the validated spatial-prior coefficient to `0.33` and exact clean-confidence gate to `0.79` in the after-PSO configuration.
-- Preserved a uniform-strength mode for controlled before/after experiments.
+### DCT–QR
 
-## DCT-Schur Rescue
+- Preserved the DCT-QIM carrier and integer-lattice closure.
+- Changed the validated QIM levels to `(20, 15, 12)` over QR reliability groups.
+- Added canonical-`R` diagonal-energy reference and local gain normalization:
+  `v_tilde = v / (s_QR / s_QR_ref)^0.75`.
+- The gain reference is measured from the final watermarked image, not from the
+  original host.
 
-- Reclassified the method as an exploratory secondary-channel hypothesis.
-- Disabled adaptive primary strength by default in this method so the Schur contribution can be isolated scientifically.
-- Added the explicit acceptance criterion: independent clean Schur accuracy must be at least `0.99` before fusion is credited.
-- Kept the spectrum/trace/determinant-preserving floating-point construction unchanged.
+### DCT–Schur
 
-## Spatial CD-DetQR
+- Removed the low-accuracy independent Schur secondary channel from the public
+  embedding/extraction path; retained it only in legacy/ablation code.
+- Added Schur spectral reliability-conditioned DCT-QIM levels `(16.5, 12.5, 9)`.
+- Added a homogeneous eigenvalue/departure scale for local DCT gain correction.
 
-- Reduced the pilot count from `79` to the validated `71`.
-- Added determinant-pilot affine hypothesis testing over small rotations and shears.
-- Added two acceptance conditions: pilot-score gain above `0.30` and absolute score at least `0.50`.
-- Preserved the exact antisymmetric update law `x' = x + 4sa`.
+### Spatial DetQR
 
-## Evaluation
+- Replaced the algebraically redundant raw determinant carrier by the normalized
+  QR residual `z(A)=det(Q)r22=det(A)/r11`.
+- Added a hard embedded determinant margin.
+- Derived and implemented the exact minimum nonnegative integer amplitude that
+  satisfies both the signed normalized-QR margin and `det(A) != 0`.
+- Reduced the pilot set to 31 and moved payload and affine pilots into the same
+  normalized-QR domain.
 
-- Replaced a mean-only optimization score by a combined mean, lower-decile, minimum-NC, and PSNR criterion.
-- Added the complete 13-host before/after tables under `results/scientific_validation/`.
-- Added English and Vietnamese mathematical method descriptions.
+### Evaluation and reproducibility
+
+- Added theorem-level unit tests; current result: `29 passed`.
+- Added 13-host × 15-attack validation with clean NC exactly 1 for all 39 clean
+  round-trips.
+- Added `scripts/run_redesigned_validation.py` and machine-readable result files.
+- Archived the pre-redesign method descriptions under `docs/legacy_original/`.

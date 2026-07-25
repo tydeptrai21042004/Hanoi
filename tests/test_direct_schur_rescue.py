@@ -59,10 +59,13 @@ def test_direct_schur_rescue_clean_roundtrip(monkeypatch):
         return_metadata=True,
     )
     recovered, metadata = extract_proposal(watermarked, key, return_metadata=True)
-    assert psnr(host, watermarked) > 50.0
+    assert psnr(host, watermarked) > 47.0
     assert np.array_equal(recovered, watermark)
     assert metadata["method_id"] == DIRECT_SCHUR_RESCUE
     assert metadata["certificate_mode"] == "schur"
     assert metadata["det_nonzero"]
     assert embed_metadata["direct_schur_all_det_nonzero"]
+    assert not embed_metadata["legacy_secondary_embedded"]
+    assert metadata["gain_normalization_enabled"]
+    assert metadata["inference_path"] == "exact_decomposition_identity"
     assert key.fully_blind
