@@ -38,6 +38,14 @@ class QR64Config:
     adaptive_step_fractions: tuple[float, float] = (0.20, 0.60)
     exact_confidence_gate: float = 0.79
 
+    # QR-conditioned pairwise coset optimization.  When enabled, one shared
+    # binary label is selected for each QR-homogeneous payload group to minimize
+    # the total squared QIM projection distance without changing Delta_b or rho_b.
+    # It is enabled only by the public DCT-QR configuration; the Schur proposal
+    # remains on its original embedding law.
+    coset_optimization_enabled: bool = False
+    coset_group_size: int = 2
+
     # Decomposition-gain normalization.  The reference is computed from the
     # final watermarked image and contains no original-host coefficients.
     # QR mode uses canonical-R diagonal energy; Schur mode uses spectral energy
@@ -90,6 +98,8 @@ class QR64Config:
             )
         if not 0 <= self.exact_confidence_gate <= 1:
             raise ValueError("exact_confidence_gate must be in [0,1].")
+        if self.coset_group_size < 2:
+            raise ValueError("coset_group_size must be at least 2.")
         if str(self.qr_gain_mode).lower() not in {"diag_l2", "carrier_r11"}:
             raise ValueError("qr_gain_mode must be 'diag_l2' or 'carrier_r11'.")
         if self.gain_gamma < 0:
@@ -115,6 +125,24 @@ class QR64Config:
     def adaptive_step_levels(self) -> tuple[float, float, float]:
         """Return the three local QIM steps implied by the global reference step."""
         return tuple(float(self.step) * float(r) for r in self.adaptive_step_ratios)
+
+    @classmethod
+    def public_dct_qr(cls) -> "QR64Config":
+        """Return the active public DCT-QR pairwise-coset configuration."""
+        return cls(
+            certificate_mode="qr",
+            step=13.25,
+            pilot_step=6.0,
+            adaptive_step_enabled=True,
+            adaptive_step_ratios=(18.25 / 13.25, 1.0, 10.25 / 13.25),
+            adaptive_step_fractions=(0.20, 0.60),
+            coset_optimization_enabled=True,
+            coset_group_size=2,
+            evidence_conf_power=2.1,
+            gain_normalization_enabled=True,
+            qr_gain_mode="carrier_r11",
+            gain_gamma=0.90,
+        ).validated()
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

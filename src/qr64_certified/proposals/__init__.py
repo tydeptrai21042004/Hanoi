@@ -1,8 +1,8 @@
-"""The three original proposal methods.
+"""The three public proposal methods.
 
-The numerical implementations in this package are the original proposal code,
-relocated into an explicit namespace so they are visible beside ``baselines``
-and ``attacks``. Compatibility modules remain at ``qr64_certified.<module>``.
+The DCT-QR path uses the active pairwise-coset embedding law. DCT-Schur and
+Spatial DetQR retain their validated implementations. Compatibility modules
+remain at ``qr64_certified.<module>``.
 """
 
 from .config import QR64Config

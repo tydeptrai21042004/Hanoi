@@ -19,6 +19,7 @@ from .proposal_registry import DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
 
 ABLATION_FLAGS: dict[str, tuple[str, ...]] = {
     DCT_QR: (
+        "no_coset_optimization",
         "uniform_step",
         "no_gain_normalization",
         "global_qr_gain",
@@ -49,6 +50,7 @@ HYPERPARAMETER_FLAGS: dict[str, tuple[str, ...]] = {
         "step", "rho_frac", "pilot_count", "pilot_step", "pilot_rho_frac",
         "eta", "qr_lift", "adaptive_step_enabled", "adaptive_step_ratios",
         "adaptive_step_fractions", "exact_confidence_gate",
+        "coset_optimization_enabled", "coset_group_size",
         "gain_normalization_enabled", "gain_gamma", "gain_clip",
         "qr_gain_mode", "qr_map_lambda", "qr_map_iters",
         "evidence_conf_power", "sync_certificate_weight",
@@ -149,6 +151,13 @@ def add_proposal_flag_arguments(parser: argparse.ArgumentParser) -> None:
     )
     common.add_argument("--exact-confidence-gate", type=float, default=None)
     common.add_argument(
+        "--coset-optimization",
+        dest="coset_optimization_enabled",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+    )
+    common.add_argument("--coset-group-size", type=int, default=None)
+    common.add_argument(
         "--gain-normalization",
         dest="gain_normalization_enabled",
         action=argparse.BooleanOptionalAction,
@@ -245,6 +254,8 @@ def _apply_qr_fields(config: QR64Config, values: Mapping[str, Any]) -> tuple[QR6
         "adaptive_step_ratios",
         "adaptive_step_fractions",
         "exact_confidence_gate",
+        "coset_optimization_enabled",
+        "coset_group_size",
         "gain_normalization_enabled",
         "gain_gamma",
         "gain_clip",
@@ -291,8 +302,14 @@ def apply_proposal_flags(
         config, direct = _apply_qr_fields(config, raw)
         overrides.update(direct)
         for name in requested:
-            if name == "uniform_step":
-                config = replace(config, adaptive_step_enabled=False)
+            if name == "no_coset_optimization":
+                config = replace(config, coset_optimization_enabled=False)
+            elif name == "uniform_step":
+                config = replace(
+                    config,
+                    adaptive_step_enabled=False,
+                    coset_optimization_enabled=False,
+                )
             elif name == "no_gain_normalization":
                 config = replace(config, gain_normalization_enabled=False)
             elif name == "global_qr_gain":

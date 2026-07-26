@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass
 from typing import Any
 
@@ -95,6 +96,101 @@ def _step_classes_from_reliability(
     return output
 
 
+
+
+def _pack_binary_mask(bits: np.ndarray) -> str:
+    """Pack a binary payload mask into a JSON-safe base64 string."""
+    values = np.asarray(bits, dtype=np.uint8).reshape(-1) & 1
+    packed = np.packbits(values, bitorder="little")
+    return base64.b64encode(packed.tobytes()).decode("ascii")
+
+
+def _unpack_binary_mask(encoded: str, count: int) -> np.ndarray:
+    """Recover exactly ``count`` bits from a packed JSON-safe mask."""
+    raw = base64.b64decode(str(encoded).encode("ascii"), validate=True)
+    values = np.unpackbits(np.frombuffer(raw, dtype=np.uint8), bitorder="little")
+    if values.size < int(count):
+        raise ValueError("Packed coset mask is shorter than the payload length.")
+    return values[: int(count)].astype(np.uint8, copy=False)
+
+
+def _coset_flip_mask_from_key(key_params: dict[str, Any], count: int) -> np.ndarray:
+    """Read the new packed mask while accepting prototype/legacy list keys."""
+    if "coset_flip_mask_b64" in key_params:
+        stored_count = int(key_params.get("coset_flip_count", count))
+        if stored_count != int(count):
+            raise ValueError("Coset flip-mask length does not match the payload length.")
+        return _unpack_binary_mask(key_params["coset_flip_mask_b64"], count)
+    if "coset_flip_by_payload" in key_params:
+        values = np.asarray(key_params["coset_flip_by_payload"], dtype=np.uint8).reshape(-1)
+        if values.size != int(count):
+            raise ValueError("Legacy coset flip-mask length does not match the payload length.")
+        return values & 1
+    return np.zeros(int(count), dtype=np.uint8)
+
+
+def _pairwise_coset_optimize(
+    carrier: np.ndarray,
+    payload_bits: np.ndarray,
+    steps: np.ndarray,
+    reliability: np.ndarray,
+    *,
+    rho_frac: float,
+    group_size: int,
+) -> tuple[np.ndarray, np.ndarray, dict[str, float | int]]:
+    """Choose the exact least-distorting binary label per QR-homogeneous group.
+
+    For group ``G_j`` the selected label is
+
+        s_j = argmin_{s in {0,1}} sum_{b in G_j}
+              |P_{u_b xor s}(v_b) - v_b|^2.
+
+    The original embedding is the feasible case ``s=0``; consequently this
+    optimization cannot increase the floating-point QIM projection energy.
+    """
+    values = np.asarray(carrier, dtype=np.float64).reshape(-1)
+    bits = np.asarray(payload_bits, dtype=np.uint8).reshape(-1) & 1
+    local_steps = np.asarray(steps, dtype=np.float64).reshape(-1)
+    local_reliability = np.asarray(reliability, dtype=np.float64).reshape(-1)
+    if not (values.size == bits.size == local_steps.size == local_reliability.size):
+        raise ValueError("Carrier, payload, step, and reliability arrays must have equal length.")
+
+    cost0 = np.empty(values.size, dtype=np.float64)
+    cost1 = np.empty(values.size, dtype=np.float64)
+    for i, (value, step) in enumerate(zip(values, local_steps, strict=True)):
+        margin = float(step) * float(rho_frac)
+        target0 = _eng._project_qim_margin(float(value), float(step), 0, margin)
+        target1 = _eng._project_qim_margin(float(value), float(step), 1, margin)
+        cost0[i] = float(target0 - value) ** 2
+        cost1[i] = float(target1 - value) ** 2
+
+    order = np.argsort(local_reliability, kind="stable")
+    flips = np.zeros(values.size, dtype=np.uint8)
+    optimized_cost = 0.0
+    original_cost = float(np.where(bits == 0, cost0, cost1).sum())
+    flipped_groups = 0
+    group_count = 0
+    for start in range(0, values.size, int(group_size)):
+        group = order[start : start + int(group_size)]
+        cost_s0 = float(np.where(bits[group] == 0, cost0[group], cost1[group]).sum())
+        cost_s1 = float(np.where(bits[group] == 0, cost1[group], cost0[group]).sum())
+        label = np.uint8(cost_s1 < cost_s0)
+        flips[group] = label
+        optimized_cost += min(cost_s0, cost_s1)
+        flipped_groups += int(label)
+        group_count += 1
+
+    encoded = np.bitwise_xor(bits, flips)
+    stats: dict[str, float | int] = {
+        "group_size": int(group_size),
+        "group_count": int(group_count),
+        "flipped_group_count": int(flipped_groups),
+        "original_projection_energy": float(original_cost),
+        "optimized_projection_energy": float(optimized_cost),
+        "projection_energy_ratio": float(optimized_cost / max(original_cost, 1e-18)),
+    }
+    return encoded, flips, stats
+
 def _embed_reliability_conditioned(
     host: np.ndarray,
     watermark: np.ndarray,
@@ -159,10 +255,6 @@ def _embed_reliability_conditioned(
     params["adaptive_step_by_payload"] = steps.astype(float).tolist()
     params["adaptive_step_levels"] = [float(x) for x in levels]
     params["adaptive_step_fractions"] = [float(x) for x in cfg.adaptive_step_fractions]
-    params["scientific_rule"] = (
-        "larger QIM separation for low QR reliability; smaller separation for stable blocks"
-    )
-
     output = host.copy()
     _eng._embed_one_carrier_md(
         host,
@@ -178,11 +270,39 @@ def _embed_reliability_conditioned(
         float(params["eta"]),
     )
 
+    encoded_bits = scrambled
+    if cfg.coset_optimization_enabled:
+        pilot_adjusted_carrier = _dct_qim_carrier(output, cfg.eta)[payload_indices]
+        encoded_bits, flips, coset_stats = _pairwise_coset_optimize(
+            pilot_adjusted_carrier,
+            scrambled,
+            steps,
+            certificate.reliability[payload_indices],
+            rho_frac=cfg.rho_frac,
+            group_size=cfg.coset_group_size,
+        )
+        params["coset_optimization_enabled"] = True
+        params["coset_group_size"] = int(cfg.coset_group_size)
+        params["coset_group_count"] = int(coset_stats["group_count"])
+        params["coset_flip_count"] = int(flips.size)
+        params["coset_flip_mask_b64"] = _pack_binary_mask(flips)
+        params["coset_group_order"] = "ascending_qr_reliability_at_embedding"
+        params["coset_projection_stats"] = coset_stats
+        params["scientific_rule"] = (
+            "QR-homogeneous group label minimizes total squared QIM projection "
+            "distance at unchanged local step and guard margin"
+        )
+    else:
+        params["coset_optimization_enabled"] = False
+        params["scientific_rule"] = (
+            "larger QIM separation for low QR reliability; smaller separation for stable blocks"
+        )
+
     total_updates = 0
     for step in np.unique(steps):
         logical = np.flatnonzero(np.isclose(steps, step))
         block_indices = payload_indices[logical].astype(np.int32)
-        bits = scrambled[logical].astype(np.uint8)
+        bits = encoded_bits[logical].astype(np.uint8)
         execution = np.argsort(block_indices, kind="stable")
         updates, unresolved = _call_with_realtime_thread_budget(
             _eng._embed_one_carrier_jilp,
@@ -219,7 +339,10 @@ def _embed_reliability_conditioned(
         schedule=[],
         fully_blind=True,
         side_information=(
-            "QR-conditioned step classes and keyed schedules; original host is not required"
+            "QR-conditioned step classes, packed pairwise coset mask, and keyed "
+            "schedules; original host is not required"
+            if cfg.coset_optimization_enabled
+            else "QR-conditioned step classes and keyed schedules; original host is not required"
         ),
     )
     return output, key
@@ -523,13 +646,16 @@ def embed(
 ) -> tuple[np.ndarray, QR64Key]:
     """Embed a 64x64 watermark with QR-certified DCT-QIM.
 
-    The certificate has an active scientific role when adaptive allocation is
-    enabled: it maps local matrix stability to the separation of the two QIM
-    decision classes.  This follows the principle that distortion should be
-    concentrated where the observation model is least stable.
+    In the public DCT-QR configuration, QR reliability has two active roles:
+    it allocates local QIM spacing and orders homogeneous block pairs.  One
+    binary coset label per pair is selected by exact minimum projection energy,
+    while the original QIM step and guard margin remain unchanged.
     """
-    cfg = config if isinstance(config, QR64Config) else QR64Config.from_mapping(config)
-    cfg = cfg.validated()
+    if config is None:
+        cfg = QR64Config.public_dct_qr()
+    else:
+        cfg = config if isinstance(config, QR64Config) else QR64Config.from_mapping(config)
+        cfg = cfg.validated()
     host = np.asarray(host_rgb, dtype=np.uint8)
     wm = np.asarray(watermark_binary, dtype=np.uint8)
     if wm.shape != (64, 64):
@@ -540,7 +666,11 @@ def embed(
         watermarked, base_key = _embed_reliability_conditioned(
             host, wm, certificate, cfg
         )
-        embedding_role = "active reliability-conditioned QIM allocation"
+        embedding_role = (
+            "QR-conditioned pairwise coset-optimized QIM"
+            if cfg.coset_optimization_enabled
+            else "active reliability-conditioned QIM allocation"
+        )
     else:
         watermarked, base_key = _base_embed(
             host,
@@ -577,13 +707,25 @@ def embed(
             "DCT carrier divided by a QR/Schur block-gain ratio raised to gamma"
         )
 
+    coset_active = bool(base_key.params.get("coset_optimization_enabled", False))
     base_key.params["qr64"] = {
         "role": embedding_role,
         "certificate_mode": cfg.certificate_mode,
         "analysis_matrix": "lifted 4x4 AC-DCT matrix per 8x8 block",
         "mathematical_condition": "det(A) != 0",
         "reliability_principle": (
-            "weak matrices receive larger class separation; stable matrices receive lower distortion"
+            "weak matrices receive larger class separation; QR-similar pairs share an "
+            "exact least-distorting binary coset label"
+            if coset_active
+            else "weak matrices receive larger class separation; stable matrices receive lower distortion"
+        ),
+        "coset_optimization_enabled": coset_active,
+        "coset_group_size": int(cfg.coset_group_size),
+        "embedding_theorem": (
+            "pairwise optimized projection energy is no greater than the original "
+            "s=0 labeling, while XOR inversion preserves each physical QIM error event"
+            if coset_active
+            else "not active"
         ),
         "analysis_lift": cfg.qr_lift,
         "det_epsilon": cfg.qr_det_epsilon,
@@ -640,6 +782,12 @@ def extract(
         scrambled_bits, positions, qim_conf = _extract_payload_bits_confidence(
             aligned, key_params, 0, 0
         )
+    if bool(key_params.get("coset_optimization_enabled", False)) or (
+        "coset_flip_mask_b64" in key_params or "coset_flip_by_payload" in key_params
+    ):
+        flips = _coset_flip_mask_from_key(key_params, payload_len)
+        scrambled_bits = np.bitwise_xor(scrambled_bits, flips)
+
     bit_array[positions] = scrambled_bits
     conf_array[positions] = qim_conf
     bit_map = _inverse_arnold_array(bit_array.reshape(wm_shape), key_params)
@@ -686,6 +834,13 @@ def extract(
             cfg.gain_normalization_enabled
             and "decomposition_gain_reference" in key_params
         ),
+        "coset_optimization_enabled": bool(
+            key_params.get("coset_optimization_enabled", False)
+            or "coset_flip_mask_b64" in key_params
+            or "coset_flip_by_payload" in key_params
+        ),
+        "coset_group_size": int(key_params.get("coset_group_size", 1)),
+        "coset_group_count": int(key_params.get("coset_group_count", 0)),
         **gain_stats,
     }
     return (recovered, metadata) if return_metadata else recovered
