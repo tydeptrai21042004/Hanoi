@@ -559,6 +559,207 @@ def resample_cycle(image: Array, down_factor: float = 0.67, cycles: int = 2, **k
         out = resize_attack(out, factor=float(down_factor))
     return out
 
+
+def grayscale_attack(image: Array, **kwargs) -> Array:
+    """Convert to luminance and restore three RGB channels."""
+    gray = Image.fromarray(_u8(image)).convert("L")
+    return np.asarray(Image.merge("RGB", (gray, gray, gray)), dtype=np.uint8)
+
+
+def channel_permutation(image: Array, order: Iterable[int] = (2, 1, 0), **kwargs) -> Array:
+    """Permute RGB channels while preserving image shape."""
+    order_tuple = tuple(int(v) for v in order)
+    if sorted(order_tuple) != [0, 1, 2]:
+        raise ValueError("Channel permutation must contain each of 0, 1, 2 exactly once")
+    return _u8(image)[..., list(order_tuple)].copy()
+
+
+def random_erasing(
+    image: Array,
+    fraction: float = 0.05,
+    rectangles: int = 3,
+    seed: int = 123,
+    value: int = 0,
+    **kwargs,
+) -> Array:
+    """Erase several deterministic random rectangles totaling about ``fraction`` area."""
+    out = _u8(image).copy()
+    h, w = out.shape[:2]
+    rng = np.random.default_rng(int(seed))
+    count = max(1, int(rectangles))
+    per_area = max(1.0, float(np.clip(fraction, 0.0, 1.0)) * h * w / count)
+    for _ in range(count):
+        aspect = float(np.exp(rng.uniform(np.log(0.4), np.log(2.5))))
+        rh = int(np.clip(round(math.sqrt(per_area / aspect)), 1, h))
+        rw = int(np.clip(round(math.sqrt(per_area * aspect)), 1, w))
+        y0 = int(rng.integers(0, h - rh + 1))
+        x0 = int(rng.integers(0, w - rw + 1))
+        out[y0:y0 + rh, x0:x0 + rw] = int(np.clip(value, 0, 255))
+    return out
+
+
+def stripe_dropout(
+    image: Array,
+    orientation: str = "horizontal",
+    width: int = 2,
+    spacing: int = 32,
+    offset: int = 0,
+    value: int = 0,
+    **kwargs,
+) -> Array:
+    """Drop regularly spaced rows or columns, simulating scan-line loss."""
+    out = _u8(image).copy()
+    width = max(1, int(width))
+    spacing = max(width + 1, int(spacing))
+    offset = int(offset) % spacing
+    if str(orientation).lower().startswith("v"):
+        for x in range(offset, out.shape[1], spacing):
+            out[:, x:x + width] = int(np.clip(value, 0, 255))
+    else:
+        for y in range(offset, out.shape[0], spacing):
+            out[y:y + width] = int(np.clip(value, 0, 255))
+    return out
+
+
+def jpeg_recompression(image: Array, quality: int = 75, cycles: int = 2, **kwargs) -> Array:
+    """Repeated JPEG round trips to model social-media recompression."""
+    out = _u8(image).copy()
+    for _ in range(max(1, int(cycles))):
+        out = jpeg(out, quality=int(quality))
+    return out
+
+
+def copy_move_attack(
+    image: Array,
+    block: int = 64,
+    seed: int = 123,
+    blend: float = 1.0,
+    **kwargs,
+) -> Array:
+    """Copy one random square patch to another location."""
+    out = _u8(image).copy()
+    h, w = out.shape[:2]
+    block = int(np.clip(int(block), 1, min(h, w)))
+    rng = np.random.default_rng(int(seed))
+    sy = int(rng.integers(0, h - block + 1))
+    sx = int(rng.integers(0, w - block + 1))
+    dy = int(rng.integers(0, h - block + 1))
+    dx = int(rng.integers(0, w - block + 1))
+    patch = out[sy:sy + block, sx:sx + block].copy().astype(np.float64)
+    alpha = float(np.clip(blend, 0.0, 1.0))
+    target = out[dy:dy + block, dx:dx + block].astype(np.float64)
+    out[dy:dy + block, dx:dx + block] = _u8(alpha * patch + (1.0 - alpha) * target)
+    return out
+
+
+def dithering_attack(image: Array, colors: int = 64, **kwargs) -> Array:
+    """Palette reduction with Floyd-Steinberg dithering."""
+    colors = int(np.clip(int(colors), 2, 256))
+    pil = Image.fromarray(_u8(image)).convert("RGB")
+    quantized = pil.quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.FLOYDSTEINBERG)
+    return np.asarray(quantized.convert("RGB"), dtype=np.uint8)
+
+
+def elastic_warp(
+    image: Array,
+    alpha: float = 2.0,
+    sigma: float = 8.0,
+    seed: int = 123,
+    fill: int = 0,
+    **kwargs,
+) -> Array:
+    """Smooth deterministic elastic deformation using OpenCV remapping."""
+    try:
+        import cv2
+    except Exception as exc:  # pragma: no cover
+        raise RuntimeError("elastic_warp requires opencv-python-headless") from exc
+    img = _u8(image)
+    h, w = img.shape[:2]
+    rng = np.random.default_rng(int(seed))
+    dx = rng.normal(0.0, 1.0, (h, w)).astype(np.float32)
+    dy = rng.normal(0.0, 1.0, (h, w)).astype(np.float32)
+    k = max(3, int(round(float(sigma) * 4)) | 1)
+    dx = cv2.GaussianBlur(dx, (k, k), float(sigma))
+    dy = cv2.GaussianBlur(dy, (k, k), float(sigma))
+    dx *= float(alpha) / max(float(np.std(dx)), 1e-6)
+    dy *= float(alpha) / max(float(np.std(dy)), 1e-6)
+    grid_x, grid_y = np.meshgrid(np.arange(w, dtype=np.float32), np.arange(h, dtype=np.float32))
+    out = cv2.remap(
+        img,
+        grid_x + dx,
+        grid_y + dy,
+        interpolation=cv2.INTER_CUBIC,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(int(fill), int(fill), int(fill)),
+    )
+    return _u8(out)
+
+
+def lens_distortion(
+    image: Array,
+    k1: float = 0.08,
+    k2: float = 0.0,
+    fill: int = 0,
+    **kwargs,
+) -> Array:
+    """Barrel/pincushion radial lens distortion with a fixed output canvas."""
+    try:
+        import cv2
+    except Exception as exc:  # pragma: no cover
+        raise RuntimeError("lens_distortion requires opencv-python-headless") from exc
+    img = _u8(image)
+    h, w = img.shape[:2]
+    yy, xx = np.indices((h, w), dtype=np.float32)
+    cx, cy = (w - 1) / 2.0, (h - 1) / 2.0
+    scale = max(cx, cy, 1.0)
+    xn = (xx - cx) / scale
+    yn = (yy - cy) / scale
+    r2 = xn * xn + yn * yn
+    radial = 1.0 + float(k1) * r2 + float(k2) * r2 * r2
+    map_x = (cx + xn * radial * scale).astype(np.float32)
+    map_y = (cy + yn * radial * scale).astype(np.float32)
+    out = cv2.remap(
+        img,
+        map_x,
+        map_y,
+        interpolation=cv2.INTER_CUBIC,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(int(fill), int(fill), int(fill)),
+    )
+    return _u8(out)
+
+
+def screen_capture_simulation(
+    image: Array,
+    scale: float = 0.82,
+    gamma: float = 1.05,
+    jpeg_quality: int = 85,
+    **kwargs,
+) -> Array:
+    """Deterministic resize/gamma/sharpen/JPEG camera-screen approximation."""
+    out = resize_attack(image, factor=float(scale))
+    out = gamma_correction(out, gamma=float(gamma))
+    out = unsharp_mask(out, radius=1.0, percent=120, threshold=2)
+    return jpeg(out, quality=int(jpeg_quality))
+
+
+def print_scan_simulation(
+    image: Array,
+    degrees: float = 0.4,
+    blur_radius: float = 0.6,
+    noise_sigma: float = 1.5,
+    contrast_factor: float = 1.03,
+    jpeg_quality: int = 88,
+    seed: int = 123,
+    **kwargs,
+) -> Array:
+    """Small rotation, blur, sensor noise, contrast drift and recompression."""
+    out = rotate_keep_size(image, degrees=float(degrees), fill=255)
+    out = gaussian_blur(out, radius=float(blur_radius))
+    out = gaussian_noise(out, sigma=float(noise_sigma), seed=int(seed))
+    out = contrast(out, factor=float(contrast_factor))
+    return jpeg(out, quality=int(jpeg_quality))
+
 _ATTACK_FUNCS: dict[str, Callable[..., Array]] = {
     "none": no_attack,
     "jpeg": jpeg,
@@ -609,6 +810,17 @@ _ATTACK_FUNCS: dict[str, Callable[..., Array]] = {
     "bilateral_filter": bilateral_filter,
     "adaptive_threshold": adaptive_threshold_luma,
     "resample_cycle": resample_cycle,
+    "grayscale": grayscale_attack,
+    "channel_permutation": channel_permutation,
+    "random_erasing": random_erasing,
+    "stripe_dropout": stripe_dropout,
+    "jpeg_recompression": jpeg_recompression,
+    "copy_move": copy_move_attack,
+    "dithering": dithering_attack,
+    "elastic_warp": elastic_warp,
+    "lens_distortion": lens_distortion,
+    "screen_capture": screen_capture_simulation,
+    "print_scan": print_scan_simulation,
 }
 
 

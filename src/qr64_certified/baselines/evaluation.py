@@ -6,7 +6,7 @@ from typing import Any, Iterable
 import numpy as np
 
 from qr64_certified.attacks import AttackConfig, apply_attack
-from qr64_certified.common.metrics import ber, nc, psnr
+from qr64_certified.common.metrics import ber, image_quality_metrics, nc, ncc, psnr, ssim, watermark_metrics
 
 from .registry import embed_baseline, extract_baseline, get_baseline_spec, normalize_baseline_id
 
@@ -46,6 +46,13 @@ def evaluate_baseline_attacks(
     )
     embed_seconds = time.perf_counter() - start
     clean_psnr = psnr(host, watermarked)
+    clean_quality = image_quality_metrics(host, watermarked)
+    clean_start = time.perf_counter()
+    clean_recovered = extract_baseline(
+        watermarked, key, original_host=host if spec.requires_original_host else None
+    )
+    clean_extract_seconds = time.perf_counter() - clean_start
+    clean_wm_metrics = watermark_metrics(watermark, clean_recovered)
     rows: list[dict[str, Any]] = []
 
     for attack in attacks:
@@ -71,10 +78,20 @@ def evaluate_baseline_attacks(
                 "attack_severity": attack.severity,
                 "status": "ok",
                 "clean_psnr_db": float(clean_psnr),
+                "clean_ssim": float(clean_quality["ssim"]),
+                "clean_uiqi": float(clean_quality["uiqi"]),
+                "clean_nc": float(clean_wm_metrics["nc"]),
+                "clean_ncc": float(clean_wm_metrics["ncc"]),
+                "clean_ber": float(clean_wm_metrics["ber"]),
                 "attacked_psnr_db": float(psnr(host, attacked)),
+                "attacked_ssim": float(ssim(host, attacked)),
                 "nc": float(nc(watermark, recovered)),
+                "ncc": float(ncc(watermark, recovered)),
                 "ber": float(ber(watermark, recovered)),
+                **{f"watermark_{k}": v for k, v in watermark_metrics(watermark, recovered).items()},
+                **{f"image_{k}": v for k, v in image_quality_metrics(host, attacked).items()},
                 "embed_seconds": float(embed_seconds),
+                "clean_extract_seconds": float(clean_extract_seconds),
                 "attack_seconds": float(attack_seconds),
                 "extract_seconds": float(extract_seconds),
             })

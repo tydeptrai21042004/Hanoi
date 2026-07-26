@@ -191,6 +191,95 @@ LEGACY_STRESS = (
     ]}, "combined", "strong"),
 )
 
+
+# Additional real-world and adversarial attacks.  Existing frozen suites remain
+# unchanged so old result files are still reproducible.
+REAL_WORLD = (
+    _a("realworld_jpeg_recompress__q85_x2", "jpeg_recompression", {"quality": 85, "cycles": 2}, "compression", "moderate"),
+    _a("realworld_jpeg_recompress__q70_x3", "jpeg_recompression", {"quality": 70, "cycles": 3}, "compression", "strong"),
+    _a("realworld_screen_capture__default", "screen_capture", {"scale": 0.82, "gamma": 1.05, "jpeg_quality": 85}, "real_world", "strong"),
+    _a("realworld_screen_capture__hard", "screen_capture", {"scale": 0.67, "gamma": 1.12, "jpeg_quality": 70}, "real_world", "extreme"),
+    _a("realworld_print_scan__default", "print_scan", {"degrees": 0.4, "blur_radius": 0.6, "noise_sigma": 1.5, "jpeg_quality": 88, "seed": 123}, "real_world", "strong"),
+    _a("realworld_print_scan__hard", "print_scan", {"degrees": 1.0, "blur_radius": 1.0, "noise_sigma": 3.0, "jpeg_quality": 75, "seed": 123}, "real_world", "extreme"),
+    _a("realworld_grayscale", "grayscale", {}, "photometric", "moderate"),
+    _a("realworld_channel_swap__bgr", "channel_permutation", {"order": [2, 1, 0]}, "photometric", "strong"),
+    _a("realworld_dithering__colors64", "dithering", {"colors": 64}, "compression", "strong"),
+    _a("realworld_copy_move__block64", "copy_move", {"block": 64, "seed": 123}, "tampering", "moderate"),
+    _a("realworld_copy_move__block128", "copy_move", {"block": 128, "seed": 321}, "tampering", "strong"),
+)
+
+DEFORMATION = (
+    _a("deformation_elastic__a1_s8", "elastic_warp", {"alpha": 1.0, "sigma": 8.0, "seed": 123}, "geometric", "moderate"),
+    _a("deformation_elastic__a2_s8", "elastic_warp", {"alpha": 2.0, "sigma": 8.0, "seed": 123}, "geometric", "strong"),
+    _a("deformation_elastic__a4_s10", "elastic_warp", {"alpha": 4.0, "sigma": 10.0, "seed": 123}, "geometric", "extreme"),
+    _a("deformation_lens__barrel0p04", "lens_distortion", {"k1": 0.04}, "geometric", "moderate"),
+    _a("deformation_lens__barrel0p08", "lens_distortion", {"k1": 0.08}, "geometric", "strong"),
+    _a("deformation_lens__pincushion0p06", "lens_distortion", {"k1": -0.06}, "geometric", "strong"),
+)
+
+STRUCTURED_LOSS = (
+    _a("structured_random_erasing__5pct_3", "random_erasing", {"fraction": 0.05, "rectangles": 3, "seed": 123}, "occlusion", "moderate"),
+    _a("structured_random_erasing__15pct_5", "random_erasing", {"fraction": 0.15, "rectangles": 5, "seed": 123}, "occlusion", "strong"),
+    _a("structured_random_erasing__30pct_8", "random_erasing", {"fraction": 0.30, "rectangles": 8, "seed": 123}, "occlusion", "extreme"),
+    _a("structured_stripes__horizontal2_32", "stripe_dropout", {"orientation": "horizontal", "width": 2, "spacing": 32}, "occlusion", "moderate"),
+    _a("structured_stripes__vertical2_32", "stripe_dropout", {"orientation": "vertical", "width": 2, "spacing": 32}, "occlusion", "moderate"),
+    _a("structured_stripes__horizontal4_24", "stripe_dropout", {"orientation": "horizontal", "width": 4, "spacing": 24}, "occlusion", "strong"),
+    _a("structured_stripes__vertical4_24", "stripe_dropout", {"orientation": "vertical", "width": 4, "spacing": 24}, "occlusion", "strong"),
+)
+
+EXTENDED_COMBINED = (
+    _a("combined__jpeg50_gaussian3", "combined", {"steps": [
+        {"group": "jpeg", "params": {"quality": 50}},
+        {"group": "gaussian_noise", "params": {"sigma": 3.0, "seed": 123}},
+    ]}, "combined", "extreme"),
+    _a("combined__resize0p5_jpeg50", "combined", {"steps": [
+        {"group": "resize", "params": {"factor": 0.5}},
+        {"group": "jpeg", "params": {"quality": 50}},
+    ]}, "combined", "extreme"),
+    _a("combined__crop0p75_jpeg50", "combined", {"steps": [
+        {"group": "crop_resize", "params": {"keep": 0.75}},
+        {"group": "jpeg", "params": {"quality": 50}},
+    ]}, "combined", "extreme"),
+    _a("combined__rotation5_jpeg70_noise1", "combined", {"steps": [
+        {"group": "rotation", "params": {"degrees": 5.0}},
+        {"group": "jpeg", "params": {"quality": 70}},
+        {"group": "gaussian_noise", "params": {"sigma": 1.0, "seed": 123}},
+    ]}, "combined", "extreme"),
+    _a("combined__grayscale_jpeg70", "combined", {"steps": [
+        {"group": "grayscale", "params": {}},
+        {"group": "jpeg", "params": {"quality": 70}},
+    ]}, "combined", "strong"),
+    _a("combined__randomerase15_jpeg70", "combined", {"steps": [
+        {"group": "random_erasing", "params": {"fraction": 0.15, "rectangles": 5, "seed": 123}},
+        {"group": "jpeg", "params": {"quality": 70}},
+    ]}, "combined", "extreme"),
+    _a("combined__lens0p04_jpeg80", "combined", {"steps": [
+        {"group": "lens_distortion", "params": {"k1": 0.04}},
+        {"group": "jpeg", "params": {"quality": 80}},
+    ]}, "combined", "strong"),
+    _a("combined__elastic1_jpeg80", "combined", {"steps": [
+        {"group": "elastic_warp", "params": {"alpha": 1.0, "sigma": 8.0, "seed": 123}},
+        {"group": "jpeg", "params": {"quality": 80}},
+    ]}, "combined", "strong"),
+)
+
+# Balanced paper suite: all common attacks plus representative attacks from
+# the newly added real-world, deformation, structured-loss and combined groups.
+PUBLICATION = _deduplicate(
+    COMMON
+    + REAL_WORLD[:8]
+    + DEFORMATION[:5]
+    + STRUCTURED_LOSS[:5]
+    + EXTENDED_COMBINED[:6]
+)
+
+# Largest deterministic suite for robustness exploration.  It intentionally
+# includes severe and destructive cases and must not be summarized as one mean
+# without category/severity breakdowns.
+EXTENDED = _deduplicate(
+    STRESS + REAL_WORLD + DEFORMATION + STRUCTURED_LOSS + EXTENDED_COMBINED
+)
+
 ATTACK_SUITES = {
     "sanity": SANITY,
     "compression": COMPRESSION,
@@ -202,6 +291,11 @@ ATTACK_SUITES = {
     "combined": COMBINED,
     "common": COMMON,
     "stress": STRESS,
+    "real_world": REAL_WORLD,
+    "deformation": DEFORMATION,
+    "structured_loss": STRUCTURED_LOSS,
+    "publication": PUBLICATION,
+    "extended": EXTENDED,
 }
 
 
