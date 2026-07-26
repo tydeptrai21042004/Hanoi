@@ -34,6 +34,8 @@ def test_attack_library_has_broad_unified_coverage():
     assert suites["sanity"] >= 6
     assert suites["common"] >= 40
     assert suites["stress"] >= 70
+    assert suites["publication"] >= 80
+    assert suites["extended"] >= 110
 
 
 def test_new_attack_types_are_deterministic_and_shape_preserving():
@@ -44,6 +46,10 @@ def test_new_attack_types_are_deterministic_and_shape_preserving():
         AttackConfig("test_affine", "affine", {"rotation": 1.0, "scale": 0.99}),
         AttackConfig("test_perspective", "perspective", {"strength": 0.02, "seed": 123}),
         AttackConfig("test_bilateral", "bilateral_filter", {"diameter": 5}),
+        AttackConfig("test_elastic", "elastic_warp", {"alpha": 1.0, "sigma": 8.0, "seed": 123}),
+        AttackConfig("test_lens", "lens_distortion", {"k1": 0.04}),
+        AttackConfig("test_erasing", "random_erasing", {"fraction": 0.05, "rectangles": 3, "seed": 123}),
+        AttackConfig("test_print_scan", "print_scan", {"seed": 123}),
     ]
     for cfg in configs:
         first = apply_attack(image, cfg)

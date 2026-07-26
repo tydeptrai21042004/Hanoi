@@ -106,7 +106,7 @@ python scripts/list_baselines.py
 python scripts/list_attacks.py
 ```
 
-Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `37 passed`.
+Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `41 passed`.
 
 
 ### Reproduce the focused DCT–QR comparison
@@ -191,3 +191,47 @@ python scripts/run_hyperparameter_sweep.py \
 
 See [`docs/ABLATION_AND_HYPERPARAMETER_FLAGS.md`](docs/ABLATION_AND_HYPERPARAMETER_FLAGS.md)
 for the complete method-specific flag tables and examples.
+
+## Unified proposal–baseline benchmark
+
+The repository now includes a shared benchmark layer under
+`src/qr64_certified/benchmark/`. It evaluates proposals and baselines with the
+same attack objects, metrics, output columns, runtime measurement, key-size
+measurement, error handling and aggregation. No proposal or baseline
+embedding/extraction formula was changed.
+
+Fast complete check:
+
+```bash
+./scripts/run_complete_pipeline.sh
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\run_complete_pipeline.ps1
+```
+
+Direct quick benchmark:
+
+```bash
+python scripts/run_unified_benchmark.py \
+  --protocol configs/benchmark/quick.json
+```
+
+Publication benchmark with atomic per-trial resume:
+
+```bash
+python scripts/run_unified_benchmark.py \
+  --protocol configs/benchmark/publication.json \
+  --resume
+```
+
+The attack library now exposes a balanced 84-attack `publication` suite and a
+113-attack `extended` suite while preserving the old frozen suites. Expanded
+metrics include PSNR, SSIM, UIQI, SNR, MSE/RMSE/MAE, image fidelity, edge and
+histogram measures, NC/NCC, BER, bit accuracy, Hamming distance, precision,
+recall, specificity, F1, balanced accuracy, timings, key size and payload rate.
+
+See [`docs/UNIFIED_BENCHMARK.md`](docs/UNIFIED_BENCHMARK.md) for method selectors,
+attack definitions, result schemas and interpretation rules.
