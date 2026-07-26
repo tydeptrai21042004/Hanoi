@@ -1,5 +1,7 @@
 # Validated before/after results
 
+> Historical record. The active public DCT–Schur method is now SP-SCQIM. Its complete result and non-passed NC promotion gate are reported in `docs/DCT_SCHUR_SP_SCQIM_REPORT.md`.
+
 Protocol: 13 supplied hosts, one 64×64 watermark, 15 moderate attacks for all methods, and rotation/shear tests for the spatial synchronization component.
 
 ## DCT-QR

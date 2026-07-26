@@ -67,5 +67,59 @@ def test_direct_schur_rescue_clean_roundtrip(monkeypatch):
     assert embed_metadata["direct_schur_all_det_nonzero"]
     assert not embed_metadata["legacy_secondary_embedded"]
     assert metadata["gain_normalization_enabled"]
-    assert metadata["inference_path"] == "exact_decomposition_identity"
+    assert metadata["inference_path"] == "independent_schur_coupling_evidence"
+    assert not metadata["dct_qr_engine_used"]
+    assert embed_metadata["minimum_frobenius_projection"]
+    assert embed_metadata["spectrum_preserved_float"]
     assert key.fully_blind
+
+
+def test_schur_coupling_basis_is_orthonormal():
+    from qr64_certified.proposals.schur_coupling_qim import SCHUR_COUPLING_BASIS
+    gram = SCHUR_COUPLING_BASIS @ SCHUR_COUPLING_BASIS.T
+    assert np.allclose(gram, np.eye(3), atol=1e-12)
+
+
+def test_public_schur_module_has_one_embed_and_extract_definition():
+    import ast
+    source = (ROOT / "src/qr64_certified/proposals/schur_coupling_qim.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    names = [node.name for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
+    assert names.count("embed") == 1
+    assert names.count("extract") == 1
+
+
+def test_schur_is_independent_of_dct_qr_public_engine(monkeypatch):
+    import qr64_certified.proposals.method as qr_method
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("DCT-QR engine must not be called by SP-SCQIM")
+
+    monkeypatch.setattr(qr_method, "embed", forbidden)
+    monkeypatch.setattr(qr_method, "extract", forbidden)
+    host, watermark = _assets()
+    watermarked, key = embed_proposal(
+        DIRECT_SCHUR_RESCUE,
+        host,
+        watermark,
+        config=DirectSchurRescueConfig(candidate_search_enabled=False),
+    )
+    recovered = extract_proposal(watermarked, key)
+    assert np.array_equal(recovered, watermark)
+
+
+def test_step_parameter_is_active():
+    host, watermark = _assets()
+    low, _ = embed_proposal(
+        DIRECT_SCHUR_RESCUE,
+        host,
+        watermark,
+        config=DirectSchurRescueConfig(step=8.0, candidate_search_enabled=False),
+    )
+    high, _ = embed_proposal(
+        DIRECT_SCHUR_RESCUE,
+        host,
+        watermark,
+        config=DirectSchurRescueConfig(step=9.0, candidate_search_enabled=False),
+    )
+    assert not np.array_equal(low, high)

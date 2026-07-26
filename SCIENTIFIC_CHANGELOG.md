@@ -1,5 +1,17 @@
 # Scientific revision changelog
 
+## 2026 independent DCT–Schur SP-SCQIM replacement (v2.3.0)
+
+- Removed duplicate public `embed()`/`extract()` definitions from the DCT–Schur path.
+- Replaced the QR-engine-backed Schur-gain hybrid with an independent strict-upper Schur coupling carrier.
+- Added three orthonormal coupling projections and three interleaved payload copies.
+- Added the exact minimum-Frobenius update `n*=n+H^T(t-Hn)`.
+- Added spectrum, trace, determinant, engine-independence, parameter-activity, and clean-round-trip tests.
+- Full test result: `49 passed`.
+- 13-host step-9 result: mean PSNR 48.173152 dB, clean NC 1.0, mean attacked NC 0.993814.
+- The former Schur-gain hybrid remains stronger in attacked NC (0.996058), so the new method is explicitly marked as not yet passing the robustness promotion gate.
+
+
 ## 2026 DCT–QR pairwise-coset replacement
 
 - Replaced only the public DCT–QR payload parity assignment; DCT–Schur and Spatial DetQR formulas remain unchanged.

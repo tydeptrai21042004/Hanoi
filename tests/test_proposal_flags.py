@@ -34,24 +34,22 @@ def test_every_ablation_builds_a_valid_config() -> None:
                 config.validate()
 
 
-def test_hyperparameter_overrides_reach_nested_schur_config() -> None:
+def test_hyperparameter_overrides_reach_independent_schur_config() -> None:
     base = default_config_for_method(DCT_SCHUR_RESCUE)
     config, report = apply_proposal_flags(
         DCT_SCHUR_RESCUE,
         base,
         {
             "ablation": [],
-            "step": 11.5,
+            "step": 9.0,
             "gain_gamma": 0.6,
-            "schur_departure_weight": 0.25,
-            "schur_step": 0.03,
+            "closure_rounds": 3,
         },
     )
-    assert config.base_config.step == 11.5
-    assert config.base_config.gain_gamma == 0.6
-    assert config.base_config.schur_departure_weight == 0.25
-    assert config.schur_step == 0.03
-    assert report["hyperparameter_overrides"]["base_config.step"] == 11.5
+    assert config.step == 9.0
+    assert config.gain_gamma == 0.6
+    assert config.closure_rounds == 3
+    assert report["hyperparameter_overrides"]["step"] == 9.0
 
 
 def test_spatial_fixed_pattern_and_no_mask_clean_roundtrip() -> None:

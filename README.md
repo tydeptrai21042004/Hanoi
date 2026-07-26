@@ -9,7 +9,7 @@ This repository contains three redesigned 64×64 blind-watermark proposals,
 | Canonical ID | Domain constraint | Redesigned contribution |
 |---|---|---|
 | `dct_qr` | DCT + QR | QR-conditioned pairwise coset-optimized QIM with carrier-specific `r11` gain normalization |
-| `dct_schur_rescue` | DCT + Schur | Schur spectral-reliability DCT-QIM with eigenvalue/departure gain compensation |
+| `dct_schur_rescue` | DCT + Schur | spectrum-preserving orthogonal strict-upper Schur coupling QIM with three interleaved payload copies |
 | `spatial_cd_detqr` | Spatial QR and `det(A) != 0` | normalized QR-residual carrier with a closed-form minimum integer update and hard determinant floor |
 
 The old exploratory implementations are retained as `*_legacy.py` modules for
@@ -24,17 +24,15 @@ moderate attacks, and 39 clean round-trips.
 | Method | Mean PSNR | Clean NC | Mean attacked NC | Mean worst NC/host |
 |---|---:|---:|---:|---:|
 | DCT–QR | **50.399139 dB** | 1.000000 | **0.998028** | **0.988097** |
-| DCT–Schur | 48.014086 dB | 1.000000 | 0.996058 | 0.975353 |
+| DCT–Schur SP-SCQIM | 48.173152 dB | 1.000000 | 0.993814 | 0.942074 |
 | Spatial DetQR | 56.670744 dB | 1.000000 | 0.991345 | 0.942829 |
 
-Compared with the stored previous proposal references, all three improve mean
-PSNR and aggregate attacked NC. Spatial DetQR improves the aggregate result but
-its separate 2° rotation and 0.08 shear measurements are slightly below the old
-version; see the report for the exact limitation.
+The active DCT–Schur path is now mathematically independent of DCT–QR and improves mean PSNR over the former Schur-gain hybrid, but it does **not** yet improve aggregate attacked NC. Median filtering on Baboon is the present promotion blocker. See the Schur report for the full gate, proofs, and exact limitation.
 
 Detailed mathematics, novelty boundaries, proof sketches, experiment protocol,
 and limitations:
 
+- [`docs/DCT_SCHUR_SP_SCQIM_REPORT.md`](docs/DCT_SCHUR_SP_SCQIM_REPORT.md)
 - [`docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md`](docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md)
 - [`docs/REDESIGNED_PROPOSALS_VI.md`](docs/REDESIGNED_PROPOSALS_VI.md)
 - [`results/dct_qr_previous_vs_carrier_r11.json`](results/dct_qr_previous_vs_carrier_r11.json)
@@ -48,7 +46,8 @@ and limitations:
 src/qr64_certified/
 ├── proposals/
 │   ├── method.py              DCT–QR proposal
-│   ├── direct_schur_rescue.py DCT–Schur proposal
+│   ├── schur_coupling_qim.py  independent DCT–Schur SP-SCQIM proposal
+│   ├── direct_schur_rescue.py compatibility wrapper
 │   ├── cd_detqr.py            spatial normalized-residual DetQR
 │   ├── certificate.py         QR/Schur certificates and gain scales
 │   ├── config.py              DCT proposal configuration
@@ -107,8 +106,19 @@ python scripts/list_baselines.py
 python scripts/list_attacks.py
 ```
 
-Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `45 passed`.
+Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `49 passed`.
 
+
+
+### Reproduce the independent DCT–Schur validation
+
+```bash
+python scripts/benchmark_schur_sp_scqim.py \
+  --step 9.0 \
+  --output results/schur_sp_scqim/reproduced.json
+```
+
+The active configuration is `configs/dct_schur_sp_scqim.json`. The benchmark is promotion-gated against the former Schur result; the current implementation passes the clean-NC and PSNR gates but not the attacked-NC gate.
 
 ### Reproduce the active DCT–QR validation
 

@@ -1,5 +1,7 @@
 # Completion report
 
+> **Current Schur revision:** the former DCT–Schur formula is no longer the public method. It has been replaced by independent SP-SCQIM; see `docs/DCT_SCHUR_SP_SCQIM_REPORT.md`. The statements below describe the earlier benchmark release.
+
 ## Delivered changes
 
 - Added one adapter-based benchmark path for all three proposals and all 16 baselines.
