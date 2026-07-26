@@ -1,0 +1,17 @@
+{
+  "protocol_id": "publication_unified_v1",
+  "host_dir": "data/host",
+  "watermarks": [
+    "data/watermark/wm.png",
+    "data/watermark/Cc.logo.circle.png"
+  ],
+  "seeds": [2026, 2027, 2028],
+  "attack_suite": "publication",
+  "methods": "paper_comparison",
+  "output_dir": "results/unified_benchmark",
+  "continue_on_error": true,
+  "resume": true,
+  "strict_clean_proposals": true,
+  "host_limit": null,
+  "attack_limit": null
+}

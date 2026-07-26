@@ -1,0 +1,18 @@
+{
+  "protocol_id": "quick_unified_v1",
+  "host_dir": "data/host",
+  "watermarks": [
+    "data/watermark/wm.png"
+  ],
+  "seeds": [
+    2026
+  ],
+  "attack_suite": "sanity",
+  "methods": "paper_comparison",
+  "output_dir": "results/unified_benchmark",
+  "continue_on_error": true,
+  "resume": true,
+  "strict_clean_proposals": true,
+  "host_limit": 1,
+  "attack_limit": 3
+}
