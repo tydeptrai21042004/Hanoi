@@ -8,7 +8,7 @@ This repository contains three redesigned 64×64 blind-watermark proposals,
 
 | Canonical ID | Domain constraint | Redesigned contribution |
 |---|---|---|
-| `dct_qr` | DCT + QR | carrier-subspace QR transfer normalization with reliability-conditioned DCT-QIM |
+| `dct_qr` | DCT + QR | QR-conditioned pairwise coset-optimized QIM with carrier-specific `r11` gain normalization |
 | `dct_schur_rescue` | DCT + Schur | Schur spectral-reliability DCT-QIM with eigenvalue/departure gain compensation |
 | `spatial_cd_detqr` | Spatial QR and `det(A) != 0` | normalized QR-residual carrier with a closed-form minimum integer update and hard determinant floor |
 
@@ -23,7 +23,7 @@ moderate attacks, and 39 clean round-trips.
 
 | Method | Mean PSNR | Clean NC | Mean attacked NC | Mean worst NC/host |
 |---|---:|---:|---:|---:|
-| DCT–QR | **47.250421 dB** | 1.000000 | **0.997867** | **0.986162** |
+| DCT–QR | **50.399139 dB** | 1.000000 | **0.998028** | **0.988097** |
 | DCT–Schur | 48.014086 dB | 1.000000 | 0.996058 | 0.975353 |
 | Spatial DetQR | 56.670744 dB | 1.000000 | 0.991345 | 0.942829 |
 
@@ -38,6 +38,7 @@ and limitations:
 - [`docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md`](docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md)
 - [`docs/REDESIGNED_PROPOSALS_VI.md`](docs/REDESIGNED_PROPOSALS_VI.md)
 - [`results/dct_qr_previous_vs_carrier_r11.json`](results/dct_qr_previous_vs_carrier_r11.json)
+- [`results/dct_qr_pairwise_coset_13host.json`](results/dct_qr_pairwise_coset_13host.json)
 - [`results/redesigned_comparison.json`](results/redesigned_comparison.json)
 - [`results/redesigned_13host_validation.json`](results/redesigned_13host_validation.json)
 
@@ -106,26 +107,27 @@ python scripts/list_baselines.py
 python scripts/list_attacks.py
 ```
 
-Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `41 passed`.
+Expected test result is reported by the current `pytest -q` run; the suite includes dedicated carrier-QR homogeneity, perturbation-bound, ablation-flag, and clean-round-trip checks. Current result: `45 passed`.
 
 
-### Reproduce the focused DCT–QR comparison
+### Reproduce the active DCT–QR validation
 
-Quick one-host comparison:
-
-```bash
-python scripts/run_dct_qr_carrier_comparison.py --host-limit 1
-```
-
-Full 13-host comparison:
+Quick one-host validation:
 
 ```bash
-python scripts/run_dct_qr_carrier_comparison.py
+python scripts/validate_dct_qr_pairwise_coset.py --host-limit 1
 ```
 
-The previous global QR configuration is preserved in
-`configs/dct_qr_previous_global_qr.json`; the validated carrier-specific
-configuration is `configs/dct_qr_after_pso.json`.
+Full 13-host validation:
+
+```bash
+python scripts/validate_dct_qr_pairwise_coset.py
+```
+
+The active configuration is `configs/dct_qr_after_pso.json`. It keeps the
+validated QIM steps and margins unchanged and enables pairwise coset
+optimization with `coset_group_size=2`. Historical QR configurations remain
+available for ablation.
 
 ## Reproduce the redesigned validation
 
@@ -167,7 +169,7 @@ Example DCT-QR ablation and override:
 ```bash
 python scripts/run_proposal_benchmark.py \
   --method dct_qr \
-  --ablation global_qr_gain \
+  --ablation no_coset_optimization \
   --gain-gamma 0.90 \
   --step 13.25
 ```

@@ -4,16 +4,17 @@ Protocol: 13 supplied hosts, one 64×64 watermark, 15 moderate attacks for all m
 
 ## DCT-QR
 
-Accepted change: QR reliability-conditioned three-level QIM separation.
+Accepted replacement: QR-conditioned pairwise coset optimization at unchanged QIM steps and margins.
 
-| Metric | Before | After | Difference |
+| Metric | Previous carrier-r11 | Active pairwise-coset | Difference |
 |---|---:|---:|---:|
-| Mean PSNR | 45.635875 | 45.684599 | +0.048724 dB |
-| Clean NC | 0.999981 | 1.000000 | +0.000019 |
-| Mean NC | 0.990520 | 0.990990 | +0.000471 |
-| Mean worst-attack NC | 0.959743 | 0.962965 | +0.003222 |
+| Mean PSNR | 47.250421 | **50.399139** | **+3.148718 dB** |
+| Clean NC | 1.000000 | **1.000000** | 0 |
+| Mean attacked NC | 0.997867 | **0.998028** | +0.000161 |
+| Mean worst-attack NC | 0.986162 | **0.988097** | +0.001935 |
+| Global worst NC | 0.964654 | **0.964723** | +0.000069 |
 
-Scientific interpretation: local matrix stability is used to distribute a fixed robustness budget instead of applying one strength to every block.
+Scientific interpretation: each QR-homogeneous pair selects the least-distorting shared binary coset. The previous mapping is the feasible case `s=0`, so continuous projection energy cannot increase, while XOR inversion preserves the physical QIM error event.
 
 ## DCT-Schur Rescue
 

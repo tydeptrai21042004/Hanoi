@@ -1,5 +1,14 @@
 # Scientific revision changelog
 
+## 2026 DCT–QR pairwise-coset replacement
+
+- Replaced only the public DCT–QR payload parity assignment; DCT–Schur and Spatial DetQR formulas remain unchanged.
+- Added QR-homogeneous groups of two payload blocks and exact binary coset minimization at unchanged local QIM steps and guard margins.
+- Added packed coset flip-mask extraction with backward compatibility for old DCT–QR keys.
+- Added the `no_coset_optimization` ablation and direct coset hyperparameter flags.
+- Validated 13 hosts × 15 attacks: mean PSNR 50.399139 dB, clean NC 1.0, mean attacked NC 0.998028, mean worst NC 0.988097.
+- Added theorem-level and integration tests; current result: `45 passed`.
+
 ## 2026 redesigned proposal release
 
 ### DCT–QR

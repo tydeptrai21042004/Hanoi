@@ -17,6 +17,8 @@ def test_public_dct_qr_default_uses_carrier_specific_qr_gain() -> None:
     assert cfg.qr_gain_mode == "carrier_r11"
     assert np.allclose(cfg.adaptive_step_levels(), (18.25, 13.25, 10.25))
     assert cfg.gain_gamma == 0.90
+    assert cfg.coset_optimization_enabled is True
+    assert cfg.coset_group_size == 2
 
 
 def test_carrier_r11_is_exact_first_column_norm() -> None:

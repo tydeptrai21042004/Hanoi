@@ -13,22 +13,22 @@
 - Replaced the former configuration-mutating complete pipeline with a read-only
   test/smoke/unified-benchmark pipeline.
 
-## Mathematical preservation
+## Mathematical change scope
 
-No file under either of these numerical implementation trees was modified:
+This release intentionally replaces only the public DCT–QR payload parity
+assignment with QR-conditioned pairwise coset optimization. The existing DCT
+carrier, QR step allocation, QIM margins, gain normalization, pilots,
+synchronization, and integer-lattice closure are retained.
 
-```text
-src/qr64_certified/proposals/
-src/qr64_certified/baselines/implementations/
-```
-
-Changes are limited to attacks, metrics, evaluation adapters, benchmark runners,
-configuration, tests, reports and documentation. Therefore, embedding and
-extraction equations for every proposal and baseline are unchanged.
+The DCT–Schur and Spatial DetQR embedding/extraction formulas and all baseline
+implementations are unchanged. Historical preservation records remain under
+`docs/PROPOSAL_PRESERVATION.*` and are explicitly marked as records of the
+earlier namespace-only migration.
 
 ## Validation performed
 
-- `pytest -q`: **41 passed**.
+- Pairwise-coset DCT–QR validation: **13 hosts × 15 attacks**, mean PSNR **50.399139 dB**, clean NC **1.0**, mean attacked NC **0.998028**.
+- `pytest -q`: **45 passed**.
 - Extended attack execution: **113/113 succeeded**, with RGB `uint8` type and
   original image shape preserved.
 - Unified all-method clean smoke: **19/19 methods completed**.
