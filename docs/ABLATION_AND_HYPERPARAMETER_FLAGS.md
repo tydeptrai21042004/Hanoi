@@ -66,38 +66,34 @@ python scripts/run_proposal_benchmark.py \
   --print-effective-config
 ```
 
-## DCT-Schur Spectral-Gain QIM
+## DCT-Schur SP-SCQIM
 
 ### Ablations
 
 | Flag | Scientific component removed |
 |---|---|
-| `uniform_step` | Removes Schur reliability-conditioned step allocation. |
-| `no_gain_normalization` | Removes Schur spectral-gain normalization. |
-| `no_schur_departure` | Uses eigenvalue energy only by setting the Henrici-departure weight to zero. |
+| `single_coupling` | Removes confidence differentiation between the three interleaved observations. |
+| `no_gain_normalization` | Removes stored Schur-scale gain normalization. |
 | `no_spatial_map` | Removes ICM spatial regularization. |
-| `no_certificate_evidence` | Removes Schur reliability from decoder evidence weighting. |
-| `no_sync_certificate` | Removes Schur-certificate consistency from synchronization. |
+| `no_candidate_search` | Uses the attacked image directly without blind sharpening selection. |
+| `single_closure` | Uses one uint8 lattice-closure round. |
 
-Important hyperparameters include the common DCT-QIM flags plus:
+Active hyperparameters include:
 
 ```text
---schur-departure-weight
---schur-step
+--step
+--eta
+--gain-normalization / --no-gain-normalization
+--gain-gamma
+--gain-clip
 --schur-lift
---schur-max-log-scale
 --schur-closure-iters
---fusion-weight
---gate-power
---schur-conf-floor
---schur-conf-scale
---agreement-bonus
---direct-det-epsilon
+--qr-map-lambda        # compatibility CLI name for map_lambda
+--qr-map-iters         # compatibility CLI name for map_iters
 ```
 
-The legacy secondary Schur channel remains disabled in the public proposal;
-its parameters are exposed only so historical/negative-result experiments can
-be reproduced.
+The public method no longer accepts a nested DCT-QR configuration. The historical
+Schur-gain hybrid remains in `direct_schur_rescue_legacy.py` for audit only.
 
 ## Spatial CD-DetQR
 

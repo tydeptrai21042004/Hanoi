@@ -61,27 +61,21 @@ def _problem(method: str, before):
             ).validated()
 
     elif method == DCT_SCHUR_RESCUE:
-        bounds = [(8.25, 16.0), (0.02, 0.08), (0.0, 0.40), (0.70, 1.50)]
+        bounds = [(7.5, 10.5), (0.40, 0.90), (0.50, 1.00), (1.0, 3.0)]
         initial = [
-            before.base_config.step,
-            before.schur_step,
-            before.fusion_weight,
-            before.gate_power,
+            before.step,
+            before.map_lambda,
+            before.gain_gamma,
+            float(before.closure_rounds),
         ]
 
         def make(position: np.ndarray):
-            base = replace(
-                before.base_config,
-                step=float(position[0]),
-                pilot_step=10.0,
-                certificate_mode="schur",
-            ).validated()
             return replace(
                 before,
-                base_config=base,
-                schur_step=float(position[1]),
-                fusion_weight=float(position[2]),
-                gate_power=float(position[3]),
+                step=float(position[0]),
+                map_lambda=float(position[1]),
+                gain_gamma=float(position[2]),
+                closure_rounds=max(1, int(round(float(position[3])))),
             ).validated()
 
     else:

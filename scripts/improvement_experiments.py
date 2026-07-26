@@ -30,7 +30,7 @@ from qr64_certified.method import (
     _icm_map,
     _inverse_arnold_array,
 )
-from qr64_certified.direct_schur_rescue import (
+from qr64_certified.proposals.direct_schur_rescue_legacy import (
     DirectSchurRescueConfig,
     DirectSchurRescueKey,
     _blocks_from_field,

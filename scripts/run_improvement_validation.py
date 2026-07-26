@@ -9,7 +9,7 @@ from qr64_certified.attacks import apply_attack, AttackConfig
 from qr64_certified.attacks.presets import moderate_attacks
 from qr64_certified.config import QR64Config
 from qr64_certified.method import embed as embed_qr, extract as extract_qr
-from qr64_certified.direct_schur_rescue import (
+from qr64_certified.proposals.direct_schur_rescue_legacy import (
     DirectSchurRescueConfig,
     embed as embed_schur,
     extract as extract_schur,
