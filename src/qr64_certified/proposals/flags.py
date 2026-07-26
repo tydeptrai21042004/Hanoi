@@ -28,12 +28,11 @@ ABLATION_FLAGS: dict[str, tuple[str, ...]] = {
         "no_sync_certificate",
     ),
     DCT_SCHUR_RESCUE: (
-        "uniform_step",
+        "single_coupling",
         "no_gain_normalization",
-        "no_schur_departure",
         "no_spatial_map",
-        "no_certificate_evidence",
-        "no_sync_certificate",
+        "no_candidate_search",
+        "single_closure",
     ),
     SPATIAL_CD_DETQR: (
         "fixed_payload_pattern",
@@ -57,16 +56,12 @@ HYPERPARAMETER_FLAGS: dict[str, tuple[str, ...]] = {
         "sync_improvement_threshold",
     ),
     DCT_SCHUR_RESCUE: (
-        "step", "rho_frac", "pilot_count", "pilot_step", "pilot_rho_frac",
-        "eta", "qr_lift", "adaptive_step_enabled", "adaptive_step_ratios",
-        "adaptive_step_fractions", "exact_confidence_gate",
+        "step", "eta", "seed", "arnold_iterations", "closure_rounds",
         "gain_normalization_enabled", "gain_gamma", "gain_clip",
-        "schur_departure_weight", "qr_map_lambda", "qr_map_iters",
-        "evidence_conf_power", "sync_certificate_weight",
-        "sync_improvement_threshold", "schur_step", "schur_lift",
-        "schur_max_log_scale", "schur_closure_iters", "fusion_weight",
-        "gate_power", "schur_conf_floor", "schur_conf_scale",
-        "agreement_bonus", "direct_det_epsilon",
+        "confidence_floor", "confidence_scale", "confidence_power",
+        "map_lambda", "map_iters", "candidate_search_enabled",
+        "candidate_agreement_weight", "candidate_evidence_weight",
+        "candidate_confidence_weight", "schur_lift", "determinant_epsilon",
     ),
     SPATIAL_CD_DETQR: (
         "target_margin", "boundary_penalty", "max_patterns",
@@ -329,68 +324,28 @@ def apply_proposal_flags(
     elif method == DCT_SCHUR_RESCUE:
         if not isinstance(config, DirectSchurRescueConfig):
             config = DirectSchurRescueConfig.from_mapping(config)  # type: ignore[arg-type]
-        base, direct_base = _apply_qr_fields(config.base_config, raw)
-        overrides.update({f"base_config.{k}": v for k, v in direct_base.items()})
-        outer_names = (
-            "schur_step",
-            "schur_lift",
-            "schur_max_log_scale",
-            "schur_closure_iters",
-            "fusion_weight",
-            "gate_power",
-            "schur_conf_floor",
-            "schur_conf_scale",
-            "agreement_bonus",
-            "direct_det_epsilon",
-        )
-        outer_updates = {
-            name: raw[name] for name in outer_names if _present(raw, name)
-        }
-        overrides.update(outer_updates)
-        config = replace(config, base_config=replace(base, certificate_mode="schur"), **outer_updates)
+        names = HYPERPARAMETER_FLAGS[DCT_SCHUR_RESCUE]
+        updates = {name: raw[name] for name in names if _present(raw, name)}
+        # CLI compatibility: --schur-step now refers to the active coupling step.
+        if _present(raw, "schur_step") and "step" not in updates:
+            updates["step"] = raw["schur_step"]
+        if _present(raw, "schur_closure_iters") and "closure_rounds" not in updates:
+            updates["closure_rounds"] = raw["schur_closure_iters"]
+        overrides.update(updates)
+        if updates:
+            config = replace(config, **updates)
         for name in requested:
-            if name == "uniform_step":
-                config = replace(
-                    config,
-                    base_config=replace(config.base_config, adaptive_step_enabled=False),
-                )
+            if name == "single_coupling":
+                # Implemented through zero confidence on the two auxiliary copies.
+                config = replace(config, confidence_scale=0.0, confidence_floor=1.0)
             elif name == "no_gain_normalization":
-                config = replace(
-                    config,
-                    base_config=replace(
-                        config.base_config, gain_normalization_enabled=False
-                    ),
-                )
-            elif name == "no_schur_departure":
-                config = replace(
-                    config,
-                    base_config=replace(
-                        config.base_config, schur_departure_weight=0.0
-                    ),
-                )
+                config = replace(config, gain_normalization_enabled=False)
             elif name == "no_spatial_map":
-                config = replace(
-                    config,
-                    base_config=replace(
-                        config.base_config, qr_map_lambda=0.0, qr_map_iters=0
-                    ),
-                )
-            elif name == "no_certificate_evidence":
-                config = replace(
-                    config,
-                    base_config=replace(
-                        config.base_config,
-                        evidence_certificate_floor=1.0,
-                        evidence_certificate_scale=0.0,
-                    ),
-                )
-            elif name == "no_sync_certificate":
-                config = replace(
-                    config,
-                    base_config=replace(
-                        config.base_config, sync_certificate_weight=0.0
-                    ),
-                )
+                config = replace(config, map_lambda=0.0, map_iters=0)
+            elif name == "no_candidate_search":
+                config = replace(config, candidate_search_enabled=False)
+            elif name == "single_closure":
+                config = replace(config, closure_rounds=1)
         config = config.validated()
 
     else:

@@ -44,12 +44,13 @@ SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
     },
     DCT_SCHUR_RESCUE: {
         "id": DCT_SCHUR_RESCUE,
-        "display_name": "DCT-Schur Spectral-Gain QIM",
-        "domain": "DCT-QIM with Schur reliability and spectral-departure gain compensation",
-        "scientific_status": "validated proposal",
+        "display_name": "DCT-Schur Spectrum-Preserving Orthogonal Coupling QIM",
+        "domain": "DCT strict-upper Schur couplings with three interleaved parity projections",
+        "scientific_status": "independent proposal; performance gate under validation",
         "description": (
-            "Schur spectral balance allocates local QIM spacing, while eigenvalue energy and "
-            "departure from normality estimate attack-induced local attenuation."
+            "Three orthogonal strict-upper Schur coupling projections carry interleaved payload "
+            "copies. The closed-form minimum-Frobenius update preserves the constructed Schur "
+            "spectrum, trace, and determinant while using an independent decoder and key."
         ),
     },
     SPATIAL_CD_DETQR: {

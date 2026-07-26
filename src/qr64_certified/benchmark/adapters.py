@@ -64,8 +64,7 @@ def _proposal_config_for_seed(method_id: str, config: Any, seed: int):
     if method_id == DCT_QR:
         return replace(config, seed=int(seed)).validated()
     if method_id == DCT_SCHUR_RESCUE:
-        base = replace(config.base_config, seed=int(seed))
-        return replace(config, base_config=base).validated()
+        return replace(config, seed=int(seed)).validated()
     if method_id == SPATIAL_CD_DETQR:
         varied = replace(
             config,
