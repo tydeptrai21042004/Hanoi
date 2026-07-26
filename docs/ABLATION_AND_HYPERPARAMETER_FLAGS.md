@@ -14,12 +14,13 @@ python scripts/run_proposal_benchmark.py --help
 requested ablations are applied. The effective validated configuration and a
 `flag_report` are written to `summary.json`.
 
-## DCT-QR Carrier-Subspace QIM
+## DCT-QR Pairwise Coset-Optimized QIM
 
 ### Ablations
 
 | Flag | Scientific component removed or replaced |
 |---|---|
+| `no_coset_optimization` | Restores the previous direct payload-to-parity mapping while retaining the same QR steps and gain model. |
 | `uniform_step` | Replaces QR reliability-conditioned local QIM steps with one global step. |
 | `no_gain_normalization` | Removes carrier-subspace QR gain compensation. |
 | `global_qr_gain` | Replaces carrier-specific `r11` gain with the previous global `||diag(R)||2` gain. |
@@ -40,6 +41,8 @@ Important hyperparameters include:
 
 ```text
 --step
+--coset-optimization / --no-coset-optimization
+--coset-group-size
 --adaptive-step-ratios WEAK,MID,STRONG
 --adaptive-step-fractions Q1,Q2
 --rho-frac

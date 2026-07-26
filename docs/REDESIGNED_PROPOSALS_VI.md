@@ -4,7 +4,7 @@
 
 Bản tái thiết kế giữ nguyên ba miền khoa học bắt buộc:
 
-1. **DCT–QR Reliability-Conditioned QIM**: mọi bit được nhúng bằng DCT-QIM; QR phải tham gia trực tiếp vào phân bổ cường độ và trích xuất.
+1. **DCT–QR Pairwise Coset-Optimized QIM**: QR điều khiển phân bổ bước, ghép cặp block tương đồng và chọn coset có méo nhỏ nhất; QR `r11` tiếp tục bù gain khi trích xuất.
 2. **DCT–Schur Spectral-Gain QIM**: mọi bit được nhúng bằng DCT-QIM; Schur phải tham gia trực tiếp vào phân bổ cường độ và bù suy hao, không chỉ làm một kênh phụ yếu.
 3. **Spatial Normalized-Residual DetQR**: phương pháp hoàn toàn trong miền không gian; QR và điều kiện cứng \(\det A\ne0\) phải nằm ngay trong luật nhúng.
 
@@ -33,7 +33,7 @@ Kết quả tổng hợp:
 
 | Proposal mới | PSNR trung bình (dB) | Clean NC | Mean NC, 15 attacks | Mean worst NC/host | Global worst NC |
 |---|---:|---:|---:|---:|---:|
-| DCT–QR | 46.213584 | 1.000000 | 0.997246 | 0.982613 | 0.948264 |
+| DCT–QR | **50.399139** | 1.000000 | **0.998028** | **0.988097** | **0.964723** |
 | DCT–Schur | 48.014086 | 1.000000 | 0.996058 | 0.975353 | 0.923018 |
 | Spatial DetQR | 56.670744 | 1.000000 | 0.991345 | 0.942829 | 0.915258 |
 
@@ -41,7 +41,7 @@ So với số liệu proposal cũ đã lưu trong repository:
 
 | Proposal | \(\Delta\)PSNR | \(\Delta\)Mean NC | \(\Delta\)Mean worst NC |
 |---|---:|---:|---:|
-| DCT–QR | +0.528985 dB | +0.006256 | +0.019648 |
+| DCT–QR | **+4.714540 dB** | **+0.007038** | **+0.025132** |
 | DCT–Schur | +0.982801 dB | +0.007256 | +0.017814 |
 | Spatial DetQR | +3.034743 dB | +0.016994 | +0.186238 |
 
@@ -54,137 +54,84 @@ Do đó không được viết rằng **mọi tấn công riêng lẻ** đều t
 
 ---
 
-# 3. Proposal I — DCT–QR Gain-Normalized Reliability QIM
+# 3. Proposal I — DCT–QR Pairwise Coset-Optimized QIM
 
-## 3.1. Miền và carrier DCT
+## 3.1. Carrier và bước QIM
 
-Từ ảnh RGB, tạo trường đối nghịch:
+Từ trường đối nghịch RGB, với mỗi block \(8\times8\), carrier là
 
 \[
-F=0.299R+0.587G+0.114B
-+\eta\left(R-\frac{G+B}{2}\right),\qquad \eta=0.07.
+v_b=\frac{C_b(0,1)-C_b(1,0)}{2}.
 \]
 
-Với block \(8\times8\), thực hiện DCT trực chuẩn và định nghĩa carrier:
+QR reliability vẫn phân bổ ba bước đã kiểm chứng:
 
 \[
-v_b=\frac{1}{2}\bigl(C_b(0,1)-C_b(1,0)\bigr).
+\Delta_b\in\{18.25,13.25,10.25\},
+\qquad \rho_b=0.45\Delta_b.
 \]
 
-Bit \(m_b\in\{0,1\}\) được mã hóa bằng hai coset QIM chẵn/lẻ. Với bước cục bộ \(\Delta_b\), chỉ số lattice mục tiêu có parity bằng \(m_b\):
+## 3.2. Luật nhúng mới
+
+Với bit watermark đã scramble \(u_b\), định nghĩa phép chiếu khoảng an toàn
+\(P_c(v_b)\) lên coset QIM parity \(c\). Sắp xếp block theo QR reliability và
+ghép cặp \(G_j\). Nhãn coset chung của cặp là
 
 \[
-k_b^*=\arg\min_{k\in\mathbb Z,\;k\bmod 2=m_b}
-|v_b-k\Delta_b|,
+\boxed{
+s_j^*=\arg\min_{s\in\{0,1\}}
+\sum_{b\in G_j}|P_{u_b\oplus s}(v_b)-v_b|^2.
+}
+\]
+
+Bit thực sự nhúng và carrier mục tiêu là
+
+\[
+\boxed{c_b=u_b\oplus s_j^*,\qquad v_b^*=P_{c_b}(v_b).}
+\]
+
+Sau đó dùng cập nhật RGB chuẩn nhỏ nhất và integer-lattice closure hiện có.
+Không giảm \(\Delta_b\) và không giảm \(\rho_b\).
+
+## 3.3. Luật trích xuất
+
+Sau bù gain bằng canonical \(r_{11}\),
+
+\[
+\widehat c_b=\operatorname{round}(\widetilde v_b/\Delta_b)\bmod2,
 \qquad
-v_b^*=k_b^*\Delta_b.
+\boxed{\widehat u_b=\widehat c_b\oplus s_j^*.}
 \]
 
-Implementation tiếp tục dùng integer-lattice closure để bảo đảm ảnh `uint8` cuối cùng vẫn giải mã sạch chính xác.
+## 3.4. Cơ sở toán học
 
-## 3.2. Ma trận phân tích QR
-
-Từ 16 hệ số DCT tần số thấp của block, xây dựng ma trận nâng \(A_b\in\mathbb R^{4\times4}\). Hệ số DC được thay bằng hiệu định hướng \(C_b(0,1)-C_b(1,0)\), sau đó thêm diagonal lift dương để ổn định phân tích:
+Vì mapping cũ tương ứng với lựa chọn khả thi \(s=0\), nghiệm tối ưu thỏa
 
 \[
-A_b=Q_bR_b,
+D_{\mathrm{new}}\le D_{\mathrm{old}}.
 \]
 
-với QR canonical, tức đường chéo của \(R_b\) không âm.
-
-Reliability được tạo từ ba thành phần:
+Ngoài ra,
 
 \[
-\beta_b=\frac{|\det A_b|}{\|A_b\|_F^3},
+\mathbf1[\widehat u_b\ne u_b]
+=
+\mathbf1[\widehat c_b\ne c_b],
 \]
 
-\[
-b_b=\frac{\min_i |r_{ii}|}{\max_i |r_{ii}|+\varepsilon},
-\qquad
-c_b=\frac{\|\operatorname{triu}(R_b,1)\|_F}
-{\|R_b\|_F+\varepsilon},
-\]
+nên phép XOR hoàn nguyên không tạo thêm lỗi bit. Điều kiện đủ cũ
+\(|e_b|<\rho_b\) vẫn giữ nguyên do bước và guard margin không thay đổi.
 
-\[
-r_b=\operatorname{Norm}_{5\%,95\%}
-\left[\log(1+\beta_b)+2b_b+0.2(1-c_b)\right].
-\]
+## 3.5. Kết quả
 
-## 3.3. Luật phân bổ QIM theo QR
+- PSNR: 47.250421 → **50.399139 dB** so với bản carrier-`r11` ngay trước đó.
+- Clean NC: **1.000000**.
+- Mean attacked NC: 0.997867 → **0.998028**.
+- Mean worst NC/host: 0.986162 → **0.988097**.
+- Global worst NC: 0.964654 → **0.964723**.
 
-QR reliability chia block thành ba nhóm. Cấu hình đã kiểm chứng sử dụng:
-
-\[
-\Delta_b=
-\begin{cases}
-20,&r_b\text{ thuộc 20\% yếu nhất},\\
-15,&r_b\text{ thuộc 40\% giữa},\\
-12,&r_b\text{ thuộc 40\% mạnh nhất}.
-\end{cases}
-\]
-
-Ý nghĩa: block yếu nhận khoảng cách coset lớn hơn để giảm lỗi; block ổn định nhận bước nhỏ hơn để giảm méo. Đây là một phân bổ méo rời rạc theo reliability thay vì một \(\Delta\) đồng nhất.
-
-## 3.4. Đóng góp QR mới: bù gain từ canonical \(R\)
-
-Định nghĩa thang QR:
-
-\[
-s_b^{QR}=\|\operatorname{diag}(R_b)\|_2.
-\]
-
-Tham chiếu \(s_b^{QR,0}\) được tính từ **ảnh watermarked cuối cùng**, không lấy từ ảnh host gốc. Khi trích xuất ảnh nghi vấn, tính:
-
-\[
-\alpha_b^{QR}
-=\operatorname{clip}\left(
-\frac{s_b^{QR}}{s_b^{QR,0}},0.55,1.45
-\right),
-\]
-
-\[
-\widetilde v_b=rac{v_b}{(\alpha_b^{QR})^{\gamma}},
-\qquad \gamma=0.75.
-\]
-
-Sau đó giải mã parity từ \(\widetilde v_b/\Delta_b\).
-
-### Mệnh đề 1 — Tính đồng bậc của thang QR
-
-Nếu block sau biến đổi gain lý tưởng thỏa:
-
-\[
-A_b'=\alpha A_b,\qquad \alpha>0,
-\]
-
-thì với QR canonical:
-
-\[
-A_b'=Q_b(\alpha R_b),
-\]
-
-và do đó:
-
-\[
-s_b^{QR}(A_b')=\alpha s_b^{QR}(A_b).
-\]
-
-Carrier DCT tuyến tính cũng thỏa \(v_b'=\alpha v_b\). Vì vậy với \(\gamma=1\), phép chia bởi tỷ số QR khử chính xác gain lý tưởng. Giá trị \(\gamma=0.75\) là shrinkage thực nghiệm để tránh over-correction khi attack không phải gain thuần.
-
-## 3.5. Điểm mới có thể bảo vệ
-
-Không tuyên bố mới ở việc “dùng QR với DCT”, vì đã có nhiều watermarking scheme dùng QR. Điểm mới cụ thể là:
-
-1. **Reliability-conditioned QIM spacing** từ determinant bound, diagonal balance và QR coupling.
-2. **Canonical-R gain normalization** dùng tỷ số thang QR của ảnh watermarked và ảnh nghi vấn.
-3. Ghép hai vai trò QR trong cùng một pipeline: QR điều khiển cả **méo khi nhúng** và **bù suy hao khi trích xuất**.
-
-## 3.6. Kết quả
-
-- PSNR: 45.684599 → **46.213584 dB**.
-- Mean NC: 0.990990 → **0.997246**.
-- Mean worst NC: 0.962965 → **0.982613**.
-- Clean NC: **1.000000** trên 13/13 host.
+Key lưu flip mask đóng gói 4096 bit (512 byte thô), đại diện cho 2048 nhãn cặp.
+Đây là side information cần báo cáo minh bạch trong bài báo.
 
 ---
 

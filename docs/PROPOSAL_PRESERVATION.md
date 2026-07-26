@@ -1,4 +1,10 @@
-# Proposal preservation verification
+# Historical proposal preservation verification
+
+> **Current-release notice:** this document records the earlier namespace-only
+> migration. The present release intentionally changes `proposals/method.py`,
+> `proposals/config.py`, `proposals/flags.py`, and `proposal_registry.py` for the
+> new DCT–QR pairwise-coset embedding law. DCT–Schur, Spatial DetQR, and baseline
+> mathematical implementations remain unchanged.
 
 The unified repository contains exactly the same three proposal methods as the
 uploaded original project:

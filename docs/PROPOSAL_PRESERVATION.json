@@ -80,5 +80,16 @@
       "marked": "1db44f704cd09d5af634f2093e95f377fba3093221363ca8e50668efe8b06542",
       "recovered": "f519f7b74ca211fe9af664921141517213bbafa21c7b0c4c25494082c4511159"
     }
+  },
+  "record_scope": "historical_namespace_migration_only",
+  "current_release": {
+    "dct_qr_formula_changed": true,
+    "change": "QR-conditioned pairwise coset-optimized payload parity assignment",
+    "unchanged_methods": [
+      "dct_schur_rescue",
+      "spatial_cd_detqr",
+      "all_baselines"
+    ],
+    "validation_result": "45 tests passed; 13-host mean PSNR 50.399139 dB; clean NC 1.0"
   }
 }
