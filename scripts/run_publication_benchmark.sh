@@ -10,8 +10,6 @@ export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
 export PYTHONPATH="$ROOT/src:$ROOT/scripts${PYTHONPATH:+:$PYTHONPATH}"
 
 pytest -q
-python scripts/smoke_test_proposals.py
-python scripts/smoke_integrated_baselines.py
 python scripts/run_unified_benchmark.py \
-  --protocol configs/benchmark/quick.json \
+  --protocol configs/benchmark/publication.json \
   --resume

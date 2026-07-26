@@ -4,7 +4,7 @@ import csv
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 import numpy as np
 
@@ -19,8 +19,9 @@ from qr64_certified import (
     extract_proposal,
 )
 from qr64_certified.attacks.presets import moderate_attacks
+from qr64_certified.attacks.types import AttackConfig
 from qr64_certified.attacks import apply_attack
-from qr64_certified.common.metrics import ber, nc, ncc, psnr, ssim
+from qr64_certified.common.metrics import ber, image_quality_metrics, nc, ncc, psnr, ssim, watermark_metrics
 
 METHODS = (DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
@@ -58,6 +59,7 @@ def evaluate_method(
     config: Any,
     host: np.ndarray,
     watermark: np.ndarray,
+    attacks: Iterable[AttackConfig] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], np.ndarray, Any, np.ndarray]:
     watermarked, key, embed_meta = embed_proposal(
         method, host, watermark, config=config, return_metadata=True
@@ -66,8 +68,11 @@ def evaluate_method(
     host_psnr = float(psnr(host, watermarked))
     host_ssim = float(ssim(host, watermarked))
     clean_nc = float(nc(watermark, recovered_clean))
+    embedding_quality = image_quality_metrics(host, watermarked)
+    clean_wm_metrics = watermark_metrics(watermark, recovered_clean)
     rows: list[dict[str, Any]] = []
-    for attack in moderate_attacks():
+    selected_attacks = list(moderate_attacks() if attacks is None else attacks)
+    for attack in selected_attacks:
         attacked = apply_attack(watermarked, attack)
         recovered, metadata = extract_proposal(attacked, key, return_metadata=True)
         rows.append(
@@ -82,6 +87,8 @@ def evaluate_method(
                 "nc": float(nc(watermark, recovered)),
                 "ncc": float(ncc(watermark, recovered)),
                 "ber": float(ber(watermark, recovered)),
+                **{f"watermark_{k}": v for k, v in watermark_metrics(watermark, recovered).items()},
+                **{f"attacked_image_{k}": v for k, v in image_quality_metrics(host, attacked).items()},
                 "det_nonzero": bool(metadata.get("det_nonzero", True)),
                 "min_abs_det": metadata.get("min_abs_det", ""),
                 "inference_path": metadata.get("inference_path", ""),
@@ -92,6 +99,8 @@ def evaluate_method(
         "configuration": config_to_dict(config),
         "host_psnr": host_psnr,
         "host_ssim": host_ssim,
+        "embedding_metrics": embedding_quality,
+        "clean_watermark_metrics": clean_wm_metrics,
         "clean_nc": clean_nc,
         "mean_nc": float(np.mean([r["nc"] for r in rows])),
         "q10_nc": float(np.quantile([r["nc"] for r in rows], 0.10)),
