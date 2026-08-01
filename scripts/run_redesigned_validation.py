@@ -123,7 +123,7 @@ def main() -> None:
     }
 
     for method in args.methods:
-        config_path = ROOT / "configs" / f"{method}_after_pso.json"
+        config_path = ROOT / "configs" / f"{method}_after_abc.json"
         config = read_config(config_path, method)
         host_rows: list[dict[str, Any]] = []
         print(f"\n[{method}] config={config_path.relative_to(ROOT)}", flush=True)

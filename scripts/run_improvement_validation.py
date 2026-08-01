@@ -51,9 +51,9 @@ def eval_attacks(out, key, extractor, attacks_list):
     return vals,per
 
 rows=[]
-qr_cfg=QR64Config.from_mapping(json.loads((ROOT/'configs/dct_qr_after_pso.json').read_text()))
-schur_cfg=DirectSchurRescueConfig.from_mapping(json.loads((ROOT/'configs/dct_schur_rescue_after_pso.json').read_text()))
-sp_raw=json.loads((ROOT/'configs/spatial_cd_detqr_after_pso.json').read_text())
+qr_cfg=QR64Config.from_mapping(json.loads((ROOT/'configs/dct_qr_after_abc.json').read_text()))
+schur_cfg=DirectSchurRescueConfig.from_mapping(json.loads((ROOT/'configs/dct_schur_rescue_after_abc.json').read_text()))
+sp_raw=json.loads((ROOT/'configs/spatial_cd_detqr_after_abc.json').read_text())
 sp_before_cfg=CDDetQRConfig(**sp_raw)
 sp_after_raw=dict(sp_raw); sp_after_raw['pilot_count']=71
 sp_after_cfg=CDDetQRConfig(**sp_after_raw)

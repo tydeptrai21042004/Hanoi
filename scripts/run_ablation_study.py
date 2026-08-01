@@ -35,7 +35,7 @@ def main() -> None:
         description="Run the full model and one-component-at-a-time ablations."
     )
     parser.add_argument("--method", choices=METHODS, required=True)
-    parser.add_argument("--stage", choices=("before", "after_pso"), default="after_pso")
+    parser.add_argument("--stage", choices=("before", "after_abc"), default="after_abc")
     parser.add_argument("--config", type=Path, default=None)
     parser.add_argument("--host", type=Path, default=ROOT / "data" / "host" / "lenna.bmp")
     parser.add_argument(

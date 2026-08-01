@@ -17,7 +17,7 @@ def main() -> None:
     parser=argparse.ArgumentParser(); parser.add_argument('--host-limit',type=int,default=0)
     parser.add_argument('--output',type=Path,default=ROOT/'results/dct_qr_pairwise_coset_13host.json')
     args=parser.parse_args(); os.environ.setdefault('JILP_NUM_THREADS','1')
-    cfg=QR64Config.from_mapping(json.loads((ROOT/'configs/dct_qr_after_pso.json').read_text()))
+    cfg=QR64Config.from_mapping(json.loads((ROOT/'configs/dct_qr_after_abc.json').read_text()))
     if not cfg.coset_optimization_enabled or cfg.coset_group_size != 2:
         raise RuntimeError('Active DCT-QR config is not the pairwise coset proposal.')
     hosts=sorted((ROOT/'data/host').glob('*.bmp'),key=lambda p:p.name.lower())

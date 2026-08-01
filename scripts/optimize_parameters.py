@@ -15,14 +15,12 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from qr64_certified import (
-    CDDetQRConfig,
     DCT_QR,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
-    DirectSchurRescueConfig,
-    QR64Config,
 )
-from qr64_certified.optimization import particle_swarm_maximize
+from qr64_certified.attacks.presets import moderate_attacks
+from qr64_certified.optimization import artificial_bee_colony_maximize
 from three_method_utils import (
     METHODS,
     evaluate_method,
@@ -34,27 +32,89 @@ from qr64_certified.common.io import load_host_rgb, load_watermark_binary
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="PSO parameter selection for the three proposal methods.")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Artificial Bee Colony (ABC) parameter selection for the three "
+            "proposal methods."
+        )
+    )
     parser.add_argument("--host", default=str(ROOT / "data" / "host" / "lenna.bmp"))
-    parser.add_argument("--watermark", default=str(ROOT / "data" / "watermark" / "wm.png"))
-    parser.add_argument("--output-dir", default=str(ROOT / "results" / "optimization"))
-    parser.add_argument("--particles", type=int, default=20)
-    parser.add_argument("--iterations", type=int, default=20)
+    parser.add_argument(
+        "--watermark", default=str(ROOT / "data" / "watermark" / "wm.png")
+    )
+    parser.add_argument(
+        "--output-dir", default=str(ROOT / "results" / "optimization_abc")
+    )
+    parser.add_argument(
+        "--config-output-dir",
+        default=str(ROOT / "configs"),
+        help="Directory receiving *_after_abc.json configurations.",
+    )
+    parser.add_argument(
+        "--food-sources",
+        "--particles",
+        dest="food_sources",
+        type=int,
+        default=20,
+        help="ABC food sources/employed bees (legacy alias: --particles).",
+    )
+    parser.add_argument(
+        "--cycles",
+        "--iterations",
+        dest="cycles",
+        type=int,
+        default=20,
+        help="ABC optimization cycles (legacy alias: --iterations).",
+    )
+    parser.add_argument(
+        "--onlookers",
+        type=int,
+        default=0,
+        help="Onlooker bees per cycle; 0 uses the food-source count.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="ABC abandonment limit; 0 uses food_sources * dimensions.",
+    )
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--method", choices=[*METHODS, "all"], default="all")
+    parser.add_argument(
+        "--attack-limit",
+        type=int,
+        default=0,
+        help="Use only the first N moderate attacks; 0 uses the full suite.",
+    )
     return parser.parse_args()
 
 
-def _problem(method: str, before):
+def _starting_config(method: str):
+    """Load the strongest available validated configuration as ABC source zero."""
+    candidates = (
+        ROOT / "configs" / f"{method}_after_abc.json",
+        ROOT / "configs" / f"{method}_after_pso.json",
+        ROOT / "configs" / f"{method}_before.json",
+    )
+    for path in candidates:
+        if path.exists():
+            return read_config(path, method), path
+    raise FileNotFoundError(f"No starting configuration found for {method}")
+
+
+def _problem(method: str, starting):
     if method == DCT_QR:
         bounds = [(8.25, 16.0), (0.20, 0.60), (1.5, 2.5)]
-        initial = [before.step, before.qr_map_lambda, before.evidence_conf_power]
+        initial = [
+            starting.step,
+            starting.qr_map_lambda,
+            starting.evidence_conf_power,
+        ]
 
         def make(position: np.ndarray):
             return replace(
-                before,
+                starting,
                 step=float(position[0]),
-                pilot_step=10.0,
                 qr_map_lambda=float(position[1]),
                 evidence_conf_power=float(position[2]),
                 certificate_mode="qr",
@@ -63,15 +123,15 @@ def _problem(method: str, before):
     elif method == DCT_SCHUR_RESCUE:
         bounds = [(7.5, 10.5), (0.40, 0.90), (0.50, 1.00), (1.0, 3.0)]
         initial = [
-            before.step,
-            before.map_lambda,
-            before.gain_gamma,
-            float(before.closure_rounds),
+            starting.step,
+            starting.map_lambda,
+            starting.gain_gamma,
+            float(starting.closure_rounds),
         ]
 
         def make(position: np.ndarray):
             return replace(
-                before,
+                starting,
                 step=float(position[0]),
                 map_lambda=float(position[1]),
                 gain_gamma=float(position[2]),
@@ -79,67 +139,83 @@ def _problem(method: str, before):
             ).validated()
 
     else:
-        # Scientific search space for the spatial determinant model.  The
-        # validated 71-pilot synchronization design is held fixed so the search
-        # isolates payload margin, spatial regularity, determinant safety, and
-        # pilot separation.
-        bounds = [(1.5, 2.75), (0.0, 0.05), (0.35, 0.75), (6.0, 10.0)]
-        initial = [2.0, 0.01, 0.5, 8.0]
+        # Bounds match the active normalized spatial carrier scale. The former
+        # PSO script used margins around 1.5--2.75, which was inconsistent with
+        # the validated 0.005 configuration and could destroy imperceptibility.
+        bounds = [(0.0025, 0.0200), (0.0, 0.0020), (0.05, 0.50), (0.0025, 0.0200)]
+        initial = [
+            starting.target_margin,
+            starting.boundary_penalty,
+            starting.embedded_determinant_margin,
+            starting.pilot_margin,
+        ]
 
         def make(position: np.ndarray):
-            cfg = CDDetQRConfig(
+            config = replace(
+                starting,
                 target_margin=float(position[0]),
                 boundary_penalty=float(position[1]),
-                max_patterns=before.max_patterns,
-                determinant_floor=before.determinant_floor,
                 embedded_determinant_margin=float(position[2]),
-                mask_seed=before.mask_seed,
-                pilot_seed=before.pilot_seed,
-                pilot_count=71,
                 pilot_margin=float(position[3]),
-                affine_sync_enabled=before.affine_sync_enabled,
-                sync_acceptance_gain=before.sync_acceptance_gain,
-                sync_min_pilot_score=before.sync_min_pilot_score,
-                rotation_grid=tuple(before.rotation_grid),
-                shear_grid=tuple(before.shear_grid),
             )
-            cfg.validate()
-            return cfg
+            config.validate()
+            return config
 
     return bounds, initial, make
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(path.resolve())
+
+
 def main() -> None:
     args = parse_args()
+    if args.attack_limit < 0:
+        raise SystemExit("--attack-limit cannot be negative")
+
     os.environ.setdefault("JILP_NUM_THREADS", "1")
     host = load_host_rgb(args.host)
     watermark = load_watermark_binary(args.watermark, size=64)
     output = Path(args.output_dir)
+    config_output = Path(args.config_output_dir)
     output.mkdir(parents=True, exist_ok=True)
+    config_output.mkdir(parents=True, exist_ok=True)
+
+    attacks = moderate_attacks()
+    if args.attack_limit:
+        attacks = attacks[: args.attack_limit]
+    if not attacks:
+        raise SystemExit("The selected attack set is empty")
 
     selected = METHODS if args.method == "all" else (args.method,)
     overall: dict[str, object] = {
         "host": str(Path(args.host).name),
         "watermark": str(Path(args.watermark).name),
-        "optimizer": "deterministic particle swarm optimization",
-        "particles": args.particles,
-        "iterations": args.iterations,
+        "optimizer": "deterministic artificial bee colony",
+        "food_sources": args.food_sources,
+        "cycles": args.cycles,
+        "onlooker_bees": args.onlookers or args.food_sources,
+        "limit": args.limit or "automatic: food_sources * dimensions",
+        "seed": args.seed,
+        "attack_count": len(attacks),
         "methods": {},
     }
 
     for offset, method in enumerate(selected):
-        before_path = ROOT / "configs" / f"{method}_before.json"
-        before = read_config(before_path, method)
-        bounds, initial, make_config = _problem(method, before)
+        starting, starting_path = _starting_config(method)
+        bounds, initial, make_config = _problem(method, starting)
         cache: dict[tuple[float, ...], tuple[float, dict[str, object]]] = {}
 
         def objective(position: np.ndarray):
-            cache_key = tuple(float(round(x, 6)) for x in position)
+            cache_key = tuple(float(round(x, 8)) for x in position)
             if cache_key in cache:
                 return cache[cache_key]
             config = make_config(position)
             summary, _rows, _watermarked, _key, _clean = evaluate_method(
-                method, config, host, watermark
+                method, config, host, watermark, attacks=attacks
             )
             if method == SPATIAL_CD_DETQR:
                 # Preserve the requested quality floor while maximizing attack
@@ -156,45 +232,53 @@ def main() -> None:
                 "host_psnr": summary["host_psnr"],
                 "clean_nc": summary["clean_nc"],
                 "mean_nc": summary["mean_nc"],
+                "q10_nc": summary["q10_nc"],
+                "min_nc": summary["min_nc"],
                 "mean_ber": summary["mean_ber"],
             }
             cache[cache_key] = (score, details)
             print(
-                f"{method}: position={np.round(position, 5).tolist()} "
+                f"{method}: position={np.round(position, 7).tolist()} "
                 f"score={score:.8f} PSNR={summary['host_psnr']:.4f} "
-                f"cleanNC={summary['clean_nc']:.6f} meanNC={summary['mean_nc']:.6f}",
+                f"cleanNC={summary['clean_nc']:.6f} "
+                f"meanNC={summary['mean_nc']:.6f}",
                 flush=True,
             )
             return score, details
 
-        result = particle_swarm_maximize(
+        result = artificial_bee_colony_maximize(
             objective,
             bounds,
             initial_position=initial,
-            particles=args.particles,
-            iterations=args.iterations,
+            food_sources=args.food_sources,
+            cycles=args.cycles,
             seed=args.seed + offset,
+            limit=None if args.limit == 0 else args.limit,
+            onlooker_bees=None if args.onlookers == 0 else args.onlookers,
         )
         best_config = make_config(result.best_position)
-        after_path = ROOT / "configs" / f"{method}_after_pso.json"
+        after_path = config_output / f"{method}_after_abc.json"
         write_config(after_path, best_config)
         trace = {
             "method_id": method,
+            "optimizer": "artificial_bee_colony",
             "bounds": bounds,
+            "starting_config": _display_path(starting_path),
             "initial_position": initial,
             "best_position": result.best_position.tolist(),
             "best_score": result.best_score,
             "history": result.history,
             "evaluations": result.evaluations,
-            "after_config": str(after_path.relative_to(ROOT)),
+            "after_config": _display_path(after_path),
         }
-        (output / f"{method}_pso_trace.json").write_text(
+        (output / f"{method}_abc_trace.json").write_text(
             json.dumps(trace, indent=2), encoding="utf-8"
         )
         overall["methods"][method] = {
+            "starting_config": _display_path(starting_path),
             "best_position": result.best_position.tolist(),
             "best_score": result.best_score,
-            "after_config": str(after_path.relative_to(ROOT)),
+            "after_config": _display_path(after_path),
         }
 
     (output / "optimization_summary.json").write_text(

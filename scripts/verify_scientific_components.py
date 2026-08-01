@@ -57,11 +57,11 @@ def main() -> None:
     host = load_host_rgb(ROOT / "data/host/lenna.bmp")
     watermark = load_watermark_binary(ROOT / "data/watermark/wm.png", size=64)
 
-    dct_cfg = read_config(ROOT / "configs/dct_qr_after_pso.json", DCT_QR)
+    dct_cfg = read_config(ROOT / "configs/dct_qr_after_abc.json", DCT_QR)
     dct_summary, *_ = evaluate_method(DCT_QR, dct_cfg, host, watermark)
 
     spatial_cfg = read_config(
-        ROOT / "configs/spatial_cd_detqr_after_pso.json", SPATIAL_CD_DETQR
+        ROOT / "configs/spatial_cd_detqr_after_abc.json", SPATIAL_CD_DETQR
     )
     spatial_watermarked, spatial_key = embed_proposal(
         SPATIAL_CD_DETQR, host, watermark, config=spatial_cfg
@@ -83,7 +83,7 @@ def main() -> None:
         }
 
     schur_cfg = read_config(
-        ROOT / "configs/dct_schur_rescue_after_pso.json", DCT_SCHUR_RESCUE
+        ROOT / "configs/dct_schur_rescue_after_abc.json", DCT_SCHUR_RESCUE
     )
     schur_watermarked, schur_key = embed_proposal(
         DCT_SCHUR_RESCUE, host, watermark, config=schur_cfg

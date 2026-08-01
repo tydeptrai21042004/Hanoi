@@ -109,7 +109,7 @@ def main() -> None:
 
     watermark = load_watermark_binary(ROOT / "data/watermark/wm.png", size=64)
     previous = load_config(ROOT / "configs/dct_qr_previous_global_qr.json")
-    proposed = load_config(ROOT / "configs/dct_qr_after_pso.json")
+    proposed = load_config(ROOT / "configs/dct_qr_after_abc.json")
 
     result = {
         "protocol": {

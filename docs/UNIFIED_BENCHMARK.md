@@ -246,6 +246,6 @@ non-blind tables. The 16×16 DEW payload must not be ranked directly against the
 - `configs/benchmark/baseline_parameters.json`: explicit baseline parameters.
 
 Proposal configurations continue to come from the existing frozen
-`configs/*_after_pso.json` files. Seed 2026 reproduces their stored scheduling.
+`configs/*_after_abc.json` files. Seed 2026 reproduces their stored scheduling.
 Other seeds vary only pseudorandom scheduling/masking, not the mathematical
 embedding or detector laws.

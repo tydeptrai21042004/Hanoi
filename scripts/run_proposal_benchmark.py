@@ -20,7 +20,7 @@ from qr64_certified.proposals.flags import add_proposal_flag_arguments, apply_pr
 def main() -> None:
     parser = argparse.ArgumentParser(description="Benchmark one of the three proposal methods on one host and 15 attacks.")
     parser.add_argument("--method", choices=[DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR], required=True)
-    parser.add_argument("--stage", choices=["before", "after_pso"], default="after_pso")
+    parser.add_argument("--stage", choices=["before", "after_abc"], default="after_abc")
     parser.add_argument(
         "--config",
         type=Path,

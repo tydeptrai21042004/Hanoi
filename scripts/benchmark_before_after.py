@@ -17,10 +17,10 @@ from qr64_certified.common.io import load_host_rgb, load_watermark_binary, save_
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Export before/after PSO results for all three methods.")
+    parser = argparse.ArgumentParser(description="Export before/after ABC results for all three methods.")
     parser.add_argument("--host", default=str(ROOT / "data" / "host" / "lenna.bmp"))
     parser.add_argument("--watermark", default=str(ROOT / "data" / "watermark" / "wm.png"))
-    parser.add_argument("--output-dir", default=str(ROOT / "results" / "before_after_pso"))
+    parser.add_argument("--output-dir", default=str(ROOT / "results" / "before_after_abc"))
     parser.add_argument("--save-images", action="store_true")
     return parser.parse_args()
 
@@ -39,7 +39,7 @@ def main() -> None:
     for method in METHODS:
         summaries[method] = {}
         stage_summaries = {}
-        for stage, suffix in (("before", "before"), ("after_pso", "after_pso")):
+        for stage, suffix in (("before", "before"), ("after_abc", "after_abc")):
             config_path = ROOT / "configs" / f"{method}_{suffix}.json"
             if not config_path.exists():
                 raise FileNotFoundError(
@@ -68,7 +68,7 @@ def main() -> None:
                 save_image(stage_dir / "clean_extracted.png", recovered_clean)
 
         before = stage_summaries["before"]
-        after = stage_summaries["after_pso"]
+        after = stage_summaries["after_abc"]
         comparison.append(
             {
                 "method_id": method,

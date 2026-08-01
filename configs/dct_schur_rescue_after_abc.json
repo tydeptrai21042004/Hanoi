@@ -1,0 +1,59 @@
+{
+  "step": 8.564752002928953,
+  "eta": 0.07,
+  "seed": 2026,
+  "arnold_iterations": 17,
+  "closure_rounds": 1,
+  "gain_normalization_enabled": true,
+  "gain_gamma": 0.952571918338587,
+  "gain_clip": [
+    0.55,
+    1.45
+  ],
+  "confidence_floor": 0.1,
+  "confidence_scale": 0.9,
+  "confidence_power": 1.5,
+  "map_lambda": 0.7952591229266326,
+  "map_iters": 20,
+  "candidate_search_enabled": true,
+  "sharpness_factors": [
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    4.0
+  ],
+  "unsharp_candidates": [
+    [
+      0.5,
+      100
+    ],
+    [
+      1.0,
+      100
+    ],
+    [
+      1.0,
+      150
+    ],
+    [
+      1.0,
+      250
+    ],
+    [
+      1.5,
+      150
+    ],
+    [
+      2.0,
+      200
+    ]
+  ],
+  "candidate_agreement_weight": 0.55,
+  "candidate_evidence_weight": 0.35,
+  "candidate_confidence_weight": 0.1,
+  "schur_lift": 128.0,
+  "determinant_epsilon": 1e-12,
+  "method_id": "dct_schur_rescue",
+  "scientific_name": "SP-SCQIM"
+}

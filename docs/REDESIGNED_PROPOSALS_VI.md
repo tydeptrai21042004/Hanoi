@@ -26,7 +26,7 @@ Các mục tiêu kiểm chứng là:
 - Watermark nhị phân \(64\times64\), tương đương 4096 bit.
 - 15 tấn công mức vừa, cùng attack suite cho cả ba phương pháp.
 - 39 lần clean round-trip: 13 host × 3 proposal.
-- Cấu hình được lấy từ các file `configs/*_after_pso.json`.
+- Cấu hình được lấy từ các file `configs/*_after_abc.json`.
 - Unit/integration tests: **29 passed**.
 
 Kết quả tổng hợp:

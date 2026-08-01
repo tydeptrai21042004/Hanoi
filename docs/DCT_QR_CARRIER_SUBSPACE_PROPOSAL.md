@@ -11,7 +11,7 @@ payload-to-QIM parity assignment.
 The implementation is in:
 
 - `src/qr64_certified/proposals/method.py`;
-- `configs/dct_qr_after_pso.json`;
+- `configs/dct_qr_after_abc.json`;
 - `scripts/validate_dct_qr_pairwise_coset.py`;
 - `tests/test_dct_qr_pairwise_coset.py`.
 

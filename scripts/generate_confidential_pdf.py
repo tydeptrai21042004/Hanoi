@@ -21,7 +21,7 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "results" / "before_after_pso" / "comparison_summary.csv"
+RESULTS = ROOT / "results" / "before_after_abc" / "comparison_summary.csv"
 OUTPUT = ROOT / "docs" / "THREE_PROPOSAL_METHODS_NOVELTY_VI.pdf"
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
@@ -53,7 +53,7 @@ def main() -> None:
         str(OUTPUT), pagesize=A4,
         leftMargin=18 * mm, rightMargin=18 * mm,
         topMargin=18 * mm, bottomMargin=20 * mm,
-        title="Ba phương pháp watermark mù và tối ưu PSO",
+        title="Ba phương pháp watermark mù và tối ưu ABC",
         author="Research proposal",
     )
     styles = getSampleStyleSheet()
@@ -127,7 +127,7 @@ def main() -> None:
         ["DCT-QR", "Chứng chỉ QR được dùng như bằng chứng ổn định cho giải mã mù, không chỉ là phép phân rã phụ."],
         ["DCT-Schur Rescue", "Tín hiệu Schur phụ được dùng để hỗ trợ vùng quyết định yếu, trong khi carrier chính vẫn được giữ ổn định."],
         ["Blind CD-DetQR", "Carrier QR-determinant trong miền không gian khai thác khác biệt liên kênh và không cần biến đổi DCT."],
-        ["PSO", "Tự động chọn bộ tham số cân bằng giữa chất lượng ảnh, clean NC và mean NC sau tấn công."],
+        ["ABC", "Tự động chọn bộ tham số cân bằng giữa chất lượng ảnh, clean NC và mean NC sau tấn công."],
     ]
     cell_style = ParagraphStyle("CellVI", parent=small, fontSize=8.2, leading=11, textColor=colors.black)
     head_style = ParagraphStyle("CellHeadVI", parent=cell_style, fontName="DV-Bold")
@@ -151,7 +151,7 @@ def main() -> None:
     ]))
     story.append(table)
     story.append(Spacer(1, 5 * mm))
-    story.append(Paragraph("4. Tối ưu tham số bằng PSO", h1))
+    story.append(Paragraph("4. Tối ưu tham số bằng ABC", h1))
     story.append(Paragraph(
         "Particle Swarm Optimization được dùng như một lớp lựa chọn tham số chung. "
         "Mỗi ứng viên được đánh giá bằng chất lượng ảnh, độ chính xác khi chưa tấn công và "
@@ -197,7 +197,7 @@ def main() -> None:
     story.append(result_table)
     story.append(Spacer(1, 5 * mm))
     story.append(Paragraph(
-        "Trên Lenna và 15 tấn công moderate, cả ba cấu hình sau PSO đều giữ NC sạch bằng 1. "
+        "Trên Lenna và 15 tấn công moderate, cả ba cấu hình sau ABC đều giữ NC sạch bằng 1. "
         "DCT-QR và DCT-Schur Rescue tăng rõ mean NC khi chấp nhận PSNR thấp hơn nhưng vẫn trong vùng chất lượng cao. "
         "Blind CD-DetQR cải thiện nhẹ vì cấu hình ban đầu đã ở gần biên PSNR mục tiêu.", body
     ))

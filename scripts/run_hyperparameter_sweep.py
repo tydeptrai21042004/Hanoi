@@ -88,7 +88,7 @@ def main() -> None:
         description="Deterministic grid sweep using the proposal flag interface."
     )
     parser.add_argument("--method", choices=METHODS, required=True)
-    parser.add_argument("--stage", choices=("before", "after_pso"), default="after_pso")
+    parser.add_argument("--stage", choices=("before", "after_abc"), default="after_abc")
     parser.add_argument("--config", type=Path, default=None)
     parser.add_argument("--host", type=Path, default=ROOT / "data" / "host" / "lenna.bmp")
     parser.add_argument(
