@@ -134,10 +134,44 @@ Full 13-host validation:
 python scripts/validate_dct_qr_pairwise_coset.py
 ```
 
-The active configuration is `configs/dct_qr_after_pso.json`. It keeps the
-validated QIM steps and margins unchanged and enables pairwise coset
-optimization with `coset_group_size=2`. Historical QR configurations remain
-available for ablation.
+The active configuration is `configs/dct_qr_after_abc.json`. It is selected by
+the deterministic ABC optimizer while retaining the validated pairwise-coset
+embedding law (`coset_group_size=2`). Historical configurations remain
+available for controlled before/after comparisons.
+
+## Artificial Bee Colony parameter optimization
+
+The proposal hyperparameters are selected with a deterministic Artificial Bee
+Colony (ABC) optimizer. The existing validated configuration is inserted as
+food source zero, and the global best is retained even if a scout abandons that
+source. Therefore, optimization cannot return a score below the supplied
+starting configuration on the evaluated objective.
+
+Full search:
+
+```bash
+python scripts/optimize_parameters.py \
+  --method all \
+  --food-sources 20 \
+  --cycles 20 \
+  --seed 2026
+```
+
+Fast end-to-end smoke search without overwriting the active configurations:
+
+```bash
+python scripts/optimize_parameters.py \
+  --method all \
+  --food-sources 2 \
+  --cycles 1 \
+  --onlookers 1 \
+  --attack-limit 1 \
+  --config-output-dir results/abc_smoke_configs
+```
+
+ABC writes `configs/*_after_abc.json` and detailed traces under
+`results/optimization_abc/`. The legacy `--particles` and `--iterations`
+arguments remain accepted as aliases for `--food-sources` and `--cycles`.
 
 ## Reproduce the redesigned validation
 
@@ -153,7 +187,7 @@ Full 13-host validation:
 python scripts/run_redesigned_validation.py
 ```
 
-The script reads `configs/*_after_pso.json`, fails if any clean NC is below
+The script reads `configs/*_after_abc.json`, fails if any clean NC is below
 `1 - 1e-12`, and writes a complete JSON report.
 
 ## Scientific scope

@@ -1,5 +1,30 @@
 # Scientific revision changelog
 
+## 2026 Artificial Bee Colony optimizer migration
+
+- Replaced the proposal-level Particle Swarm Optimization driver with a
+  deterministic Artificial Bee Colony (ABC) implementation.
+- Added employed-bee, onlooker-bee, and scout phases with bounded neighbour
+  generation, deterministic seeding, complete evaluation traces, and global-best
+  retention.
+- Inserted the existing validated configuration as food source zero so ABC cannot
+  return a worse score than the starting point on the evaluated objective.
+- Switched active proposal configuration paths from `*_after_pso.json` to
+  `*_after_abc.json` across benchmark registries, validation scripts, ablations,
+  documentation, and reproducibility tools.
+- Corrected the Spatial CD-DetQR search bounds to the active normalized carrier
+  scale around `0.005`; the obsolete large-margin range was incompatible with the
+  current method.
+- Added `tests/test_abc.py` for baseline retention, deterministic replay, scout
+  behavior, and bound safety.
+- Added an active SP-SCQIM `extract_components()` implementation so the scientific
+  component verifier no longer imports inactive legacy code.
+- Full repository result: `51 passed`.
+- DCT-QR full 15-attack ABC check on Lenna: PSNR `51.719975 dB`, clean NC `1.0`,
+  mean attacked NC `0.998248`, minimum NC `0.988790`.
+- Bounded end-to-end ABC smoke checks completed for DCT-Schur and Spatial
+  CD-DetQR, with clean NC `1.0` in both active configurations.
+
 ## 2026 independent DCT–Schur SP-SCQIM replacement (v2.3.0)
 
 - Removed duplicate public `embed()`/`extract()` definitions from the DCT–Schur path.
