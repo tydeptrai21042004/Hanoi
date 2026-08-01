@@ -33,7 +33,7 @@ def proposal_spec(method_id: str) -> BenchmarkMethodSpec:
         payload_size=64,
         cover_dependent_key=True,
         comparison_group="proposal_key_assisted_4096",
-        config_path=f"configs/{canonical}_after_pso.json",
+        config_path=f"configs/{canonical}_after_abc.json",
     )
 
 

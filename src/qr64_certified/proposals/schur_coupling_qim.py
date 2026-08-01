@@ -655,6 +655,44 @@ def embed(
     return (current, key, metadata) if return_metadata else (current, key)
 
 
+def extract_components(
+    possibly_attacked_rgb: np.ndarray,
+    key: DirectSchurRescueKey,
+) -> dict[str, Any]:
+    """Return raw Schur-coupling evidence before candidate search and MAP.
+
+    This keeps the scientific component verifier attached to the active
+    SP-SCQIM implementation instead of the inactive legacy rescue module.
+    """
+    cfg = DirectSchurRescueConfig.from_mapping(key.config)
+    image = np.asarray(possibly_attacked_rgb, dtype=np.uint8)
+    if tuple(image.shape) != tuple(key.host_shape):
+        raise ValueError(
+            f"Image shape {image.shape} does not match key host shape {key.host_shape}"
+        )
+    reference = np.asarray(key.spectral_reference, dtype=np.float64)
+    evidence, confidence, vote_matrix, current_scale = _raw_payload_evidence(
+        image, cfg, reference
+    )
+    evidence_map = _inverse_arnold(
+        evidence.reshape(key.watermark_shape),
+        cfg.arnold_iterations,
+        key.arnold_period,
+    )
+    confidence_map = _inverse_arnold(
+        confidence.reshape(key.watermark_shape),
+        cfg.arnold_iterations,
+        key.arnold_period,
+    )
+    return {
+        "schur_map": (evidence_map > 0.0).astype(np.uint8),
+        "schur_evidence": evidence_map,
+        "schur_confidence": confidence_map,
+        "vote_matrix": vote_matrix,
+        "current_scale": current_scale,
+    }
+
+
 def extract(
     possibly_attacked_rgb: np.ndarray,
     key: DirectSchurRescueKey,
@@ -705,6 +743,7 @@ __all__ = [
     "_constructed_schur_matrices",
     "_embed_coupling_constraints",
     "_embed_schur_coefficients",
+    "extract_components",
     "embed",
     "extract",
 ]
