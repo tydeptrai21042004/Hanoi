@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hướng dẫn toán học 3 proposal watermarking</title>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)'],['$','$']],displayMath:[['\\[','\\]'],['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{--bg:#f6f7fb;--paper:#fff;--text:#1a1f2b;--muted:#5a6475;--line:#dfe3eb;--accent:#3157c8;--soft:#eef2ff;--code:#111827}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.68}
+.layout{display:grid;grid-template-columns:290px minmax(0,920px);gap:28px;max-width:1260px;margin:0 auto;padding:30px 22px 60px}.toc{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 36px);overflow:auto;padding:18px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 20px rgba(20,30,55,.05)}.toc-title{font-weight:800;margin-bottom:10px;font-size:1.05rem}.toc a{display:block;text-decoration:none;color:#344054;padding:5px 7px;border-radius:7px;font-size:.88rem}.toc a:hover{background:var(--soft);color:var(--accent)}.toc-l3{padding-left:20px!important;color:var(--muted)!important;font-size:.82rem!important}
+article{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:46px 54px;box-shadow:0 8px 28px rgba(20,30,55,.05);min-width:0}h1{font-size:2rem;line-height:1.25;margin-top:0;letter-spacing:-.025em}h2{margin-top:2.4rem;padding-top:.3rem;border-top:1px solid var(--line);font-size:1.45rem}h3{margin-top:1.8rem;font-size:1.15rem}h1,h2,h3,h4{color:#121826}.anchor{opacity:0;margin-left:8px;font-size:.8em;text-decoration:none;color:var(--accent)}h1:hover .anchor,h2:hover .anchor,h3:hover .anchor,h4:hover .anchor{opacity:.7}
+blockquote{margin:1.2rem 0;padding:13px 18px;background:var(--soft);border-left:4px solid var(--accent);color:#344054;border-radius:0 9px 9px 0}code{background:#f2f4f7;padding:.15em .34em;border-radius:5px;font-family:"Cascadia Code",Consolas,monospace;font-size:.92em}pre{background:var(--code);color:#e5e7eb;padding:18px;border-radius:10px;overflow:auto;line-height:1.5}pre code{background:transparent;padding:0;color:inherit}table{width:100%;border-collapse:collapse;margin:1.2rem 0 1.6rem;display:block;overflow-x:auto}th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}th{background:#f8fafc;font-weight:700}hr{border:0;border-top:1px solid var(--line);margin:2rem 0}strong{color:#111827}.math{overflow-x:auto;overflow-y:hidden}
+@media(max-width:980px){.layout{grid-template-columns:1fr;padding:12px}.toc{position:relative;top:0;max-height:360px}article{padding:28px 22px}}@media print{body{background:#fff}.layout{display:block;max-width:none;padding:0}.toc{display:none}article{border:0;box-shadow:none;padding:0}pre{white-space:pre-wrap}}
+</style></head><body><div class="layout"><nav class="toc"><div class="toc-title">Mục lục</div><a class="toc-l2" href="#1-tong-quan-nhanh">1. Tổng quan nhanh</a><a class="toc-l2" href="#2-ky-hieu-chung">2. Ký hiệu chung</a><a class="toc-l2" href="#3-y-tuong-cua-dct-qr">3. Ý tưởng của dct_qr</a><a class="toc-l3" href="#3-1-carrier-dct">3.1 Carrier DCT</a><a class="toc-l2" href="#4-qr-certificate-va-reliability">4. QR certificate và reliability</a><a class="toc-l2" href="#5-luat-chon-qim-step-theo-reliability">5. Luật chọn QIM step theo reliability</a><a class="toc-l2" href="#6-mien-quyet-inh-qim-co-guard-margin">6. Miền quyết định QIM có guard margin</a><a class="toc-l2" href="#7-luat-nhung-moi-pairwise-coset-optimization">7. Luật nhúng mới: Pairwise Coset Optimization</a><a class="toc-l3" href="#vi-sao-coset-optimization-giup-psnr">Vì sao coset optimization giúp PSNR?</a><a class="toc-l2" href="#8-tu-thay-oi-carrier-sang-thay-oi-pixel-rgb">8. Từ thay đổi carrier sang thay đổi pixel RGB</a><a class="toc-l2" href="#9-luat-trich-xuat-cua-dctqr">9. Luật trích xuất của DCT–QR</a><a class="toc-l3" href="#9-1-ong-bo">9.1 Đồng bộ</a><a class="toc-l3" href="#9-2-hieu-chinh-gain-bang-qr-carrier-r-11">9.2 Hiệu chỉnh gain bằng QR carrier-\(r_{11}\)</a><a class="toc-l3" href="#9-3-quyet-inh-parity">9.3 Quyết định parity</a><a class="toc-l3" href="#9-4-xor-nguoc-coset">9.4 XOR ngược coset</a><a class="toc-l2" href="#10-pseudocode-dctqr">10. Pseudocode DCT–QR</a><a class="toc-l2" href="#11-iem-cot-loi-cua-dct-schur-rescue">11. Điểm cốt lõi của dct_schur_rescue</a><a class="toc-l2" href="#12-ba-huong-coupling-truc-giao">12. Ba hướng coupling trực giao</a><a class="toc-l2" href="#13-tao-ba-ban-sao-payload-xen-ke">13. Tạo ba bản sao payload xen kẽ</a><a class="toc-l2" href="#14-target-parity-trong-schur-coupling">14. Target parity trong Schur coupling</a><a class="toc-l2" href="#15-luat-nhung-schur-nghiem-ong-form-minimum-frobenius">15. Luật nhúng Schur: nghiệm đóng-form minimum Frobenius</a><a class="toc-l3" href="#15-1-chung-minh-ngan">15.1 Chứng minh ngắn</a><a class="toc-l2" href="#16-vi-sao-spectrum-trace-va-determinant-uoc-bao-toan">16. Vì sao spectrum, trace và determinant được bảo toàn?</a><a class="toc-l2" href="#17-chuyen-thay-oi-schur-coupling-ve-anh">17. Chuyển thay đổi Schur coupling về ảnh</a><a class="toc-l2" href="#18-luat-trich-xuat-sp-scqim">18. Luật trích xuất SP-SCQIM</a><a class="toc-l3" href="#18-1-tinh-lai-ba-carrier">18.1 Tính lại ba carrier</a><a class="toc-l3" href="#18-2-gain-normalization">18.2 Gain normalization</a><a class="toc-l3" href="#18-3-quyet-inh-bit-cho-tung-copy">18.3 Quyết định bit cho từng copy</a><a class="toc-l3" href="#18-4-ua-ba-copy-ve-cung-payload-index">18.4 Đưa ba copy về cùng payload index</a><a class="toc-l2" href="#19-pseudocode-dctschur-sp-scqim">19. Pseudocode DCT–Schur SP-SCQIM</a><a class="toc-l2" href="#20-y-tuong-cua-spatial-cd-detqr">20. Ý tưởng của spatial_cd_detqr</a><a class="toc-l2" href="#21-determinant-va-normalized-qr-residual">21. Determinant và normalized QR residual</a><a class="toc-l2" href="#22-ma-hoa-bit-bang-dau">22. Mã hóa bit bằng dấu</a><a class="toc-l2" href="#23-update-antisymmetric-trong-khong-gian-anh">23. Update antisymmetric trong không gian ảnh</a><a class="toc-l2" href="#24-rang-buoc-qr-margin-va-determinant-khac-0">24. Ràng buộc QR margin và determinant khác 0</a><a class="toc-l2" href="#25-luat-nhung-ong-form-cua-detqr">25. Luật nhúng đóng-form của DetQR</a><a class="toc-l3" href="#y-nghia">Ý nghĩa</a><a class="toc-l2" href="#26-chon-pattern-co-distortion-thap-nhat">26. Chọn pattern có distortion thấp nhất</a><a class="toc-l2" href="#27-pilot-cua-spatial-detqr">27. Pilot của Spatial DetQR</a><a class="toc-l2" href="#28-luat-trich-xuat-spatial-detqr">28. Luật trích xuất Spatial DetQR</a><a class="toc-l2" href="#29-pseudocode-spatial-detqr">29. Pseudocode Spatial DetQR</a><a class="toc-l2" href="#30-so-sanh-ba-luat-nhung">30. So sánh ba luật nhúng</a><a class="toc-l2" href="#31-khi-nao-mot-bit-uoc-xem-la-ung">31. Khi nào một bit được xem là “đúng”?</a><a class="toc-l3" href="#dctqr">DCT–QR</a><a class="toc-l3" href="#dctschur">DCT–Schur</a><a class="toc-l3" href="#spatial-detqr">Spatial DetQR</a><a class="toc-l2" href="#32-cai-at-tren-linux-wsl-macos">32. Cài đặt trên Linux / WSL / macOS</a><a class="toc-l2" href="#33-cai-at-tren-windows-powershell">33. Cài đặt trên Windows PowerShell</a><a class="toc-l2" href="#34-kiem-tra-ba-proposal-co-uoc-nhan-dien-khong">34. Kiểm tra ba proposal có được nhận diện không</a><a class="toc-l2" href="#35-smoke-test-nhanh-nhat-cho-ca-ba-proposal">35. Smoke test nhanh nhất cho cả ba proposal</a><a class="toc-l2" href="#36-test-truc-tiep-phan-core-cua-3-proposal">36. Test trực tiếp phần core của 3 proposal</a><a class="toc-l3" href="#luu-y-ve-pytest-q-toan-repo">Lưu ý về pytest -q toàn repo</a><a class="toc-l2" href="#37-dctqr-chay-nhanh-1-host">37. DCT–QR: chạy nhanh 1 host</a><a class="toc-l2" href="#38-dctqr-benchmark-dung-config-abc-hien-tai">38. DCT–QR: benchmark dùng config ABC hiện tại</a><a class="toc-l2" href="#39-dctschur-sp-scqim">39. DCT–Schur SP-SCQIM</a><a class="toc-l2" href="#40-spatial-detqr">40. Spatial DetQR</a><a class="toc-l2" href="#41-chay-ca-ba-proposal-tren-1-host">41. Chạy cả ba proposal trên 1 host</a><a class="toc-l2" href="#42-chay-ablation">42. Chạy ablation</a><a class="toc-l2" href="#43-toi-uu-tham-so-bang-artificial-bee-colony-abc">43. Tối ưu tham số bằng Artificial Bee Colony (ABC)</a><a class="toc-l2" href="#44-goi-proposal-bang-python">44. Gọi proposal bằng Python</a><a class="toc-l2" href="#45-phat-bieu-ngan-gon-luat-nhung-cua-tung-proposal">45. Phát biểu ngắn gọn luật nhúng của từng proposal</a><a class="toc-l3" href="#dctqr-2">DCT–QR</a><a class="toc-l3" href="#dctschur-sp-scqim">DCT–Schur SP-SCQIM</a><a class="toc-l3" href="#spatial-detqr-2">Spatial DetQR</a><a class="toc-l2" href="#46-phat-bieu-ngan-gon-luat-trich-xuat">46. Phát biểu ngắn gọn luật trích xuất</a><a class="toc-l3" href="#dctqr-3">DCT–QR</a><a class="toc-l3" href="#dctschur-2">DCT–Schur</a><a class="toc-l3" href="#spatial-detqr-3">Spatial DetQR</a><a class="toc-l2" href="#47-cac-luu-y-khoa-hoc-quan-trong">47. Các lưu ý khoa học quan trọng</a><a class="toc-l2" href="#48-file-source-can-oc-khi-chinh-sua-proposal">48. File source cần đọc khi chỉnh sửa proposal</a><a class="toc-l2" href="#49-ket-luan">49. Kết luận</a></nav><article><h1 id="huong-dan-toan-hoc-luat-nhung-luat-trich-xuat-va-cach-chay-3-proposal">HƯỚNG DẪN TOÁN HỌC: LUẬT NHÚNG, LUẬT TRÍCH XUẤT VÀ CÁCH CHẠY 3 PROPOSAL<a class="anchor" href="#huong-dan-toan-hoc-luat-nhung-luat-trich-xuat-va-cach-chay-3-proposal">#</a></h1>
+<blockquote>
+<p><strong>Repository được đối chiếu:</strong> <code>Hanoi-main</code> trong file ZIP người dùng cung cấp.<br />
+<strong>Mục tiêu tài liệu:</strong> giải thích đúng implementation hiện tại, đặc biệt là <em>luật nhúng</em>, <em>luật trích xuất</em>, các công thức toán học và lệnh chạy tái lập.<br />
+<strong>Ba proposal công khai:</strong> <code>dct_qr</code>, <code>dct_schur_rescue</code>, <code>spatial_cd_detqr</code>.</p>
+</blockquote>
+<hr />
+<h2 id="1-tong-quan-nhanh">1. Tổng quan nhanh<a class="anchor" href="#1-tong-quan-nhanh">#</a></h2>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Tên phương pháp</th>
+  <th>Miền nhúng</th>
+  <th>Biến quyết định chính</th>
+  <th>Luật nhúng cốt lõi</th>
+  <th>Luật trích xuất cốt lõi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>dct_qr</code></td>
+  <td>DCT–QR Pairwise Coset-Optimized Gain-Normalized QIM</td>
+  <td>DCT 8×8</td>
+  <td>carrier vi sai <span class="math">\(v_b=(C_{01}-C_{10})/2\)</span></td>
+  <td>chiếu QIM theo parity, rồi chọn nhãn coset chung cho từng cặp để giảm distortion</td>
+  <td>hiệu chỉnh gain bằng QR-<span class="math">\(r_{11}\)</span>, làm tròn lattice, lấy parity, XOR ngược coset</td>
+</tr>
+<tr>
+  <td><code>dct_schur_rescue</code></td>
+  <td>DCT–Schur SP-SCQIM</td>
+  <td>DCT + tọa độ Schur strict-upper</td>
+  <td>3 carrier trực giao <span class="math">\(h_k^Tn\)</span></td>
+  <td><span class="math">\(n^*=n+H^T(t-Hn)\)</span></td>
+  <td>giải mã parity của 3 carrier, hiệu chỉnh gain, bỏ permutation, cộng phiếu và MAP</td>
+</tr>
+<tr>
+  <td><code>spatial_cd_detqr</code></td>
+  <td>Spatial Normalized-Residual DetQR</td>
+  <td>Không gian ảnh</td>
+  <td>dấu của <span class="math">\(\det(A)=u-v\)</span> và QR residual chuẩn hóa</td>
+  <td><span class="math">\(a^*=\max(0,\lceil(T-sd)/2\rceil)\)</span></td>
+  <td>đọc dấu determinant; nếu pilot hợp lệ thì bỏ mask payload</td>
+</tr>
+</tbody>
+</table>
+<p>Điểm quan trọng: <strong>ba phương pháp này không phải ba biến thể của cùng một QIM</strong>. Chúng có luật nhúng khác nhau về bản chất.</p>
+<ul>
+<li><code>dct_qr</code>: bài toán <strong>chiếu lên miền QIM parity</strong>.</li>
+<li><code>dct_schur_rescue</code>: bài toán <strong>chiếu trực giao tối thiểu Frobenius lên ba ràng buộc tuyến tính</strong>.</li>
+<li><code>spatial_cd_detqr</code>: bài toán <strong>tìm biên độ nguyên nhỏ nhất để ép dấu và biên QR/determinant</strong>.</li>
+</ul>
+<hr />
+<h2 id="2-ky-hieu-chung">2. Ký hiệu chung<a class="anchor" href="#2-ky-hieu-chung">#</a></h2>
+<ul>
+<li>Ảnh host RGB: <span class="math">\(I\in\{0,\ldots,255\}^{512\times512\times3}\)</span>.</li>
+<li>Watermark nhị phân: <span class="math">\(W\in\{0,1\}^{64\times64}\)</span>, tổng cộng <span class="math">\(4096\)</span> bit.</li>
+<li>Mỗi ảnh 512×512 được chia thành <span class="math">\(64\times64=4096\)</span> block 8×8, nên có thể gắn một bit payload cho mỗi block.</li>
+<li><span class="math">\(b\)</span>: chỉ số block.</li>
+<li><span class="math">\(C_b(i,j)\)</span>: hệ số DCT trực chuẩn tại vị trí <span class="math">\((i,j)\)</span> của block <span class="math">\(b\)</span>.</li>
+<li><span class="math">\(\Delta\)</span>: bước lượng tử/QIM step.</li>
+<li><span class="math">\(\rho\)</span>: guard margin bên trong miền quyết định QIM.</li>
+<li><span class="math">\(\widehat W\)</span>: watermark trích xuất.</li>
+</ul>
+<p>Hai proposal DCT dùng trường màu</p>
+<div class="math">$$
+
+F(R,G,B)=0.299R+0.587G+0.114B
++\eta\left(R-\frac{G+B}{2}\right),
+\qquad \eta=0.07.
+
+$$</div>
+<p>Viết</p>
+<div class="math">$$
+
+\mathbf g=
+\begin{bmatrix}
+0.299+\eta\\
+0.587-\eta/2\\
+0.114-\eta/2
+\end{bmatrix}.
+
+$$</div>
+<p>Khi cần thay đổi trường <span class="math">\(F\)</span> một lượng <span class="math">\(\delta\)</span>, hướng RGB có norm nhỏ nhất là</p>
+<div class="math">$$
+
+\boxed{
+\mathbf p=\frac{\mathbf g}{\|\mathbf g\|_2^2}
+}
+
+$$</div>
+<p>vì <span class="math">\(\mathbf g^T\mathbf p=1\)</span>. Đây là lý do code có các hệ số <code>p0</code>, <code>p1</code>, <code>p2</code>.</p>
+<hr />
+<h1 id="phan-i-dctqr-pairwise-coset-optimized-qim">PHẦN I — DCT–QR PAIRWISE COSET-OPTIMIZED QIM<a class="anchor" href="#phan-i-dctqr-pairwise-coset-optimized-qim">#</a></h1>
+<h2 id="3-y-tuong-cua-dct-qr">3. Ý tưởng của <code>dct_qr</code><a class="anchor" href="#3-y-tuong-cua-dct-qr">#</a></h2>
+<p>Phương pháp này giữ carrier DCT vi sai, nhưng bổ sung ba thành phần chính:</p>
+<ol>
+<li><strong>QR reliability</strong> để quyết định block nào cần QIM mạnh/yếu hơn.</li>
+<li><strong>Pairwise coset optimization</strong> để chọn cách gán parity ít gây méo nhất.</li>
+<li><strong>QR carrier-<span class="math">\(r_{11}\)</span> gain normalization</strong> để bù suy hao cục bộ khi trích xuất.</li>
+</ol>
+<p>Source chính:</p>
+<pre><code class="language-text">src/qr64_certified/proposals/method.py
+src/qr64_certified/proposals/config.py
+src/qr64_certified/proposals/certificate.py
+src/qr64_certified/_jilp_core/engine.py
+</code></pre>
+<h3 id="3-1-carrier-dct">3.1 Carrier DCT<a class="anchor" href="#3-1-carrier-dct">#</a></h3>
+<p>Với mỗi block 8×8, tính DCT trực chuẩn. Carrier payload là</p>
+<div class="math">$$
+
+\boxed{
+v_b=\frac{C_b(0,1)-C_b(1,0)}{2}.
+}
+
+$$</div>
+<p>Đây là một low-frequency differential carrier: thay vì dùng trực tiếp một hệ số DCT, ta dùng hiệu của hai hệ số đối xứng thấp tần.</p>
+<hr />
+<h2 id="4-qr-certificate-va-reliability">4. QR certificate và reliability<a class="anchor" href="#4-qr-certificate-va-reliability">#</a></h2>
+<p>Từ block DCT, code tạo ma trận phân tích 4×4 <span class="math">\(A_b\)</span>. Thành phần DC được thay bởi hiệu <span class="math">\(C_{01}-C_{10}\)</span>, sau đó cộng một diagonal lift để phân tích độ ổn định.</p>
+<p>Thực hiện QR chuẩn hóa dấu:</p>
+<div class="math">$$
+
+A_b=Q_bR_b,
+
+$$</div>
+<p>với đường chéo <span class="math">\(R_b\)</span> được ép không âm để loại bỏ bất định dấu của QR.</p>
+<p>Các đại lượng độ ổn định:</p>
+<div class="math">$$
+
+\beta_b=\frac{|\det(A_b)|}{\|A_b\|_F^3+\varepsilon},
+
+$$</div>
+<div class="math">$$
+
+\text{balance}_b=
+\frac{\min_i |(R_b)_{ii}|}
+{\max_i |(R_b)_{ii}|+\varepsilon},
+
+$$</div>
+<div class="math">$$
+
+\text{coupling}_b=
+\frac{\|\operatorname{triu}(R_b,1)\|_F}
+{\|R_b\|_F+\varepsilon}.
+
+$$</div>
+<p>Điểm reliability thô:</p>
+<div class="math">$$
+
+r_b^{\rm raw}=\log(1+\beta_b)
++2\,\text{balance}_b
++0.2(1-\text{coupling}_b).
+
+$$</div>
+<p>Sau đó code chuẩn hóa theo quantile 5%–95% về <span class="math">\([0,1]\)</span>. Block có reliability thấp được xem là <strong>kém ổn định</strong>.</p>
+<hr />
+<h2 id="5-luat-chon-qim-step-theo-reliability">5. Luật chọn QIM step theo reliability<a class="anchor" href="#5-luat-chon-qim-step-theo-reliability">#</a></h2>
+<p>Payload block được sắp theo reliability từ thấp đến cao. Ba mức QIM được phân cho ba nhóm:</p>
+<ul>
+<li>nhóm yếu nhất: bước lớn nhất;</li>
+<li>nhóm trung bình: bước chuẩn;</li>
+<li>nhóm ổn định nhất: bước nhỏ nhất.</li>
+</ul>
+<p>Ở <strong>default public API</strong> (<code>QR64Config.public_dct_qr()</code>):</p>
+<div class="math">$$
+
+\boxed{
+\Delta_b\in\{18.25,\ 13.25,\ 10.25\}
+}
+
+$$</div>
+<p>với tỉ lệ nhóm xấp xỉ 20% / 40% / 40%, và</p>
+<div class="math">$$
+
+\rho_b=0.45\Delta_b.
+
+$$</div>
+<p><strong>Lưu ý về config:</strong> lệnh benchmark <code>--stage after_abc</code> không nhất thiết dùng đúng các giá trị default trên; nó đọc <code>configs/dct_qr_after_abc.json</code>. Trong ZIP hiện tại, ABC đã thay <code>step</code> cơ sở nhưng vẫn giữ cùng luật toán học và cùng <code>coset_group_size=2</code>.</p>
+<hr />
+<h2 id="6-mien-quyet-inh-qim-co-guard-margin">6. Miền quyết định QIM có guard margin<a class="anchor" href="#6-mien-quyet-inh-qim-co-guard-margin">#</a></h2>
+<p>Với bit mã hóa <span class="math">\(c\in\{0,1\}\)</span>, các lattice center hợp lệ là <span class="math">\(q\Delta_b\)</span> với parity <span class="math">\(q\bmod2=c\)</span>.</p>
+<p>Miền an toàn quanh center:</p>
+<div class="math">$$
+
+\mathcal S_c(\Delta_b,\rho_b)=
+\bigcup_{q\in\mathbb Z:\ q\bmod2=c}
+\left[
+q\Delta_b-\frac{\Delta_b}{2}+\rho_b,
+q\Delta_b+\frac{\Delta_b}{2}-\rho_b
+\right].
+
+$$</div>
+<p>Phép chiếu distortion nhỏ nhất:</p>
+<div class="math">$$
+
+\boxed{
+P_c(v_b)=
+\arg\min_{x\in\mathcal S_c(\Delta_b,\rho_b)}
+|x-v_b|^2.
+}
+
+$$</div>
+<p>Khác center-QIM truyền thống, nếu <span class="math">\(v_b\)</span> đã nằm trong vùng an toàn đúng parity thì <strong>không cần di chuyển carrier</strong>.</p>
+<hr />
+<h2 id="7-luat-nhung-moi-pairwise-coset-optimization">7. Luật nhúng mới: Pairwise Coset Optimization<a class="anchor" href="#7-luat-nhung-moi-pairwise-coset-optimization">#</a></h2>
+<p>Trước tiên watermark được Arnold-scramble thành chuỗi bit <span class="math">\(u_b\)</span>.</p>
+<p>Các block payload được sắp theo QR reliability rồi chia thành từng cặp</p>
+<div class="math">$$
+
+G_j=\{b_{j,1},b_{j,2}\}.
+
+$$</div>
+<p>Thay vì bắt buộc nhúng trực tiếp parity <span class="math">\(u_b\)</span>, mỗi cặp được phép dùng một nhãn chung <span class="math">\(s_j\in\{0,1\}\)</span>.</p>
+<p>Luật chọn nhãn:</p>
+<div class="math">$$
+
+\boxed{
+s_j^*=\arg\min_{s\in\{0,1\}}
+\sum_{b\in G_j}
+\left|P_{u_b\oplus s}(v_b)-v_b\right|^2.
+}
+
+$$</div>
+<p>Bit vật lý thực sự được nhúng:</p>
+<div class="math">$$
+
+\boxed{
+c_b=u_b\oplus s_j^*.
+}
+
+$$</div>
+<p>Carrier sau nhúng:</p>
+<div class="math">$$
+
+\boxed{
+v_b^*=P_{c_b}(v_b).
+}
+
+$$</div>
+<h3 id="vi-sao-coset-optimization-giup-psnr">Vì sao coset optimization giúp PSNR?<a class="anchor" href="#vi-sao-coset-optimization-giup-psnr">#</a></h3>
+<p>Cách cũ tương đương luôn chọn <span class="math">\(s=0\)</span>. Trong luật mới, <span class="math">\(s=0\)</span> vẫn là một nghiệm khả thi, nên</p>
+<div class="math">$$
+
+D_j^{\rm new}
+=\min(D_j(s=0),D_j(s=1))
+\le D_j(s=0)=D_j^{\rm old}.
+
+$$</div>
+<p>Do đó, ở mức <strong>projection energy lý tưởng trước khi lượng tử RGB</strong>, luật pairwise coset không thể làm distortion lớn hơn mapping cũ.</p>
+<hr />
+<h2 id="8-tu-thay-oi-carrier-sang-thay-oi-pixel-rgb">8. Từ thay đổi carrier sang thay đổi pixel RGB<a class="anchor" href="#8-tu-thay-oi-carrier-sang-thay-oi-pixel-rgb">#</a></h2>
+<p>Gọi</p>
+<div class="math">$$
+
+\delta_b=v_b^*-v_b.
+
+$$</div>
+<p>Hai basis DCT payload là <span class="math">\(B_{01}\)</span> và <span class="math">\(B_{10}\)</span>. Tại pixel <span class="math">\((i,j)\)</span> trong block, thay đổi trường <span class="math">\(F\)</span> là</p>
+<div class="math">$$
+
+\Delta F_{ij}=\delta_b\left(B_{01}(i,j)-B_{10}(i,j)\right).
+
+$$</div>
+<p>Update RGB norm nhỏ nhất:</p>
+<div class="math">$$
+
+\boxed{
+\Delta\mathbf x_{ij}
+=\Delta F_{ij}\,
+\frac{\mathbf g}{\|\mathbf g\|_2^2}.
+}
+
+$$</div>
+<p>Sau đó code:</p>
+<ol>
+<li>clip về <span class="math">\([0,255]\)</span>;</li>
+<li>round sang <code>uint8</code>;</li>
+<li>chạy <strong>integer-lattice closure</strong> để bảo đảm parity trên ảnh số nguyên cuối cùng vẫn đúng.</li>
+</ol>
+<p>Closure không thay đổi luật QIM; nó sửa sai số do lượng tử pixel 8-bit.</p>
+<hr />
+<h2 id="9-luat-trich-xuat-cua-dctqr">9. Luật trích xuất của DCT–QR<a class="anchor" href="#9-luat-trich-xuat-cua-dctqr">#</a></h2>
+<h3 id="9-1-ong-bo">9.1 Đồng bộ<a class="anchor" href="#9-1-ong-bo">#</a></h3>
+<p>Nếu ảnh bị dịch/biến đổi nhẹ, proposal dùng pilot và certificate để chọn alignment. Đây là bước trước giải mã payload.</p>
+<h3 id="9-2-hieu-chinh-gain-bang-qr-carrier-r-11">9.2 Hiệu chỉnh gain bằng QR carrier-<span class="math">\(r_{11}\)</span><a class="anchor" href="#9-2-hieu-chinh-gain-bang-qr-carrier-r-11">#</a></h3>
+<p>Với ma trận phân tích không lift, QR canonical cho</p>
+<div class="math">$$
+
+A_b=Q_bR_b.
+
+$$</div>
+<p>Scale được dùng là</p>
+<div class="math">$$
+
+s_b=|(R_b)_{11}|.
+
+$$</div>
+<p>Key lưu reference <span class="math">\(s_b^0\)</span> lấy từ ảnh watermarked cuối cùng. Trên ảnh bị attack:</p>
+<div class="math">$$
+
+\alpha_b=
+\operatorname{clip}\left(
+\frac{s_b}{s_b^0},
+\alpha_{\min},\alpha_{\max}
+\right).
+
+$$</div>
+<p>Carrier hiệu chỉnh:</p>
+<div class="math">$$
+
+\boxed{
+\widetilde v_b=
+\frac{v_b^{(a)}}{\alpha_b^{\gamma}}.
+}
+
+$$</div>
+<p>Default public DCT–QR dùng <span class="math">\(\gamma=0.90\)</span>.</p>
+<h3 id="9-3-quyet-inh-parity">9.3 Quyết định parity<a class="anchor" href="#9-3-quyet-inh-parity">#</a></h3>
+<div class="math">$$
+
+q_b=\operatorname{round}\left(\frac{\widetilde v_b}{\Delta_b}\right),
+
+$$</div>
+<div class="math">$$
+
+\boxed{
+\widehat c_b=q_b\bmod2.
+}
+
+$$</div>
+<p>Confidence QIM trong code:</p>
+<div class="math">$$
+
+\operatorname{conf}_b=
+\operatorname{clip}
+\left(
+1-2\left|
+\frac{\widetilde v_b}{\Delta_b}-q_b
+\right|,
+0,1
+\right).
+
+$$</div>
+<h3 id="9-4-xor-nguoc-coset">9.4 XOR ngược coset<a class="anchor" href="#9-4-xor-nguoc-coset">#</a></h3>
+<p>Key lưu packed flip mask của từng payload bit. Vì</p>
+<div class="math">$$
+
+c_b=u_b\oplus s_j^*,
+
+$$</div>
+<p>nên</p>
+<div class="math">$$
+
+\boxed{
+\widehat u_b=\widehat c_b\oplus s_j^*.
+}
+
+$$</div>
+<p>Sau đó inverse Arnold đưa bit về đúng vị trí watermark ban đầu.</p>
+<p>Một tính chất quan trọng:</p>
+<div class="math">$$
+
+\mathbf1[\widehat u_b\ne u_b]
+=
+\mathbf1[\widehat c_b\ne c_b].
+
+$$</div>
+<p>Nghĩa là XOR ngược coset <strong>không tự tạo thêm lỗi bit</strong>.</p>
+<hr />
+<h2 id="10-pseudocode-dctqr">10. Pseudocode DCT–QR<a class="anchor" href="#10-pseudocode-dctqr">#</a></h2>
+<pre><code class="language-text">NHÚNG
+1. W -&gt; Arnold scramble -&gt; u
+2. Tính trường F và DCT 8x8
+3. Tính QR certificate + reliability cho từng block
+4. Chọn Delta_b theo reliability
+5. Sort block theo reliability, ghép từng cặp G_j
+6. Với mỗi cặp:
+      tính cost s=0
+      tính cost s=1
+      s_j* = argmin(cost)
+      c_b = u_b XOR s_j*
+7. v_b* = QIM projection P_c(v_b)
+8. Update RGB theo hướng minimum-norm
+9. Integer-lattice closure
+10. Lưu schedule, Delta_b, coset flip-mask, gain reference vào key
+
+TRÍCH XUẤT
+1. Đồng bộ ảnh bằng pilot/certificate
+2. Tính carrier v_b^(a)
+3. Tính QR carrier-r11 scale và alpha_b
+4. v_tilde = v_b^(a) / alpha_b^gamma
+5. q = round(v_tilde / Delta_b)
+6. c_hat = q mod 2
+7. u_hat = c_hat XOR s_j*
+8. Inverse Arnold
+9. Nếu evidence không đủ chắc chắn: MAP refinement
+</code></pre>
+<hr />
+<h1 id="phan-ii-dctschur-sp-scqim">PHẦN II — DCT–SCHUR SP-SCQIM<a class="anchor" href="#phan-ii-dctschur-sp-scqim">#</a></h1>
+<h2 id="11-iem-cot-loi-cua-dct-schur-rescue">11. Điểm cốt lõi của <code>dct_schur_rescue</code><a class="anchor" href="#11-iem-cot-loi-cua-dct-schur-rescue">#</a></h2>
+<p>Implementation hiện tại <strong>không phải</strong> “Schur rescue phụ trợ cho DCT–QR”. Nó là proposal độc lập:</p>
+<blockquote>
+<p><strong>Spectrum-Preserving Schur Coupling QIM (SP-SCQIM)</strong>.</p>
+</blockquote>
+<p>Source chính:</p>
+<pre><code class="language-text">src/qr64_certified/proposals/schur_coupling_qim.py
+</code></pre>
+<p>Mỗi block DCT chọn 6 hệ số làm vector strict-upper Schur ảo:</p>
+<div class="math">$$
+
+\boxed{
+n=
+[n_{12},n_{13},n_{14},n_{23},n_{24},n_{34}]^T\in\mathbb R^6.
+}
+
+$$</div>
+<p>Các vị trí DCT tương ứng trong code:</p>
+<pre><code class="language-text">(0,1), (1,0), (0,2), (1,1), (2,0), (1,2)
+</code></pre>
+<hr />
+<h2 id="12-ba-huong-coupling-truc-giao">12. Ba hướng coupling trực giao<a class="anchor" href="#12-ba-huong-coupling-truc-giao">#</a></h2>
+<p>Code định nghĩa ba vector rồi chuẩn hóa thành unit norm:</p>
+<div class="math">$$
+
+h_1\propto[1,-1,0,0,0,0],
+
+$$</div>
+<div class="math">$$
+
+h_2\propto[1,1,-1,-1,0,0],
+
+$$</div>
+<div class="math">$$
+
+h_3\propto[1,1,1,1,-2,-2].
+
+$$</div>
+<p>Gọi</p>
+<div class="math">$$
+
+H=
+\begin{bmatrix}
+h_1^T\\h_2^T\\h_3^T
+\end{bmatrix}
+\in\mathbb R^{3\times6}.
+
+$$</div>
+<p>Sau chuẩn hóa:</p>
+<div class="math">$$
+
+\boxed{HH^T=I_3.}
+
+$$</div>
+<p>Ba carrier của một block là</p>
+<div class="math">$$
+
+y=Hn,
+\qquad y_k=h_k^Tn.
+
+$$</div>
+<hr />
+<h2 id="13-tao-ba-ban-sao-payload-xen-ke">13. Tạo ba bản sao payload xen kẽ<a class="anchor" href="#13-tao-ba-ban-sao-payload-xen-ke">#</a></h2>
+<p>Watermark được Arnold-scramble trước. Sau đó code sinh ba permutation độc lập từ cùng seed:</p>
+<div class="math">$$
+
+\pi_1,\pi_2,\pi_3.
+
+$$</div>
+<p>Mỗi carrier <span class="math">\(k\)</span> mang một bản permutation của payload:</p>
+<div class="math">$$
+
+b_{k,b}=u_{\pi_k(b)}.
+
+$$</div>
+<p>Vì vậy một bit watermark có thể nhận evidence từ ba coupling khác nhau sau khi đảo permutation.</p>
+<hr />
+<h2 id="14-target-parity-trong-schur-coupling">14. Target parity trong Schur coupling<a class="anchor" href="#14-target-parity-trong-schur-coupling">#</a></h2>
+<p>Với carrier <span class="math">\(y_k\)</span>, step <span class="math">\(\Delta\)</span> và bit <span class="math">\(b_k\)</span>, code chọn integer <span class="math">\(q_k\)</span> gần nhất sao cho</p>
+<div class="math">$$
+
+q_k\bmod2=b_k.
+
+$$</div>
+<p>Target:</p>
+<div class="math">$$
+
+\boxed{
+t_k=q_k\Delta.}
+
+$$</div>
+<p>Khác DCT–QR, SP-SCQIM ở implementation này dùng <strong>nearest parity center</strong>, không dùng QIM interval guard như <code>dct_qr</code>.</p>
+<hr />
+<h2 id="15-luat-nhung-schur-nghiem-ong-form-minimum-frobenius">15. Luật nhúng Schur: nghiệm đóng-form minimum Frobenius<a class="anchor" href="#15-luat-nhung-schur-nghiem-ong-form-minimum-frobenius">#</a></h2>
+<p>Ta cần tìm <span class="math">\(n^*\)</span> gần <span class="math">\(n\)</span> nhất nhưng thỏa</p>
+<div class="math">$$
+
+Hn^*=t.
+
+$$</div>
+<p>Bài toán:</p>
+<div class="math">$$
+
+\min_{n^*}\|n^*-n\|_2^2
+\quad\text{s.t.}\quad Hn^*=t.
+
+$$</div>
+<p>Do các hàng của <span class="math">\(H\)</span> trực chuẩn, nghiệm chiếu trực giao là</p>
+<div class="math">$$
+
+\boxed{
+n^*=n+H^T(t-Hn).
+}
+
+$$</div>
+<p>Đây chính là luật nhúng được code thực thi.</p>
+<h3 id="15-1-chung-minh-ngan">15.1 Chứng minh ngắn<a class="anchor" href="#15-1-chung-minh-ngan">#</a></h3>
+<p>Đặt <span class="math">\(\delta=n^*-n\)</span>. Ràng buộc trở thành</p>
+<div class="math">$$
+
+H\delta=t-Hn=r.
+
+$$</div>
+<p>Vì <span class="math">\(HH^T=I\)</span>, một nghiệm là</p>
+<div class="math">$$
+
+\delta_0=H^Tr.
+
+$$</div>
+<p>Mọi nghiệm khác có dạng</p>
+<div class="math">$$
+
+\delta=H^Tr+z,
+\qquad Hz=0.
+
+$$</div>
+<p>Không gian hàng của <span class="math">\(H\)</span> trực giao với null-space của <span class="math">\(H\)</span>, nên</p>
+<div class="math">$$
+
+\|\delta\|_2^2
+=\|H^Tr\|_2^2+\|z\|_2^2
+\ge\|H^Tr\|_2^2.
+
+$$</div>
+<p>Dấu bằng khi <span class="math">\(z=0\)</span>. Vậy <span class="math">\(n^*=n+H^T(t-Hn)\)</span> là nghiệm duy nhất có norm thay đổi nhỏ nhất.</p>
+<hr />
+<h2 id="16-vi-sao-spectrum-trace-va-determinant-uoc-bao-toan">16. Vì sao spectrum, trace và determinant được bảo toàn?<a class="anchor" href="#16-vi-sao-spectrum-trace-va-determinant-uoc-bao-toan">#</a></h2>
+<p>Code tạo ma trận tam giác trên 4×4:</p>
+<div class="math">$$
+
+T=
+\begin{bmatrix}
+\lambda_1&amp;n_{12}&amp;n_{13}&amp;n_{14}\\
+0&amp;\lambda_2&amp;n_{23}&amp;n_{24}\\
+0&amp;0&amp;\lambda_3&amp;n_{34}\\
+0&amp;0&amp;0&amp;\lambda_4
+\end{bmatrix}.
+
+$$</div>
+<p>Luật nhúng chỉ thay <strong>strict-upper entries</strong> <span class="math">\(n_{ij}\)</span>, không đổi diagonal <span class="math">\(\lambda_i\)</span>.</p>
+<p>Với ma trận tam giác:</p>
+<div class="math">$$
+
+\operatorname{spec}(T)=\{\lambda_1,\lambda_2,\lambda_3,\lambda_4\},
+
+$$</div>
+<div class="math">$$
+
+\operatorname{tr}(T)=\sum_i\lambda_i,
+
+$$</div>
+<div class="math">$$
+
+\det(T)=\prod_i\lambda_i.
+
+$$</div>
+<p>Do đó, ở miền floating-point trước khi quay lại ảnh <code>uint8</code>:</p>
+<div class="math">$$
+
+\boxed{
+\text{spectrum, trace, determinant không đổi.}
+}
+
+$$</div>
+<p>Đây là ý nghĩa toán học của tên <strong>Spectrum-Preserving</strong>.</p>
+<hr />
+<h2 id="17-chuyen-thay-oi-schur-coupling-ve-anh">17. Chuyển thay đổi Schur coupling về ảnh<a class="anchor" href="#17-chuyen-thay-oi-schur-coupling-ve-anh">#</a></h2>
+<p>Sau khi viết <span class="math">\(n^*\)</span> vào 6 hệ số DCT:</p>
+<ol>
+<li>IDCT block;</li>
+<li>lấy chênh lệch trường <span class="math">\(\Delta F\)</span>;</li>
+<li>chiếu <span class="math">\(\Delta F\)</span> sang RGB theo hướng minimum-norm <span class="math">\(\mathbf g/\|\mathbf g\|^2\)</span>;</li>
+<li>round và clip về <code>uint8</code>;</li>
+<li>kiểm tra lại ba bản sao vật lý;</li>
+<li>nếu chưa exact thì closure re-project từ ảnh số nguyên hiện tại.</li>
+</ol>
+<hr />
+<h2 id="18-luat-trich-xuat-sp-scqim">18. Luật trích xuất SP-SCQIM<a class="anchor" href="#18-luat-trich-xuat-sp-scqim">#</a></h2>
+<h3 id="18-1-tinh-lai-ba-carrier">18.1 Tính lại ba carrier<a class="anchor" href="#18-1-tinh-lai-ba-carrier">#</a></h3>
+<p>Từ ảnh cần kiểm tra, lấy vector coupling <span class="math">\(n^{(a)}\)</span>. Với mỗi <span class="math">\(k\)</span>:</p>
+<div class="math">$$
+
+y_k^{(a)}=h_k^Tn^{(a)}.
+
+$$</div>
+<h3 id="18-2-gain-normalization">18.2 Gain normalization<a class="anchor" href="#18-2-gain-normalization">#</a></h3>
+<p>Code dùng một scale phổ cục bộ từ các hệ số DCT riêng biệt:</p>
+<div class="math">$$
+
+s_b=\sqrt{\operatorname{mean}(c_{b,j}^2)+10^{-6}}.
+
+$$</div>
+<p>Key giữ reference <span class="math">\(s_b^0\)</span> từ ảnh watermarked cuối cùng. Ratio được median-filter 3×3 và clip:</p>
+<div class="math">$$
+
+\alpha_b=\operatorname{clip}
+\left(\frac{s_b}{s_b^0},0.55,1.45\right).
+
+$$</div>
+<p>Carrier hiệu chỉnh:</p>
+<div class="math">$$
+
+\boxed{
+\widetilde y_{k,b}=
+\frac{y_{k,b}^{(a)}}{\alpha_b^{\gamma}}.
+}
+
+$$</div>
+<h3 id="18-3-quyet-inh-bit-cho-tung-copy">18.3 Quyết định bit cho từng copy<a class="anchor" href="#18-3-quyet-inh-bit-cho-tung-copy">#</a></h3>
+<div class="math">$$
+
+q_{k,b}=\operatorname{round}
+\left(\frac{\widetilde y_{k,b}}{\Delta}\right),
+
+$$</div>
+<div class="math">$$
+
+\boxed{
+\widehat b_{k,b}=q_{k,b}\bmod2.
+}
+
+$$</div>
+<p>Confidence:</p>
+<div class="math">$$
+
+\operatorname{conf}_{k,b}
+=\operatorname{clip}
+\left(
+1-2\left|
+\frac{\widetilde y_{k,b}}{\Delta}-q_{k,b}
+\right|,0,1
+\right).
+
+$$</div>
+<h3 id="18-4-ua-ba-copy-ve-cung-payload-index">18.4 Đưa ba copy về cùng payload index<a class="anchor" href="#18-4-ua-ba-copy-ve-cung-payload-index">#</a></h3>
+<p>Mỗi copy được inverse-permute bởi <span class="math">\(\pi_k\)</span>, sau đó đổi bit thành evidence có dấu:</p>
+<div class="math">$$
+
+e_{k,i}=\operatorname{sign}(\widehat b_{k,i})
+\left(c_0+c_1\operatorname{conf}_{k,i}^{p}\right).
+
+$$</div>
+<p>Tổng evidence:</p>
+<div class="math">$$
+
+\boxed{
+E_i=\sum_{k=1}^3e_{k,i}.
+}
+
+$$</div>
+<p>Sau inverse Arnold, code có thể dùng ICM/MAP để tận dụng tính liên tục không gian của watermark nhị phân.</p>
+<hr />
+<h2 id="19-pseudocode-dctschur-sp-scqim">19. Pseudocode DCT–Schur SP-SCQIM<a class="anchor" href="#19-pseudocode-dctschur-sp-scqim">#</a></h2>
+<pre><code class="language-text">NHÚNG
+1. W -&gt; Arnold scramble
+2. Sinh 3 permutation pi1, pi2, pi3
+3. Với mỗi 8x8 block:
+      lấy 6 DCT coefficient -&gt; n in R^6
+      y = H n
+      với k=1..3:
+          chọn q_k gần nhất, parity(q_k)=bit_k
+          t_k = q_k * Delta
+      n* = n + H^T(t - Hn)
+      ghi n* về DCT block
+4. IDCT + minimum-norm RGB update
+5. uint8 closure nếu cần
+6. Lưu spectral gain reference vào key
+
+TRÍCH XUẤT
+1. Tạo candidate image nếu candidate-search bật
+2. Với từng candidate:
+      lấy n
+      gain normalize
+      y_k = h_k^T n
+      q_k = round(y_k/Delta)
+      bit_k = q_k mod 2
+      inverse permutation cho 3 copy
+      tính agreement + confidence + evidence
+3. Chọn candidate có score cao nhất
+4. Cộng evidence ba copy
+5. Inverse Arnold
+6. ICM/MAP -&gt; watermark cuối
+</code></pre>
+<hr />
+<h1 id="phan-iii-spatial-normalized-residual-detqr">PHẦN III — SPATIAL NORMALIZED-RESIDUAL DetQR<a class="anchor" href="#phan-iii-spatial-normalized-residual-detqr">#</a></h1>
+<h2 id="20-y-tuong-cua-spatial-cd-detqr">20. Ý tưởng của <code>spatial_cd_detqr</code><a class="anchor" href="#20-y-tuong-cua-spatial-cd-detqr">#</a></h2>
+<p>Phương pháp này <strong>không dùng DCT</strong> để nhúng payload. Nó làm việc trực tiếp trong block luminance 8×8.</p>
+<p>Source chính:</p>
+<pre><code class="language-text">src/qr64_certified/proposals/cd_detqr.py
+</code></pre>
+<p>Mỗi block dùng các pattern Hadamard <span class="math">\(P\in\{-1,+1\}^{8\times8}\)</span>. Với một pattern:</p>
+<ul>
+<li><span class="math">\(u\)</span>: trung bình luminance tại các pixel <span class="math">\(P=+1\)</span>;</li>
+<li><span class="math">\(v\)</span>: trung bình luminance tại các pixel <span class="math">\(P=-1\)</span>.</li>
+</ul>
+<p>Tạo ma trận</p>
+<div class="math">$$
+
+\boxed{
+A=
+\begin{bmatrix}
+u&amp;1\\
+v&amp;1
+\end{bmatrix}.
+}
+
+$$</div>
+<hr />
+<h2 id="21-determinant-va-normalized-qr-residual">21. Determinant và normalized QR residual<a class="anchor" href="#21-determinant-va-normalized-qr-residual">#</a></h2>
+<p>Ta có trực tiếp</p>
+<div class="math">$$
+
+\boxed{\det(A)=u-v.}
+
+$$</div>
+<p>Đặt</p>
+<div class="math">$$
+
+d=u-v,
+\qquad k=u+v.
+
+$$</div>
+<p>Từ QR canonical <span class="math">\(A=QR\)</span>:</p>
+<div class="math">$$
+
+r_{11}=\sqrt{u^2+v^2}.
+
+$$</div>
+<p>Carrier chuẩn hóa trong code:</p>
+<div class="math">$$
+
+\boxed{
+z(A)=\det(Q)r_{22}
+=\frac{\det(A)}{r_{11}}
+=\frac{u-v}{\sqrt{u^2+v^2}}.
+}
+
+$$</div>
+<p>Dùng <span class="math">\(k,d\)</span>:</p>
+<div class="math">$$
+
+u=\frac{k+d}{2},\qquad
+v=\frac{k-d}{2},
+
+$$</div>
+<p>nên</p>
+<div class="math">$$
+
+u^2+v^2=\frac{k^2+d^2}{2}.
+
+$$</div>
+<p>Do đó</p>
+<div class="math">$$
+
+\boxed{
+z(A)=\frac{\sqrt2\,d}{\sqrt{k^2+d^2}}.}
+
+$$</div>
+<hr />
+<h2 id="22-ma-hoa-bit-bang-dau">22. Mã hóa bit bằng dấu<a class="anchor" href="#22-ma-hoa-bit-bang-dau">#</a></h2>
+<p>Watermark bit <span class="math">\(w\)</span> trước hết có thể XOR với pseudorandom payload mask:</p>
+<div class="math">$$
+
+c=w\oplus m.
+
+$$</div>
+<p>Ánh xạ sang dấu:</p>
+<div class="math">$$
+
+\boxed{
+s=\begin{cases}
++1,&amp;c=1,\\
+-1,&amp;c=0.
+\end{cases}}
+
+$$</div>
+<p>Mục tiêu là làm cho determinant cuối cùng mang dấu <span class="math">\(s\)</span>, đồng thời có biên đủ lớn.</p>
+<hr />
+<h2 id="23-update-antisymmetric-trong-khong-gian-anh">23. Update antisymmetric trong không gian ảnh<a class="anchor" href="#23-update-antisymmetric-trong-khong-gian-anh">#</a></h2>
+<p>Với amplitude nguyên <span class="math">\(a\ge0\)</span>, code update block RGB:</p>
+<div class="math">$$
+
+\boxed{
+I^*=I+s\,a\,P
+}
+
+$$</div>
+<p>trên cả ba kênh, sau đó clip về <code>[0,255]</code>.</p>
+<p>Vì nhóm <span class="math">\(P=+1\)</span> tăng <span class="math">\(sa\)</span>, nhóm <span class="math">\(P=-1\)</span> giảm <span class="math">\(sa\)</span>:</p>
+<div class="math">$$
+
+u'=u+sa,
+
+$$</div>
+<div class="math">$$
+
+v'=v-sa.
+
+$$</div>
+<p>Suy ra</p>
+<div class="math">$$
+
+\boxed{k'=u'+v'=k}
+
+$$</div>
+<p>và</p>
+<div class="math">$$
+
+\boxed{d'=u'-v'=d+2sa.}
+
+$$</div>
+<p>Đây là điểm rất đẹp của luật nhúng: <strong>tổng <span class="math">\(u+v\)</span> được giữ, chỉ hiệu <span class="math">\(u-v\)</span> được điều khiển</strong>.</p>
+<hr />
+<h2 id="24-rang-buoc-qr-margin-va-determinant-khac-0">24. Ràng buộc QR margin và determinant khác 0<a class="anchor" href="#24-rang-buoc-qr-margin-va-determinant-khac-0">#</a></h2>
+<p>Proposal yêu cầu normalized margin</p>
+<div class="math">$$
+
+\boxed{s\,z(A')\ge\mu}
+
+$$</div>
+<p>và determinant safety</p>
+<div class="math">$$
+
+\boxed{|\det(A')|=|d'|\ge\delta.}
+
+$$</div>
+<p>Vì dấu mong muốn là <span class="math">\(s\)</span>, điều kiện thứ hai có thể kết hợp thành ngưỡng cho <span class="math">\(sd'\)</span>.</p>
+<p>Từ</p>
+<div class="math">$$
+
+s\frac{\sqrt2d'}{\sqrt{k^2+d'^2}}\ge\mu,
+
+$$</div>
+<p>với <span class="math">\(0&lt;\mu&lt;\sqrt2\)</span>, bình phương và biến đổi cho ta</p>
+<div class="math">$$
+
+\boxed{
+sd'\ge
+\frac{\mu|k|}{\sqrt{2-\mu^2}}.}
+
+$$</div>
+<p>Kết hợp với determinant margin <span class="math">\(\delta\)</span>:</p>
+<div class="math">$$
+
+\boxed{
+T=\max\left(
+\delta,
+\frac{\mu|k|}{\sqrt{2-\mu^2}}
+\right).
+}
+
+$$</div>
+<p>Cần</p>
+<div class="math">$$
+
+sd'=s(d+2sa)=sd+2a\ge T.
+
+$$</div>
+<hr />
+<h2 id="25-luat-nhung-ong-form-cua-detqr">25. Luật nhúng đóng-form của DetQR<a class="anchor" href="#25-luat-nhung-ong-form-cua-detqr">#</a></h2>
+<p>Từ</p>
+<div class="math">$$
+
+sd+2a\ge T,
+
+$$</div>
+<p>suy ra</p>
+<div class="math">$$
+
+a\ge\frac{T-sd}{2}.
+
+$$</div>
+<p>Do <span class="math">\(a\)</span> phải là số nguyên không âm, biên độ nhỏ nhất là</p>
+<div class="math">$$
+
+\boxed{
+a^*=\max\left(
+0,
+\left\lceil\frac{T-sd}{2}\right\rceil
+\right).
+}
+
+$$</div>
+<p>Thay <span class="math">\(T\)</span>:</p>
+<div class="math">$$
+
+\boxed{
+a^*=\max\left(
+0,
+\left\lceil
+\frac{
+\max\left(\delta,\mu|u+v|/\sqrt{2-\mu^2}\right)
+-s(u-v)}{2}
+\right\rceil
+\right).
+}
+
+$$</div>
+<p>Đây chính là hàm <code>minimum_integer_amplitude()</code> trong code.</p>
+<h3 id="y-nghia">Ý nghĩa<a class="anchor" href="#y-nghia">#</a></h3>
+<ul>
+<li>Nếu carrier đã đúng dấu và đủ xa biên: <span class="math">\(a^*=0\)</span>, block không bị sửa.</li>
+<li>Nếu chưa đủ: chỉ thêm <strong>số mức nguyên nhỏ nhất</strong> cần thiết.</li>
+<li>Điều này trực tiếp tối ưu imperceptibility ở mức local amplitude.</li>
+</ul>
+<hr />
+<h2 id="26-chon-pattern-co-distortion-thap-nhat">26. Chọn pattern có distortion thấp nhất<a class="anchor" href="#26-chon-pattern-co-distortion-thap-nhat">#</a></h2>
+<p>Có tối đa 10 pattern Hadamard ứng viên. Với mỗi pattern <span class="math">\(p\)</span>, code tính <span class="math">\(a_p^*\)</span> rồi dùng cost</p>
+<div class="math">$$
+
+\boxed{
+J_p=(a_p^*)^2
++\lambda_B B_p
+-10^{-6}s z_p.
+}
+
+$$</div>
+<p>Trong đó:</p>
+<ul>
+<li><span class="math">\(B_p\)</span>: boundary cost của pattern;</li>
+<li><span class="math">\(\lambda_B\)</span>: <code>boundary_penalty</code>;</li>
+<li>thành phần rất nhỏ <span class="math">\(-10^{-6}s z_p\)</span> dùng tie-break theo hướng carrier thuận lợi.</li>
+</ul>
+<p>Chọn</p>
+<div class="math">$$
+
+\boxed{p^*=\arg\min_pJ_p.}
+
+$$</div>
+<p>Sau đó nhúng bằng <span class="math">\(a_{p^*}^*\)</span>.</p>
+<hr />
+<h2 id="27-pilot-cua-spatial-detqr">27. Pilot của Spatial DetQR<a class="anchor" href="#27-pilot-cua-spatial-detqr">#</a></h2>
+<p>Pilot dùng <strong>cùng QR/determinant domain</strong>, không phải một carrier DCT riêng.</p>
+<p>Trong ảnh host ban đầu, code tìm các carrier pilot có determinant âm đủ an toàn, rồi nhúng chúng về giả thuyết dương bằng cùng công thức amplitude đóng-form.</p>
+<p>Khi extract:</p>
+<div class="math">$$
+
+\text{pilot detected}
+\Longleftrightarrow
+\#\{\det(A_{pilot})&gt;0\}&gt;rac{N_p}{2}.
+
+$$</div>
+<p>Pilot cũng được dùng để đánh giá rotation/shear candidate phục vụ affine synchronization.</p>
+<hr />
+<h2 id="28-luat-trich-xuat-spatial-detqr">28. Luật trích xuất Spatial DetQR<a class="anchor" href="#28-luat-trich-xuat-spatial-detqr">#</a></h2>
+<p>Sau alignment:</p>
+<ol>
+<li>dùng pattern đã lưu trong key;</li>
+<li>tính <span class="math">\(u,v\)</span> và determinant;</li>
+<li>đọc coded bit bằng dấu:</li>
+</ol>
+<div class="math">$$
+
+\boxed{
+\widehat c=
+\begin{cases}
+1,&amp;u-v&gt;0,\\
+0,&amp;u-v\le0.
+\end{cases}}
+
+$$</div>
+<ol start="4">
+<li>kiểm tra majority pilot;</li>
+<li>nếu pilot được phát hiện và payload mask bật:</li>
+</ol>
+<div class="math">$$
+
+\boxed{\widehat w=\widehat c\oplus m.}
+
+$$</div>
+<p>Nếu pilot không được phát hiện, implementation hiện tại giữ <code>coded</code> payload thay vì unmask.</p>
+<p>Điểm khác DCT–QR/Schur: <strong>không có bước <code>round(carrier/Delta) mod 2</code></strong>. Bit ở đây nằm trong <strong>dấu của determinant</strong>.</p>
+<hr />
+<h2 id="29-pseudocode-spatial-detqr">29. Pseudocode Spatial DetQR<a class="anchor" href="#29-pseudocode-spatial-detqr">#</a></h2>
+<pre><code class="language-text">NHÚNG
+1. W -&gt; bits
+2. Sinh payload mask m; coded = bits XOR m
+3. Với mỗi block và mỗi Hadamard pattern:
+      tính u, v
+      d = u-v, k=u+v
+      s = +1 nếu coded=1, ngược lại -1
+      T = max(delta, mu|k|/sqrt(2-mu^2))
+      a* = max(0, ceil((T-sd)/2))
+4. Chọn pattern có cost nhỏ nhất
+5. I* = I + s a* P
+6. Nhúng pilot cùng miền determinant
+7. Closure để khôi phục exact clean extraction sau clip/round
+8. Lưu pattern schedule, pilot schedule, mask seed vào key
+
+TRÍCH XUẤT
+1. Dùng pilot để thử affine alignment
+2. Tính determinant tại payload patterns
+3. c_hat = 1 nếu determinant &gt; 0, ngược lại 0
+4. Majority vote pilot
+5. Nếu pilot detected: w_hat = c_hat XOR mask
+6. Reshape thành 64x64
+</code></pre>
+<hr />
+<h1 id="phan-iv-so-sanh-toan-hoc">PHẦN IV — SO SÁNH TOÁN HỌC<a class="anchor" href="#phan-iv-so-sanh-toan-hoc">#</a></h1>
+<h2 id="30-so-sanh-ba-luat-nhung">30. So sánh ba luật nhúng<a class="anchor" href="#30-so-sanh-ba-luat-nhung">#</a></h2>
+<p>| Thành phần | DCT–QR | DCT–Schur SP-SCQIM | Spatial DetQR |
+|---|---|---|---|
+| Domain | DCT | DCT / Schur coordinates | Spatial luminance |
+| Carrier | <span class="math">\((C_{01}-C_{10})/2\)</span> | <span class="math">\(h_k^Tn\)</span>, <span class="math">\(k=1,2,3\)</span> | <span class="math">\(d=u-v=\det(A)\)</span> |
+| Kiểu bit | parity lattice | parity lattice | sign determinant |
+| Luật tối ưu | chọn coset <span class="math">\(s_j\)</span> có projection energy nhỏ nhất | orthogonal projection minimum Frobenius | integer amplitude nhỏ nhất thỏa margin |
+| Công thức chính | <span class="math">\(s_j^*=\arg\min_s\sum|P_{u\oplus s}(v)-v|^2\)</span> | <span class="math">\(n^*=n+H^T(t-Hn)\)</span> | <span class="math">\(a^*=\max(0,\lceil(T-sd)/2\rceil)\)</span> |
+| Redundancy | 1 physical bit/block + coset side info | 3 coupling copies | 1 determinant bit/block |
+| Gain correction | QR carrier-<span class="math">\(r_{11}\)</span> | spectral DCT reference | không dùng gain-QIM |
+| Extract decision | round + parity | round + parity + vote | sign of determinant |
+| Blindness | key-assisted blind | key-assisted blind | key-assisted blind |</p>
+<hr />
+<h2 id="31-khi-nao-mot-bit-uoc-xem-la-ung">31. Khi nào một bit được xem là “đúng”?<a class="anchor" href="#31-khi-nao-mot-bit-uoc-xem-la-ung">#</a></h2>
+<h3 id="dctqr">DCT–QR<a class="anchor" href="#dctqr">#</a></h3>
+<p>Sau gain correction:</p>
+<div class="math">$$
+
+\operatorname{round}(\widetilde v/\Delta)\bmod2=c.
+
+$$</div>
+<p>Sau đó XOR coset để về bit watermark.</p>
+<h3 id="dctschur">DCT–Schur<a class="anchor" href="#dctschur">#</a></h3>
+<p>Cho từng copy:</p>
+<div class="math">$$
+
+\operatorname{round}(\widetilde y_k/\Delta)\bmod2=b_k,
+
+$$</div>
+<p>rồi ba copy được hợp nhất bằng evidence/vote.</p>
+<h3 id="spatial-detqr">Spatial DetQR<a class="anchor" href="#spatial-detqr">#</a></h3>
+<div class="math">$$
+
+\operatorname{sign}(u-v)=s.
+
+$$</div>
+<p>Không cần QIM parity.</p>
+<hr />
+<h1 id="phan-v-cach-chay-repository">PHẦN V — CÁCH CHẠY REPOSITORY<a class="anchor" href="#phan-v-cach-chay-repository">#</a></h1>
+<h2 id="32-cai-at-tren-linux-wsl-macos">32. Cài đặt trên Linux / WSL / macOS<a class="anchor" href="#32-cai-at-tren-linux-wsl-macos">#</a></h2>
+<p>Đứng tại thư mục gốc <code>Hanoi-main</code>:</p>
+<pre><code class="language-bash">python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export PYTHONPATH=&quot;$PWD/src:$PWD/scripts&quot;
+export JILP_NUM_THREADS=1
+</code></pre>
+<p>Để giảm khác biệt runtime từ BLAS/OpenMP, có thể thêm:</p>
+<pre><code class="language-bash">export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+</code></pre>
+<hr />
+<h2 id="33-cai-at-tren-windows-powershell">33. Cài đặt trên Windows PowerShell<a class="anchor" href="#33-cai-at-tren-windows-powershell">#</a></h2>
+<pre><code class="language-powershell">python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:PYTHONPATH=&quot;$PWD\src;$PWD\scripts&quot;
+$env:JILP_NUM_THREADS=&quot;1&quot;
+$env:OMP_NUM_THREADS=&quot;1&quot;
+$env:OPENBLAS_NUM_THREADS=&quot;1&quot;
+</code></pre>
+<hr />
+<h2 id="34-kiem-tra-ba-proposal-co-uoc-nhan-dien-khong">34. Kiểm tra ba proposal có được nhận diện không<a class="anchor" href="#34-kiem-tra-ba-proposal-co-uoc-nhan-dien-khong">#</a></h2>
+<pre><code class="language-bash">python scripts/list_proposals.py
+</code></pre>
+<p>Kết quả phải liệt kê đúng:</p>
+<pre><code class="language-text">dct_qr
+dct_schur_rescue
+spatial_cd_detqr
+</code></pre>
+<hr />
+<h2 id="35-smoke-test-nhanh-nhat-cho-ca-ba-proposal">35. Smoke test nhanh nhất cho cả ba proposal<a class="anchor" href="#35-smoke-test-nhanh-nhat-cho-ca-ba-proposal">#</a></h2>
+<pre><code class="language-bash">python scripts/smoke_test_proposals.py
+</code></pre>
+<p>Khi chạy trực tiếp trên ZIP đã cung cấp trong quá trình tạo tài liệu này, kết quả clean trên <code>lenna.bmp</code> là:</p>
+<table>
+<thead>
+<tr>
+  <th>Method</th>
+  <th style="text-align:right">PSNR smoke</th>
+  <th style="text-align:right">Clean NC</th>
+  <th>det_nonzero</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>dct_qr</code></td>
+  <td style="text-align:right">50.2777 dB</td>
+  <td style="text-align:right">1.0000</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td><code>dct_schur_rescue</code></td>
+  <td style="text-align:right">48.1566 dB</td>
+  <td style="text-align:right">1.0000</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td><code>spatial_cd_detqr</code></td>
+  <td style="text-align:right">55.8722 dB</td>
+  <td style="text-align:right">1.0000</td>
+  <td>true</td>
+</tr>
+</tbody>
+</table>
+<p>Đây là <strong>smoke result clean</strong>, không phải kết luận benchmark attacked-NC cuối cùng.</p>
+<hr />
+<h2 id="36-test-truc-tiep-phan-core-cua-3-proposal">36. Test trực tiếp phần core của 3 proposal<a class="anchor" href="#36-test-truc-tiep-phan-core-cua-3-proposal">#</a></h2>
+<pre><code class="language-bash">pytest -q \
+  tests/test_dct_qr_pairwise_coset.py \
+  tests/test_direct_schur_rescue.py \
+  tests/test_cd_detqr.py
+</code></pre>
+<p>Kết quả đã kiểm tra trên package hiện tại:</p>
+<pre><code class="language-text">15 passed
+</code></pre>
+<h3 id="luu-y-ve-pytest-q-toan-repo">Lưu ý về <code>pytest -q</code> toàn repo<a class="anchor" href="#luu-y-ve-pytest-q-toan-repo">#</a></h3>
+<p>Hiện tại lệnh:</p>
+<pre><code class="language-bash">pytest -q
+</code></pre>
+<p>dừng ở collection vì file cũ <code>tests/test_pso.py</code> vẫn import:</p>
+<pre><code class="language-python">particle_swarm_maximize
+</code></pre>
+<p>trong khi optimizer hiện tại đã chuyển sang ABC và <code>qr64_certified.optimization</code> không export hàm PSO đó. Vì vậy dòng README nói <code>49 passed</code> <strong>không tái lập được với trạng thái ZIP hiện tại</strong> nếu chạy nguyên lệnh <code>pytest -q</code>.</p>
+<hr />
+<h1 id="phan-vi-lenh-chay-tung-proposal">PHẦN VI — LỆNH CHẠY TỪNG PROPOSAL<a class="anchor" href="#phan-vi-lenh-chay-tung-proposal">#</a></h1>
+<h2 id="37-dctqr-chay-nhanh-1-host">37. DCT–QR: chạy nhanh 1 host<a class="anchor" href="#37-dctqr-chay-nhanh-1-host">#</a></h2>
+<p>Validation riêng của pairwise coset:</p>
+<pre><code class="language-bash">python scripts/validate_dct_qr_pairwise_coset.py --host-limit 1
+</code></pre>
+<p>Full tất cả BMP trong <code>data/host</code>:</p>
+<pre><code class="language-bash">python scripts/validate_dct_qr_pairwise_coset.py
+</code></pre>
+<p>Chỉ định output:</p>
+<pre><code class="language-bash">python scripts/validate_dct_qr_pairwise_coset.py \
+  --output results/my_dct_qr_validation.json
+</code></pre>
+<hr />
+<h2 id="38-dctqr-benchmark-dung-config-abc-hien-tai">38. DCT–QR: benchmark dùng config ABC hiện tại<a class="anchor" href="#38-dctqr-benchmark-dung-config-abc-hien-tai">#</a></h2>
+<pre><code class="language-bash">python scripts/run_proposal_benchmark.py \
+  --method dct_qr \
+  --stage after_abc \
+  --save-images
+</code></pre>
+<p>In config thật sự sau khi áp dụng flag:</p>
+<pre><code class="language-bash">python scripts/run_proposal_benchmark.py \
+  --method dct_qr \
+  --stage after_abc \
+  --print-effective-config
+</code></pre>
+<p>Ví dụ ablation bỏ coset optimization:</p>
+<pre><code class="language-bash">python scripts/run_proposal_benchmark.py \
+  --method dct_qr \
+  --ablation no_coset_optimization \
+  --gain-gamma 0.90 \
+  --step 13.25
+</code></pre>
+<hr />
+<h2 id="39-dctschur-sp-scqim">39. DCT–Schur SP-SCQIM<a class="anchor" href="#39-dctschur-sp-scqim">#</a></h2>
+<p>Reproduce validation riêng với step 9.0:</p>
+<pre><code class="language-bash">python scripts/benchmark_schur_sp_scqim.py \
+  --step 9.0 \
+  --output results/schur_sp_scqim/reproduced.json
+</code></pre>
+<p>Chỉ chạy một số host theo tên:</p>
+<pre><code class="language-bash">python scripts/benchmark_schur_sp_scqim.py \
+  --hosts lenna baboon peppers \
+  --step 9.0
+</code></pre>
+<p>Benchmark theo config <code>after_abc</code>:</p>
+<pre><code class="language-bash">python scripts/run_proposal_benchmark.py \
+  --method dct_schur_rescue \
+  --stage after_abc \
+  --save-images
+</code></pre>
+<hr />
+<h2 id="40-spatial-detqr">40. Spatial DetQR<a class="anchor" href="#40-spatial-detqr">#</a></h2>
+<p>Benchmark 1 host với config ABC:</p>
+<pre><code class="language-bash">python scripts/run_proposal_benchmark.py \
+  --method spatial_cd_detqr \
+  --stage after_abc \
+  --save-images
+</code></pre>
+<p>Chạy redesigned validation chỉ cho Spatial DetQR trên 1 host:</p>
+<pre><code class="language-bash">python scripts/run_redesigned_validation.py \
+  --methods spatial_cd_detqr \
+  --host-limit 1
+</code></pre>
+<p>Chạy tất cả host:</p>
+<pre><code class="language-bash">python scripts/run_redesigned_validation.py \
+  --methods spatial_cd_detqr
+</code></pre>
+<hr />
+<h2 id="41-chay-ca-ba-proposal-tren-1-host">41. Chạy cả ba proposal trên 1 host<a class="anchor" href="#41-chay-ca-ba-proposal-tren-1-host">#</a></h2>
+<pre><code class="language-bash">python scripts/run_redesigned_validation.py --host-limit 1
+</code></pre>
+<p>Chạy full host set:</p>
+<pre><code class="language-bash">python scripts/run_redesigned_validation.py
+</code></pre>
+<p>Lệnh này đọc:</p>
+<pre><code class="language-text">configs/dct_qr_after_abc.json
+configs/dct_schur_rescue_after_abc.json
+configs/spatial_cd_detqr_after_abc.json
+</code></pre>
+<p>và mặc định fail nếu clean NC của bất kỳ host nào nhỏ hơn <span class="math">\(1-10^{-12}\)</span>.</p>
+<hr />
+<h2 id="42-chay-ablation">42. Chạy ablation<a class="anchor" href="#42-chay-ablation">#</a></h2>
+<p>DCT–QR:</p>
+<pre><code class="language-bash">python scripts/run_ablation_study.py --method dct_qr
+</code></pre>
+<p>DCT–Schur:</p>
+<pre><code class="language-bash">python scripts/run_ablation_study.py --method dct_schur_rescue
+</code></pre>
+<p>Spatial DetQR:</p>
+<pre><code class="language-bash">python scripts/run_ablation_study.py --method spatial_cd_detqr
+</code></pre>
+<p>Chỉ chạy clean để kiểm tra flag nhanh:</p>
+<pre><code class="language-bash">python scripts/run_ablation_study.py \
+  --method dct_qr \
+  --clean-only
+</code></pre>
+<hr />
+<h2 id="43-toi-uu-tham-so-bang-artificial-bee-colony-abc">43. Tối ưu tham số bằng Artificial Bee Colony (ABC)<a class="anchor" href="#43-toi-uu-tham-so-bang-artificial-bee-colony-abc">#</a></h2>
+<p>Full cho cả ba:</p>
+<pre><code class="language-bash">python scripts/optimize_parameters.py \
+  --method all \
+  --food-sources 20 \
+  --cycles 20 \
+  --seed 2026
+</code></pre>
+<p>Chỉ DCT–QR:</p>
+<pre><code class="language-bash">python scripts/optimize_parameters.py \
+  --method dct_qr \
+  --food-sources 20 \
+  --cycles 20 \
+  --seed 2026
+</code></pre>
+<p>Smoke optimization rất nhanh:</p>
+<pre><code class="language-bash">python scripts/optimize_parameters.py \
+  --method all \
+  --food-sources 2 \
+  --cycles 1 \
+  --onlookers 1 \
+  --attack-limit 1 \
+  --config-output-dir results/abc_smoke_configs
+</code></pre>
+<p>Không nên dùng smoke optimization này để báo cáo paper result; nó chỉ kiểm tra pipeline.</p>
+<hr />
+<h1 id="phan-vii-api-python-toi-thieu">PHẦN VII — API PYTHON TỐI THIỂU<a class="anchor" href="#phan-vii-api-python-toi-thieu">#</a></h1>
+<h2 id="44-goi-proposal-bang-python">44. Gọi proposal bằng Python<a class="anchor" href="#44-goi-proposal-bang-python">#</a></h2>
+<pre><code class="language-python">from qr64_certified.proposals import embed_proposal, extract_proposal
+
+# host: numpy uint8, shape (512, 512, 3)
+# watermark: binary/uint8, shape (64, 64)
+
+watermarked, key = embed_proposal(&quot;dct_qr&quot;, host, watermark)
+recovered = extract_proposal(watermarked, key)
+</code></pre>
+<p>Đổi phương pháp:</p>
+<pre><code class="language-python">watermarked, key = embed_proposal(&quot;dct_schur_rescue&quot;, host, watermark)
+recovered = extract_proposal(watermarked, key)
+</code></pre>
+<pre><code class="language-python">watermarked, key = embed_proposal(&quot;spatial_cd_detqr&quot;, host, watermark)
+recovered = extract_proposal(watermarked, key)
+</code></pre>
+<p>Nếu cần metadata:</p>
+<pre><code class="language-python">watermarked, key, embed_meta = embed_proposal(
+    &quot;dct_schur_rescue&quot;,
+    host,
+    watermark,
+    return_metadata=True,
+)
+
+recovered, extract_meta = extract_proposal(
+    watermarked,
+    key,
+    return_metadata=True,
+)
+</code></pre>
+<hr />
+<h1 id="phan-viii-cach-trinh-bay-trong-paper-thesis">PHẦN VIII — CÁCH TRÌNH BÀY TRONG PAPER/THESIS<a class="anchor" href="#phan-viii-cach-trinh-bay-trong-paper-thesis">#</a></h1>
+<h2 id="45-phat-bieu-ngan-gon-luat-nhung-cua-tung-proposal">45. Phát biểu ngắn gọn luật nhúng của từng proposal<a class="anchor" href="#45-phat-bieu-ngan-gon-luat-nhung-cua-tung-proposal">#</a></h2>
+<h3 id="dctqr-2">DCT–QR<a class="anchor" href="#dctqr-2">#</a></h3>
+<blockquote>
+<p>Với mỗi cặp block gần nhau về QR reliability, proposal chọn một nhãn coset nhị phân chung sao cho tổng năng lượng chiếu QIM của cả cặp là nhỏ nhất, sau đó thực hiện minimum-distortion guarded-QIM projection và integer-lattice closure trên ảnh RGB 8-bit.</p>
+</blockquote>
+<p>Công thức trung tâm:</p>
+<div class="math">$$
+
+\boxed{
+s_j^*=\arg\min_s\sum_{b\in G_j}|P_{u_b\oplus s}(v_b)-v_b|^2.}
+
+$$</div>
+<h3 id="dctschur-sp-scqim">DCT–Schur SP-SCQIM<a class="anchor" href="#dctschur-sp-scqim">#</a></h3>
+<blockquote>
+<p>Ba tổ hợp trực giao của sáu strict-upper Schur couplings được ép vào ba lattice parity target. Do basis coupling có các hàng trực chuẩn, nghiệm nhúng có biến dạng Frobenius nhỏ nhất được cho trực tiếp bởi phép chiếu trực giao.</p>
+</blockquote>
+<p>Công thức trung tâm:</p>
+<div class="math">$$
+
+\boxed{n^*=n+H^T(t-Hn).}
+
+$$</div>
+<h3 id="spatial-detqr-2">Spatial DetQR<a class="anchor" href="#spatial-detqr-2">#</a></h3>
+<blockquote>
+<p>Mỗi bit được mã hóa bằng dấu của determinant trong một ma trận QR 2×2 hình thành từ hai trung bình luminance đối nghịch. Biên độ spatial nguyên nhỏ nhất được suy ra đóng-form để đồng thời thỏa normalized QR margin và determinant safety.</p>
+</blockquote>
+<p>Công thức trung tâm:</p>
+<div class="math">$$
+
+\boxed{
+a^*=\max\left(0,\left\lceil\frac{T-sd}{2}\right\rceil\right).}
+
+$$</div>
+<hr />
+<h2 id="46-phat-bieu-ngan-gon-luat-trich-xuat">46. Phát biểu ngắn gọn luật trích xuất<a class="anchor" href="#46-phat-bieu-ngan-gon-luat-trich-xuat">#</a></h2>
+<h3 id="dctqr-3">DCT–QR<a class="anchor" href="#dctqr-3">#</a></h3>
+<div class="math">$$
+
+\boxed{
+\widehat u_b=
+\left[
+\operatorname{round}
+\left(
+\frac{v_b^{(a)}}{\alpha_b^\gamma\Delta_b}
+\right)
+\bmod2
+\right]
+\oplus s_j^*.
+}
+
+$$</div>
+<h3 id="dctschur-2">DCT–Schur<a class="anchor" href="#dctschur-2">#</a></h3>
+<p>Cho ba carrier:</p>
+<div class="math">$$
+
+\widehat b_{k,b}=
+\operatorname{round}
+\left(
+\frac{h_k^Tn_b^{(a)}}{\alpha_b^\gamma\Delta}
+\right)\bmod2,
+
+$$</div>
+<p>sau đó inverse permutation và fusion ba evidence.</p>
+<h3 id="spatial-detqr-3">Spatial DetQR<a class="anchor" href="#spatial-detqr-3">#</a></h3>
+<div class="math">$$
+
+\boxed{
+\widehat c_b=\mathbf1[\det(A_b)&gt;0],
+\qquad
+\widehat w_b=\widehat c_b\oplus m_b
+}
+
+$$</div>
+<p>khi pilot được phát hiện.</p>
+<hr />
+<h2 id="47-cac-luu-y-khoa-hoc-quan-trong">47. Các lưu ý khoa học quan trọng<a class="anchor" href="#47-cac-luu-y-khoa-hoc-quan-trong">#</a></h2>
+<ol>
+<li><strong>Key-assisted blind không đồng nghĩa không có side information.</strong> Cả ba phương pháp không cần original host khi extract, nhưng key vẫn chứa schedule/reference cần thiết.</li>
+<li>Với DCT–QR, packed coset mask là một phần thiết yếu của luật giải mã; không nên ẩn chi tiết này khi viết paper.</li>
+<li>Với Schur, bảo toàn spectrum/trace/determinant là tính chất của constructed triangular Schur matrix ở miền floating-point; sau IDCT và lượng tử <code>uint8</code>, cần phân biệt invariant theorem với ảnh vật lý cuối cùng.</li>
+<li>Với Spatial DetQR, điều kiện đóng-form được suy ra trước clip; closure được dùng để phục hồi điều kiện trên ảnh số nguyên cuối.</li>
+<li>Kết quả smoke clean NC=1 không chứng minh robustness dưới attack. Báo cáo paper nên tách rõ clean exactness, attacked NC, worst-case NC, PSNR/SSIM, latency và key size.</li>
+<li>Khi so sánh latency, phải cố định số thread (<code>JILP_NUM_THREADS</code>, <code>OMP_NUM_THREADS</code>, <code>OPENBLAS_NUM_THREADS</code>) và cùng hardware.</li>
+</ol>
+<hr />
+<h2 id="48-file-source-can-oc-khi-chinh-sua-proposal">48. File source cần đọc khi chỉnh sửa proposal<a class="anchor" href="#48-file-source-can-oc-khi-chinh-sua-proposal">#</a></h2>
+<pre><code class="language-text"># DCT–QR
+src/qr64_certified/proposals/method.py
+src/qr64_certified/proposals/config.py
+src/qr64_certified/proposals/certificate.py
+src/qr64_certified/_jilp_core/engine.py
+configs/dct_qr_after_abc.json
+
+# DCT–Schur SP-SCQIM
+src/qr64_certified/proposals/schur_coupling_qim.py
+configs/dct_schur_rescue_after_abc.json
+configs/dct_schur_sp_scqim.json
+
+# Spatial DetQR
+src/qr64_certified/proposals/cd_detqr.py
+configs/spatial_cd_detqr_after_abc.json
+
+# Runner / evaluation
+scripts/run_proposal_benchmark.py
+scripts/run_redesigned_validation.py
+scripts/run_ablation_study.py
+scripts/optimize_parameters.py
+scripts/smoke_test_proposals.py
+</code></pre>
+<hr />
+<h2 id="49-ket-luan">49. Kết luận<a class="anchor" href="#49-ket-luan">#</a></h2>
+<p>Ba proposal giải ba bài toán tối ưu local khác nhau:</p>
+<div class="math">$$
+
+\boxed{
+\text{DCT–QR: tối thiểu hóa QIM projection energy qua coset.}
+}
+
+$$</div>
+<div class="math">$$
+
+\boxed{
+\text{DCT–Schur: tối thiểu hóa Frobenius update dưới ràng buộc coupling parity.}
+}
+
+$$</div>
+<div class="math">$$
+
+\boxed{
+\text{Spatial DetQR: tối thiểu hóa integer amplitude dưới QR/determinant margin.}
+}
+
+$$</div>
+<p>Nếu cần mô tả ngắn nhất về “luật nhúng” của cả hệ thống, có thể nói:</p>
+<blockquote>
+<p><strong>DCT–QR tối ưu cách gán parity trước khi chiếu QIM; DCT–Schur giải trực tiếp phép chiếu trực giao tối thiểu lên ba ràng buộc parity; Spatial DetQR suy ra biên độ nguyên nhỏ nhất để ép dấu determinant và biên QR. Luật trích xuất tương ứng lần lượt là parity sau gain correction + XOR coset, parity fusion của ba Schur coupling, và quyết định dấu determinant + unmask bằng pilot.</strong></p>
+</blockquote>
+</article></div></body></html>
