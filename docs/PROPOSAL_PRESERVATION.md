@@ -6,12 +6,16 @@
 > new DCT–QR pairwise-coset embedding law. DCT–Schur, Spatial DetQR, and baseline
 > mathematical implementations remain unchanged.
 
-The unified repository contains exactly the same three proposal methods as the
-uploaded original project:
+The original three proposal methods from the uploaded project are still
+preserved:
 
 1. `dct_qr`
 2. `dct_schur_rescue`
 3. `spatial_cd_detqr`
+
+The current repository additionally exposes `dct_qr_direct_r`. This fourth
+method is a new transform-domain DCT->QR->R proposal and is not part of the
+historical byte/numerical-preservation claim below.
 
 ## Location
 

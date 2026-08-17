@@ -11,9 +11,13 @@ import numpy as np
 from qr64_certified import (
     CDDetQRConfig,
     DCT_QR,
+    DCT_QR_DIRECT_R,
+    DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     DirectSchurRescueConfig,
+    DCTQRDirectRConfig,
+    DCTQRR11QIMConfig,
     QR64Config,
     embed_proposal,
     extract_proposal,
@@ -23,7 +27,7 @@ from qr64_certified.attacks.types import AttackConfig
 from qr64_certified.attacks import apply_attack
 from qr64_certified.common.metrics import ber, image_quality_metrics, nc, ncc, psnr, ssim, watermark_metrics
 
-METHODS = (DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
+METHODS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
 
 def config_to_dict(config: Any) -> dict[str, Any]:
@@ -37,6 +41,10 @@ def config_from_dict(method: str, values: Mapping[str, Any] | None):
     if method == DCT_QR:
         raw["certificate_mode"] = "qr"
         return QR64Config.from_mapping(raw)
+    if method == DCT_QR_DIRECT_R:
+        return DCTQRDirectRConfig.from_mapping(raw)
+    if method == DCT_QR_R11_QIM:
+        return DCTQRR11QIMConfig.from_mapping(raw)
     if method == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig.from_mapping(raw)
     allowed = set(CDDetQRConfig.__dataclass_fields__)

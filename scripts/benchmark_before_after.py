@@ -17,7 +17,7 @@ from qr64_certified.common.io import load_host_rgb, load_watermark_binary, save_
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Export before/after ABC results for all three methods.")
+    parser = argparse.ArgumentParser(description="Export before/after ABC results for all proposal methods.")
     parser.add_argument("--host", default=str(ROOT / "data" / "host" / "lenna.bmp"))
     parser.add_argument("--watermark", default=str(ROOT / "data" / "watermark" / "wm.png"))
     parser.add_argument("--output-dir", default=str(ROOT / "results" / "before_after_abc"))

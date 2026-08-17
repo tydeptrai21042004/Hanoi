@@ -11,15 +11,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from qr64_certified import DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
+from qr64_certified import DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
 from three_method_utils import evaluate_method, read_config, write_rows
 from qr64_certified.common.io import load_host_rgb, load_watermark_binary, save_image
 from qr64_certified.proposals.flags import add_proposal_flag_arguments, apply_proposal_flags
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Benchmark one of the three proposal methods on one host and 15 attacks.")
-    parser.add_argument("--method", choices=[DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR], required=True)
+    parser = argparse.ArgumentParser(description="Benchmark one proposal method on one host and 15 attacks.")
+    parser.add_argument("--method", choices=[DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR], required=True)
     parser.add_argument("--stage", choices=["before", "after_abc"], default="after_abc")
     parser.add_argument(
         "--config",

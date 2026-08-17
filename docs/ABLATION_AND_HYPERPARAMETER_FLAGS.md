@@ -1,6 +1,6 @@
 # Ablation and Hyperparameter Flags
 
-The three proposals expose reproducible component ablations and direct
+The public proposals expose reproducible component ablations and direct
 hyperparameter overrides. No source-code editing is required.
 
 ## Discover the available flags
@@ -64,6 +64,37 @@ python scripts/run_proposal_benchmark.py \
   --adaptive-step-ratios 1.38,1.0,0.77 \
   --gain-gamma 0.90 \
   --print-effective-config
+```
+
+## DCT-QR Direct-R Differential QIM
+
+This proposal performs QR on the regularized 4×4 low-frequency DCT matrix and
+embeds directly into the first row of `R`.
+
+### Ablation
+
+| Flag | Scientific component removed or simplified |
+|---|---|
+| `single_closure` | Uses one uint8 closure round instead of the default two. |
+
+Direct hyperparameters are:
+
+```text
+--seed
+--step
+--regularization
+--det-epsilon
+--closure-rounds
+```
+
+Example:
+
+```bash
+python scripts/run_proposal_benchmark.py \
+  --method dct_qr_direct_r \
+  --step 8.0 \
+  --regularization 1.0 \
+  --closure-rounds 2
 ```
 
 ## DCT-Schur SP-SCQIM
