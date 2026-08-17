@@ -1,16 +1,21 @@
-"""The three public proposal methods.
+"""Public proposal methods.
 
 The DCT-QR path uses the active pairwise-coset embedding law. DCT-Schur and
-Spatial DetQR retain their validated implementations. Compatibility modules
-remain at ``qr64_certified.<module>``.
+Spatial DetQR retain their validated implementations. ``dct_qr_direct_r`` is
+the direct transform-domain DCT->QR->R proposal. Compatibility modules remain
+at ``qr64_certified.<module>``.
 """
 
 from .config import QR64Config
 from .method import QR64Key, embed, extract
 from .direct_schur_rescue import DirectSchurRescueConfig, DirectSchurRescueKey
 from .cd_detqr import CDDetQRConfig, CDDetQRKey, BlindCDDetQR
+from .dct_qr_direct_r import DCTQRDirectRConfig, DCTQRDirectRKey
+from .dct_qr_r11_qim import DCTQRR11QIMConfig, DCTQRR11QIMKey
 from .proposal_registry import (
     DCT_QR,
+    DCT_QR_DIRECT_R,
+    DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     QR_CERTIFIED,
@@ -33,10 +38,16 @@ __all__ = [
     "CDDetQRConfig",
     "CDDetQRKey",
     "BlindCDDetQR",
+    "DCTQRDirectRConfig",
+    "DCTQRDirectRKey",
+    "DCTQRR11QIMConfig",
+    "DCTQRR11QIMKey",
     "ABLATION_FLAGS",
     "HYPERPARAMETER_FLAGS",
     "apply_proposal_flags",
     "DCT_QR",
+    "DCT_QR_DIRECT_R",
+    "DCT_QR_R11_QIM",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",
     "QR_CERTIFIED",

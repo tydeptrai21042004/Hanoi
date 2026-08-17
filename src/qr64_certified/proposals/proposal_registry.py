@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Public registry exposing exactly three proposal methods."""
+"""Public registry exposing the proposal methods."""
 
 from dataclasses import replace
 from typing import Any, Mapping
@@ -20,13 +20,27 @@ from .direct_schur_rescue import (
     embed as embed_direct_schur_rescue,
     extract as extract_direct_schur_rescue,
 )
+from .dct_qr_direct_r import (
+    DCTQRDirectRConfig,
+    DCTQRDirectRKey,
+    embed as embed_dct_qr_direct_r,
+    extract as extract_dct_qr_direct_r,
+)
+from .dct_qr_r11_qim import (
+    DCTQRR11QIMConfig,
+    DCTQRR11QIMKey,
+    embed as embed_dct_qr_r11_qim,
+    extract as extract_dct_qr_r11_qim,
+)
 from .method import QR64Key, embed as embed_certified, extract as extract_certified
 
 DCT_QR = "dct_qr"
+DCT_QR_DIRECT_R = "dct_qr_direct_r"
+DCT_QR_R11_QIM = "dct_qr_r11_qim"
 DCT_SCHUR_RESCUE = "dct_schur_rescue"
 SPATIAL_CD_DETQR = "spatial_cd_detqr"
 
-# Compatibility aliases retained for old commands, but only three methods are listed.
+# Compatibility aliases retained for old commands.
 QR_CERTIFIED = DCT_QR
 DIRECT_SCHUR_RESCUE = DCT_SCHUR_RESCUE
 
@@ -40,6 +54,29 @@ SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
             "QR reliability selects local QIM spacing and forms homogeneous block pairs. "
             "An exact binary coset choice minimizes pairwise projection distortion at unchanged "
             "QIM step and margin, while carrier r11 supplies blind gain compensation."
+        ),
+    },
+    DCT_QR_DIRECT_R: {
+        "id": DCT_QR_DIRECT_R,
+        "display_name": "Transform-Domain DCT-QR Direct-R Differential QIM",
+        "domain": "8x8 DCT followed by direct QR of a regularized 4x4 low-frequency coefficient matrix",
+        "scientific_status": "new proposal; smoke-validated",
+        "description": (
+            "The payload is embedded after the QR decomposition itself. A parity-QIM rule "
+            "modifies the first-row differential (R12-R13)/2 while preserving R11 as the "
+            "dominant low-frequency energy anchor. QR is therefore performed in the transform "
+            "domain, not on spatial image blocks."
+        ),
+    },
+    DCT_QR_R11_QIM: {
+        "id": DCT_QR_R11_QIM,
+        "display_name": "Transform-Domain DCT-QR Direct-R11 QIM",
+        "domain": "8x8 DCT followed by QR of a regularized 4x4 low-frequency coefficient matrix; direct R11 embedding",
+        "scientific_status": "new proposal; smoke-validated",
+        "description": (
+            "The watermark bit is embedded directly in R11 after transform-domain QR. "
+            "Canonical positive-diagonal QR makes R11 the norm of the first low-frequency "
+            "DCT column, and parity-QIM changes only R11 before QR reconstruction and IDCT."
         ),
     },
     DCT_SCHUR_RESCUE: {
@@ -70,6 +107,12 @@ METHOD_ALIASES = {
     "qr64": DCT_QR,
     "qr_certified": DCT_QR,
     "dct_qr": DCT_QR,
+    "dct_qr_direct_r": DCT_QR_DIRECT_R,
+    "direct_r_qr": DCT_QR_DIRECT_R,
+    "transform_qr": DCT_QR_DIRECT_R,
+    "dct_qr_r11_qim": DCT_QR_R11_QIM,
+    "r11_qim": DCT_QR_R11_QIM,
+    "direct_r11_qr": DCT_QR_R11_QIM,
     "schur": DCT_SCHUR_RESCUE,
     "schur_rescue": DCT_SCHUR_RESCUE,
     "direct_schur": DCT_SCHUR_RESCUE,
@@ -97,6 +140,10 @@ def default_config_for_method(method_id: str):
     method = normalize_proposal_method_id(method_id)
     if method == DCT_QR:
         return QR64Config.public_dct_qr()
+    if method == DCT_QR_DIRECT_R:
+        return DCTQRDirectRConfig().validated()
+    if method == DCT_QR_R11_QIM:
+        return DCTQRR11QIMConfig().validated()
     if method == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig().validated()
     return CDDetQRConfig()
@@ -107,10 +154,24 @@ def embed_proposal(
     host_rgb: np.ndarray,
     watermark_binary: np.ndarray,
     *,
-    config: QR64Config | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
+    config: QR64Config | DCTQRDirectRConfig | DCTQRR11QIMConfig | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
     return_metadata: bool = False,
 ):
     method = normalize_proposal_method_id(method_id)
+    if method == DCT_QR_DIRECT_R:
+        return embed_dct_qr_direct_r(
+            host_rgb,
+            watermark_binary,
+            config=DCTQRDirectRConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
+    if method == DCT_QR_R11_QIM:
+        return embed_dct_qr_r11_qim(
+            host_rgb,
+            watermark_binary,
+            config=DCTQRR11QIMConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
     if method == DCT_SCHUR_RESCUE:
         result = embed_direct_schur_rescue(
             host_rgb,
@@ -155,10 +216,18 @@ def embed_proposal(
 
 def extract_proposal(
     possibly_attacked_rgb: np.ndarray,
-    key: QR64Key | DirectSchurRescueKey | CDDetQRKey,
+    key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey,
     *,
     return_metadata: bool = False,
 ):
+    if isinstance(key, DCTQRDirectRKey):
+        return extract_dct_qr_direct_r(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
+    if isinstance(key, DCTQRR11QIMKey):
+        return extract_dct_qr_r11_qim(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
     if isinstance(key, DirectSchurRescueKey):
         result = extract_direct_schur_rescue(
             possibly_attacked_rgb, key, return_metadata=return_metadata
@@ -178,7 +247,11 @@ def extract_proposal(
     )
 
 
-def method_id_from_key(key: QR64Key | DirectSchurRescueKey | CDDetQRKey) -> str:
+def method_id_from_key(key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey) -> str:
+    if isinstance(key, DCTQRDirectRKey):
+        return DCT_QR_DIRECT_R
+    if isinstance(key, DCTQRR11QIMKey):
+        return DCT_QR_R11_QIM
     if isinstance(key, DirectSchurRescueKey):
         return DCT_SCHUR_RESCUE
     if isinstance(key, CDDetQRKey):
@@ -188,6 +261,8 @@ def method_id_from_key(key: QR64Key | DirectSchurRescueKey | CDDetQRKey) -> str:
 
 __all__ = [
     "DCT_QR",
+    "DCT_QR_DIRECT_R",
+    "DCT_QR_R11_QIM",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",
     "QR_CERTIFIED",

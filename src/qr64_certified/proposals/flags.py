@@ -13,8 +13,10 @@ from typing import Any, Mapping
 
 from .cd_detqr import CDDetQRConfig
 from .config import QR64Config
+from .dct_qr_direct_r import DCTQRDirectRConfig
+from .dct_qr_r11_qim import DCTQRR11QIMConfig
 from .direct_schur_rescue import DirectSchurRescueConfig
-from .proposal_registry import DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
+from .proposal_registry import DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
 
 
 ABLATION_FLAGS: dict[str, tuple[str, ...]] = {
@@ -26,6 +28,12 @@ ABLATION_FLAGS: dict[str, tuple[str, ...]] = {
         "no_spatial_map",
         "no_certificate_evidence",
         "no_sync_certificate",
+    ),
+    DCT_QR_DIRECT_R: (
+        "single_closure",
+    ),
+    DCT_QR_R11_QIM: (
+        "single_closure",
     ),
     DCT_SCHUR_RESCUE: (
         "single_coupling",
@@ -54,6 +62,12 @@ HYPERPARAMETER_FLAGS: dict[str, tuple[str, ...]] = {
         "qr_gain_mode", "qr_map_lambda", "qr_map_iters",
         "evidence_conf_power", "sync_certificate_weight",
         "sync_improvement_threshold",
+    ),
+    DCT_QR_DIRECT_R: (
+        "seed", "step", "regularization", "det_epsilon", "closure_rounds",
+    ),
+    DCT_QR_R11_QIM: (
+        "seed", "step", "regularization", "det_epsilon", "closure_rounds",
     ),
     DCT_SCHUR_RESCUE: (
         "step", "eta", "seed", "arnold_iterations", "closure_rounds",
@@ -120,6 +134,7 @@ def add_proposal_flag_arguments(parser: argparse.ArgumentParser) -> None:
 
     common = parser.add_argument_group("DCT-QIM / decomposition hyperparameters")
     common.add_argument("--step", type=float, default=None)
+    common.add_argument("--seed", type=int, default=None)
     common.add_argument("--rho-frac", type=float, default=None)
     common.add_argument("--pilot-count", type=int, default=None)
     common.add_argument("--pilot-step", type=float, default=None)
@@ -177,6 +192,8 @@ def add_proposal_flag_arguments(parser: argparse.ArgumentParser) -> None:
         choices=("carrier_r11", "diag_l2"),
         default=None,
     )
+    qr.add_argument("--regularization", type=float, default=None)
+    qr.add_argument("--det-epsilon", type=float, default=None)
 
     schur = parser.add_argument_group("DCT-Schur hyperparameters")
     schur.add_argument("--schur-departure-weight", type=float, default=None)
@@ -270,9 +287,9 @@ def _apply_qr_fields(config: QR64Config, values: Mapping[str, Any]) -> tuple[QR6
 
 def apply_proposal_flags(
     method: str,
-    config: QR64Config | DirectSchurRescueConfig | CDDetQRConfig,
+    config: QR64Config | DCTQRDirectRConfig | DirectSchurRescueConfig | CDDetQRConfig,
     values: Mapping[str, Any] | argparse.Namespace,
-) -> tuple[QR64Config | DirectSchurRescueConfig | CDDetQRConfig, dict[str, Any]]:
+) -> tuple[QR64Config | DCTQRDirectRConfig | DirectSchurRescueConfig | CDDetQRConfig, dict[str, Any]]:
     """Apply method-specific ablations and hyperparameters to a config.
 
     Returns the validated config and a serializable report describing every
@@ -319,6 +336,32 @@ def apply_proposal_flags(
                 )
             elif name == "no_sync_certificate":
                 config = replace(config, sync_certificate_weight=0.0)
+        config = config.validated()
+
+    elif method == DCT_QR_DIRECT_R:
+        if not isinstance(config, DCTQRDirectRConfig):
+            config = DCTQRDirectRConfig.from_mapping(config)  # type: ignore[arg-type]
+        names = HYPERPARAMETER_FLAGS[DCT_QR_DIRECT_R]
+        updates = {name: raw[name] for name in names if _present(raw, name)}
+        overrides.update(updates)
+        if updates:
+            config = replace(config, **updates)
+        for name in requested:
+            if name == "single_closure":
+                config = replace(config, closure_rounds=1)
+        config = config.validated()
+
+    elif method == DCT_QR_R11_QIM:
+        if not isinstance(config, DCTQRR11QIMConfig):
+            config = DCTQRR11QIMConfig.from_mapping(config)  # type: ignore[arg-type]
+        names = HYPERPARAMETER_FLAGS[DCT_QR_R11_QIM]
+        updates = {name: raw[name] for name in names if _present(raw, name)}
+        overrides.update(updates)
+        if updates:
+            config = replace(config, **updates)
+        for name in requested:
+            if name == "single_closure":
+                config = replace(config, closure_rounds=1)
         config = config.validated()
 
     elif method == DCT_SCHUR_RESCUE:

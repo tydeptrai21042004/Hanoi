@@ -8,6 +8,8 @@ from qr64_certified.baselines.registry import (
 )
 from qr64_certified.proposals.proposal_registry import (
     DCT_QR,
+    DCT_QR_DIRECT_R,
+    DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     SUPPORTED_PROPOSAL_METHODS,
@@ -16,23 +18,24 @@ from qr64_certified.proposals.proposal_registry import (
 
 from .types import BenchmarkMethodSpec
 
-PROPOSAL_IDS = (DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
+PROPOSAL_IDS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
 
 def proposal_spec(method_id: str) -> BenchmarkMethodSpec:
     canonical = normalize_proposal_method_id(method_id)
     metadata = SUPPORTED_PROPOSAL_METHODS[canonical]
+    direct_blind = canonical in {DCT_QR_DIRECT_R, DCT_QR_R11_QIM}
     return BenchmarkMethodSpec(
         method_id=canonical,
         method_kind="proposal",
         display_name=str(metadata["display_name"]),
-        blindness_tier="key_assisted_blind",
+        blindness_tier="blind" if direct_blind else "key_assisted_blind",
         fidelity_tier="proposal",
         requires_original_host=False,
         common_4096_payload=True,
         payload_size=64,
-        cover_dependent_key=True,
-        comparison_group="proposal_key_assisted_4096",
+        cover_dependent_key=not direct_blind,
+        comparison_group="proposal_blind_4096" if direct_blind else "proposal_key_assisted_4096",
         config_path=f"configs/{canonical}_after_abc.json",
     )
 

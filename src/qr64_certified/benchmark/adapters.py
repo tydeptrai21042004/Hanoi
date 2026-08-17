@@ -10,9 +10,13 @@ import numpy as np
 from qr64_certified.baselines.registry import embed_baseline, extract_baseline
 from qr64_certified.proposals.cd_detqr import CDDetQRConfig
 from qr64_certified.proposals.config import QR64Config
+from qr64_certified.proposals.dct_qr_direct_r import DCTQRDirectRConfig
+from qr64_certified.proposals.dct_qr_r11_qim import DCTQRR11QIMConfig
 from qr64_certified.proposals.direct_schur_rescue import DirectSchurRescueConfig
 from qr64_certified.proposals.proposal_registry import (
     DCT_QR,
+    DCT_QR_DIRECT_R,
+    DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     default_config_for_method,
@@ -46,6 +50,10 @@ def _load_proposal_config(spec: BenchmarkMethodSpec, root: Path):
     if spec.method_id == DCT_QR:
         raw["certificate_mode"] = "qr"
         return QR64Config.from_mapping(raw)
+    if spec.method_id == DCT_QR_DIRECT_R:
+        return DCTQRDirectRConfig.from_mapping(raw)
+    if spec.method_id == DCT_QR_R11_QIM:
+        return DCTQRR11QIMConfig.from_mapping(raw)
     if spec.method_id == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig.from_mapping(raw)
     allowed = set(CDDetQRConfig.__dataclass_fields__)
@@ -62,6 +70,10 @@ def _proposal_config_for_seed(method_id: str, config: Any, seed: int):
     """
     offset = int(seed) - 2026
     if method_id == DCT_QR:
+        return replace(config, seed=int(seed)).validated()
+    if method_id == DCT_QR_DIRECT_R:
+        return replace(config, seed=int(seed)).validated()
+    if method_id == DCT_QR_R11_QIM:
         return replace(config, seed=int(seed)).validated()
     if method_id == DCT_SCHUR_RESCUE:
         return replace(config, seed=int(seed)).validated()
