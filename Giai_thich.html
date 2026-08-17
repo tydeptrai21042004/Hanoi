@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ba phương pháp watermarking - giải thích cho người mới</title>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{--ink:#171717;--muted:#62666c;--paper:#fff;--bg:#eceff1;--line:#c7ccd1;--soft:#f6f7f8;--blue:#274a6d;--note:#eef5fb;--green:#eff8f1;--yellow:#fff8e6;--red:#fff1f1}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.68;font-size:17px}
+.wrap{max-width:1350px;margin:auto;display:grid;grid-template-columns:285px minmax(0,940px);gap:24px;padding:24px 16px 70px}
+nav{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 28px);overflow:auto;background:#fff;border:1px solid var(--line);padding:16px}
+nav h3{font:700 14px Arial,sans-serif;text-transform:uppercase;margin:0 0 10px;color:#333} nav a{display:block;text-decoration:none;color:#30343a;padding:5px 7px;font:14px/1.35 Arial,sans-serif;border-left:2px solid transparent} nav a:hover{background:#f3f5f6;border-left-color:var(--blue)} nav .sub{padding-left:20px;font-size:13px;color:#555}
+article{background:var(--paper);border:1px solid var(--line);box-shadow:0 7px 25px rgba(0,0,0,.06);padding:54px 68px}
+h1,h2,h3,h4{line-height:1.28;color:#111} h1{text-align:center;font-size:35px;margin:0 0 10px} .subtitle{text-align:center;color:#454a50;max-width:760px;margin:0 auto 30px;font-size:18px} .meta{text-align:center;color:#6a6e73;font:14px Arial,sans-serif;margin-bottom:35px}
+h2{font-size:28px;margin-top:48px;padding-top:16px;border-top:1.5px solid #222} h3{font-size:22px;margin-top:33px} h4{font-size:18px;margin-top:22px}
+p{margin:10px 0 14px} li{margin:7px 0} code{font:0.89em Consolas,"Courier New",monospace;background:#f0f2f3;padding:1px 4px;border-radius:3px}
+.box,.note,.tip,.warning,.important{padding:14px 16px;margin:18px 0;border-left:4px solid var(--blue);background:var(--note)} .tip{background:var(--green);border-left-color:#4e805a}.warning{background:var(--yellow);border-left-color:#a87817}.important{background:var(--red);border-left-color:#a64242}
+.simple{font:15px/1.55 Arial,sans-serif;background:#f7f8f9;border:1px solid #d1d5d9;padding:13px 15px;margin:16px 0}.simple strong{color:#1d3550}
+.eq{position:relative;text-align:center;padding:7px 55px 7px 20px;margin:16px 0;overflow-x:auto}.eq .num{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#555;font-size:14px}
+table{width:100%;border-collapse:collapse;margin:17px 0 24px;font-size:15px} th,td{border:1px solid #adb4bb;padding:9px 10px;vertical-align:top} th{background:#f0f2f4;text-align:left;font:700 14px Arial,sans-serif}
+.steps{counter-reset:step}.step{display:grid;grid-template-columns:44px 1fr;gap:12px;border-top:1px solid #dedede;padding:15px 0;margin:4px 0}.step .numc{width:36px;height:36px;border:1.5px solid #333;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 15px Arial,sans-serif}.step h4{margin:2px 0 6px}.step p{margin:6px 0}
+.flow{max-width:780px;margin:20px auto;text-align:center;font:14px/1.4 Arial,sans-serif}.flow .fbox{border:1px solid #666;background:#fafafa;padding:10px 12px;margin:auto;max-width:680px}.flow .arrow{font-size:21px;line-height:1.1;margin:3px;color:#444}.flow .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.flow .row .fbox{width:100%}
+.pattern{border-collapse:collapse;width:auto;margin:8px auto}.pattern td{width:28px;height:28px;padding:0;text-align:center;font:bold 15px Arial,sans-serif;border:1px solid #aab0b6}.plus{background:#f3f7fa}.minus{background:#f8f3f3}
+.numberline{font:15px/1.7 Consolas,monospace;background:#f7f7f7;border:1px solid #ccc;padding:12px 14px;overflow:auto;white-space:pre}
+.example{border:1px solid #b7bdc4;background:#fbfbfb;padding:16px 18px;margin:20px 0}.example h4{margin:0 0 10px;font-family:Arial,sans-serif;color:#1e3e60}.example .result{font-weight:bold}
+.term{border-bottom:1px dotted #555;cursor:help}.official{color:#666;font-size:.92em}.small{font-size:14px;color:#5c6167}
+.footnotes{font-size:14px;border-top:1px solid #aaa;margin-top:44px;padding-top:14px}.footnotes ol{padding-left:22px}.footnotes li{margin:8px 0}.footnotes a{text-decoration:none}
+.matrix{display:inline-block;font-family:Consolas,monospace;white-space:pre;background:#f7f7f7;border:1px solid #ddd;padding:8px 12px;line-height:1.4}
+.check{background:#f2f7f3;border:1px solid #b8cdbd;padding:14px 16px;margin:20px 0}
+hr{border:0;border-top:1px solid #bbb;margin:34px 0}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr;padding:8px}.wrap nav{position:relative;max-height:none;top:0}article{padding:34px 24px}.flow .row{grid-template-columns:1fr}}
+@media print{body{background:#fff;font-size:11pt}.wrap{display:block;max-width:none;padding:0}nav{display:none}article{border:0;box-shadow:none;padding:0 8mm}.step,.example,.box,.note,.tip,.warning,.important,.flow{break-inside:avoid}h2{page-break-before:always}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<h3>Mục lục</h3>
+<a href="#howto">0. Cách đọc tài liệu</a>
+<a href="#picture">1. Bức tranh tổng thể</a>
+<a href="#terms">2. Các khái niệm từ số 0</a>
+<a class="sub" href="#block">2.1 Pixel, block, bit</a>
+<a class="sub" href="#pattern">2.2 Pattern là gì?</a>
+<a class="sub" href="#dct">2.3 DCT là gì?</a>
+<a class="sub" href="#qr">2.4 QR là gì?</a>
+<a class="sub" href="#hess">2.5 Hessenberg là gì?</a>
+<a class="sub" href="#schur">2.6 Schur là gì?</a>
+<a class="sub" href="#qim">2.7 QIM là gì?</a>
+<a href="#m1">3. Phương pháp 1: DCT + QR</a>
+<a class="sub" href="#m1example">3.1 Ví dụ số</a>
+<a class="sub" href="#m1extract">3.2 Trích xuất</a>
+<a href="#m2">4. Phương pháp 2: DCT + Schur</a>
+<a class="sub" href="#m2example">4.1 Ví dụ số</a>
+<a class="sub" href="#m2extract">4.2 Trích xuất</a>
+<a href="#m3">5. Phương pháp 3: Spatial + DetQR</a>
+<a class="sub" href="#patterns-real">5.1 Pattern thật trong code</a>
+<a class="sub" href="#m3example">5.2 Ví dụ số</a>
+<a class="sub" href="#m3extract">5.3 Trích xuất</a>
+<a href="#compare">6. So sánh ba phương pháp</a>
+<a href="#pdfvsrepo">7. PDF Hessenberg vs code hiện tại</a>
+<a href="#glossary">8. Từ điển thuật ngữ</a>
+<a href="#source">9. Đối chiếu source code</a>
+</nav>
+
+<article>
+<h1>BA PHƯƠNG PHÁP WATERMARKING TRONG REPOSITORY</h1>
+<p class="subtitle">Giải thích bằng tiếng Việt cho người không học chuyên ngành khoa học máy tính: đi từ “ảnh là gì?” đến DCT, QR, Hessenberg, Schur, pattern, QIM, rồi mới đi vào từng thuật toán.</p>
+<p class="meta">Bản beginner-first · đối chiếu với implementation hiện tại trong <code>Hanoi-main</code></p>
+
+<section id="howto">
+<h2>0. Cách đọc tài liệu này</h2>
+<p>Ở bản này, tôi cố tình <strong>không bắt đầu bằng tên dài của thuật toán</strong>. Mỗi khái niệm được trình bày theo thứ tự:</p>
+<ol>
+<li><strong>Nó là gì bằng ngôn ngữ thường?</strong></li>
+<li><strong>Công thức tối thiểu cần biết.</strong></li>
+<li><strong>Một ví dụ bằng số.</strong></li>
+<li><strong>Nó được dùng để làm gì trong code.</strong></li>
+</ol>
+<div class="tip"><strong>Quy tắc đọc:</strong> nếu gặp một từ lạ như “carrier”, “QIM”, “determinant”, “Schur”, hãy đọc câu tiếng Việt ngay trước nó. Tên tiếng Anh chỉ được giữ lại để bạn có thể đối chiếu với source code.</div>
+<p>Trong ba phương pháp hiện tại, ta chỉ cần nhớ ba câu sau:</p>
+<table>
+<tr><th>Phương pháp</th><th>Câu nhớ ngắn nhất</th></tr>
+<tr><td><strong>1. DCT + QR</strong></td><td>DCT tạo ra một con số để chứa bit; QR chỉ đánh giá block nào yếu hay mạnh.</td></tr>
+<tr><td><strong>2. DCT + Schur</strong></td><td>DCT lấy sáu con số; ba cách phối hợp sáu con số đó cùng chứa ba bản sao của watermark.</td></tr>
+<tr><td><strong>3. Spatial + DetQR</strong></td><td>Chia pixel trong block thành hai nhóm; bit được biểu diễn bằng việc nhóm nào sáng hơn.</td></tr>
+</table>
+</section>
+
+<section id="picture">
+<h2>1. Bức tranh tổng thể trước khi học toán</h2>
+<p>Watermark nhị phân chỉ là một ảnh đen trắng. Mỗi ô của watermark có giá trị <strong>0 hoặc 1</strong>. Mục tiêu là giấu 4096 bit của watermark 64 × 64 vào ảnh màu 512 × 512 mà mắt người khó nhận ra.</p>
+<div class="flow">
+<div class="fbox">Ảnh màu 512 × 512</div><div class="arrow">↓</div>
+<div class="fbox">Chia thành 4096 block, mỗi block 8 × 8 pixel</div><div class="arrow">↓</div>
+<div class="fbox">Mỗi block gánh một bit watermark</div><div class="arrow">↓</div>
+<div class="row"><div class="fbox">Phương pháp 1–2: đổi block sang miền DCT rồi thay đổi rất nhẹ</div><div class="fbox">Phương pháp 3: thay đổi pixel trực tiếp theo một pattern +/−</div></div><div class="arrow">↓</div>
+<div class="fbox">Ảnh đã nhúng watermark</div>
+</div>
+<div class="simple"><strong>Tại sao đúng 4096 block?</strong><br>512/8 = 64 block theo chiều ngang và 64 block theo chiều dọc. Vì vậy 64 × 64 = 4096 block, đúng bằng 64 × 64 = 4096 bit watermark.</div>
+</section>
+
+<section id="terms">
+<h2>2. Các khái niệm từ số 0</h2>
+
+<h3 id="block">2.1. Pixel, block và bit watermark</h3>
+<p><strong>Pixel</strong> là một điểm ảnh. Một pixel RGB có ba số: R (đỏ), G (xanh lá), B (xanh dương), thường nằm từ 0 đến 255.</p>
+<div class="example"><h4>Ví dụ</h4><p>Pixel <code>(120, 200, 40)</code> nghĩa là R = 120, G = 200, B = 40.</p></div>
+<p><strong>Block 8 × 8</strong> chỉ là một ô vuông gồm 64 pixel. Code xử lý ảnh theo từng block thay vì xử lý toàn bộ ảnh cùng lúc.</p>
+<p><strong>Bit watermark</strong> là 0 hoặc 1. Một block không “chứa” bit theo nghĩa có một ô nhớ riêng; code làm cho một <em>tính chất toán học</em> của block rơi vào trạng thái đại diện cho 0 hoặc 1.</p>
+
+<h3 id="pattern">2.2. “Pattern” là gì?</h3>
+<p><strong>Pattern</strong> trong phương pháp Spatial có thể hiểu rất đơn giản là một <strong>tấm mặt nạ gồm dấu + và −</strong>. Dấu + đánh dấu nhóm pixel A; dấu − đánh dấu nhóm pixel B.</p>
+<div class="example"><h4>Ví dụ pattern đơn giản</h4>
+<table class="pattern"><tr><td class="plus">+</td><td class="plus">+</td><td class="minus">−</td><td class="minus">−</td></tr><tr><td class="plus">+</td><td class="plus">+</td><td class="minus">−</td><td class="minus">−</td></tr><tr><td class="plus">+</td><td class="plus">+</td><td class="minus">−</td><td class="minus">−</td></tr><tr><td class="plus">+</td><td class="plus">+</td><td class="minus">−</td><td class="minus">−</td></tr></table>
+<p>Giả sử trung bình độ sáng phía “+” là <strong>u = 120</strong> và phía “−” là <strong>v = 116</strong>. Ta có u − v = 4. Nghĩa là nhóm “+” sáng hơn.</p></div>
+<p>Khi cần tăng chênh lệch, code cộng một lượng nhỏ vào các pixel ở vùng “+” và đồng thời trừ cùng lượng đó ở vùng “−”. Vì hai phía đổi ngược chiều nhau, hiệu u − v thay đổi nhanh nhưng độ sáng trung bình tổng thể ít bị lệch.</p>
+<div class="note"><strong>Điểm quan trọng:</strong> “pattern” không phải watermark. Pattern chỉ là cách chọn <em>những pixel nào sẽ tăng</em> và <em>những pixel nào sẽ giảm</em>.</div>
+
+<h3 id="dct">2.3. DCT là gì?</h3>
+<p><strong>DCT</strong> (<em>Discrete Cosine Transform</em>) có thể hiểu như một cách <strong>đổi cách nhìn một block ảnh</strong>. Thay vì hỏi “pixel này sáng bao nhiêu?”, DCT hỏi:</p>
+<ul><li>Block có sáng tối trung bình bao nhiêu?</li><li>Block thay đổi sáng–tối theo chiều ngang mạnh đến mức nào?</li><li>Block thay đổi theo chiều dọc mạnh đến mức nào?</li><li>Có nhiều chi tiết nhỏ, cạnh hoặc vân hay không?</li></ul>
+<p>Sau DCT, một block 8 × 8 vẫn trở thành một bảng 8 × 8 số. Mỗi số gọi là <strong>hệ số DCT</strong><sup><a href="#fn-dct">[1]</a></sup>.</p>
+<div class="simple"><strong>Cách tưởng tượng:</strong> DCT giống như tách một bản nhạc thành các nốt. Pixel là tín hiệu tổng; hệ số DCT cho biết “mẫu biến thiên” nào xuất hiện mạnh.</div>
+<p>Hai hệ số mà phương pháp 1 dùng là:</p>
+<ul><li><strong>C<sub>0,1</sub></strong>: nhạy với thay đổi theo một hướng;</li><li><strong>C<sub>1,0</sub></strong>: nhạy với hướng vuông góc còn lại.</li></ul>
+<p>Code gộp chúng thành một con số:</p>
+<div class="eq">\[v=\frac{C_{0,1}-C_{1,0}}{2}.\]<span class="num">(1)</span></div>
+<p>Con số <strong>v</strong> là thứ thực sự mang bit trong phương pháp 1. Ta gọi nó là <span class="term">carrier</span><sup><a href="#fn-carrier">[2]</a></sup>, nhưng có thể đơn giản gọi là <strong>“con số chứa bit”</strong>.</p>
+<div class="example"><h4>Ví dụ DCT rất trực quan</h4><p>Giả sử một block có nửa trái sáng 120 và nửa phải sáng 100. Với DCT 8 × 8, một ví dụ tính được:</p><p>C<sub>0,1</sub> ≈ 72.49, C<sub>1,0</sub> ≈ 0.</p><p class="result">Vậy v ≈ (72.49 − 0)/2 = 36.25.</p><p>Ta không cần hiểu cách tính 72.49 bằng tay. Điều quan trọng là: <strong>block có hướng sáng–tối rõ ràng → một số DCT thấp tần trở nên lớn</strong>.</p></div>
+
+<h3 id="qr">2.4. QR decomposition là gì?</h3>
+<p><strong>QR decomposition</strong> là cách tách một ma trận A thành hai ma trận:</p>
+<div class="eq">\[A=QR.\]<span class="num">(2)</span></div>
+<p>Trong đó:</p>
+<ul><li><strong>Q</strong> mô tả các hướng đã được chuẩn hóa và vuông góc nhau<sup><a href="#fn-orthogonal">[3]</a></sup>.</li><li><strong>R</strong> là ma trận tam giác trên, có thể hiểu là chứa các hệ số độ lớn sau khi đã tách hướng.</li></ul>
+<div class="simple"><strong>Ẩn dụ:</strong> Nếu A là hai mũi tên chồng chéo, QR giống như dựng một bộ trục thẳng góc Q rồi ghi lại “đi bao xa theo mỗi trục” trong R.</div>
+<p>Trong <strong>phương pháp 1</strong>, QR <u>không phải nơi chứa watermark</u>. Code lấy một ma trận 4 × 4 từ các hệ số DCT thấp tần, QR-decompose ma trận đó, rồi dùng kết quả để đánh giá block ổn định hay không.</p>
+<p>Trong <strong>phương pháp 3</strong>, QR lại tham gia trực tiếp hơn: code tạo ma trận 2 × 2 từ hai độ sáng trung bình u và v:</p>
+<div class="eq">\[A=\begin{bmatrix}u&1\\v&1\end{bmatrix}.\]<span class="num">(3)</span></div>
+<p>Định thức của ma trận này là:</p>
+<div class="eq">\[\det(A)=u-v.\]<span class="num">(4)</span></div>
+<p>Vì vậy dấu của u − v có thể dùng để biểu diễn bit.</p>
+<div class="example"><h4>Ví dụ QR/định thức</h4><p>Nếu u = 120, v = 116:</p><div class="eq">\[A=\begin{bmatrix}120&1\\116&1\end{bmatrix},\qquad \det(A)=120-116=4>0.\]</div><p>Ta có thể quy ước dấu dương là bit 1. Nếu muốn bit 0, code phải làm cho u − v âm.</p></div>
+
+<h3 id="hess">2.5. Hessenberg decomposition là gì?</h3>
+<p><strong>Hessenberg</strong> xuất hiện trong PDF tham khảo của bạn. Một ma trận Hessenberg trên có dạng gần tam giác:</p>
+<div style="text-align:center"><span class="matrix">[ ×  ×  ×  × ]
+[ ×  ×  ×  × ]
+[ 0  ×  ×  × ]
+[ 0  0  ×  × ]</span></div>
+<p>Các phần tử nằm thấp hơn đường chéo phụ thứ nhất bằng 0. Phân rã Hessenberg trong PDF được viết:</p>
+<div class="eq">\[A=QHQ^{T}.\]<span class="num">(5)</span></div>
+<p>PDF dùng một số phần tử của Q hoặc H để nhúng bit. Cụ thể, nó xét q<sub>2,2</sub>, q<sub>3,2</sub> và h<sub>2,2</sub>.</p>
+<div class="important"><strong>Đừng nhầm:</strong> Ba proposal đang public trong repository hiện tại <strong>không có proposal nào trực tiếp nhúng bit vào một ma trận Hessenberg H như PDF</strong>. Hessenberg ở đây cần học để hiểu bài báo mẫu và lịch sử ý tưởng, không phải để mô tả sai code hiện tại.</div>
+
+<h3 id="schur">2.6. Schur là gì?</h3>
+<p>Schur decomposition cũng biến một ma trận thành dạng tam giác trên. Về mặt khái niệm:</p>
+<div class="eq">\[A=ZT Z^{H},\]<span class="num">(6)</span></div>
+<p>trong đó T là ma trận tam giác trên. Các số trên đường chéo của T liên quan trực tiếp đến các trị riêng của A.</p>
+<p>Nhưng proposal 2 trong code có một điểm rất quan trọng: <strong>nó không chạy Schur decomposition đầy đủ cho từng block để lấy T</strong>. Thay vào đó, code lấy 6 hệ số DCT và <strong>xem chúng như 6 vị trí phía trên đường chéo của một ma trận Schur 4 × 4 “ảo”</strong>.</p>
+<div style="text-align:center"><span class="matrix">[ d1  n1  n2  n3 ]
+[  0  d2  n4  n5 ]
+[  0   0  d3  n6 ]
+[  0   0   0  d4 ]</span></div>
+<p>Các d<sub>1</sub>…d<sub>4</sub> được giữ nguyên; sáu n<sub>1</sub>…n<sub>6</sub> có thể thay đổi. Vì đường chéo không đổi, các đại lượng phổ chính của ma trận tam giác ảo được giữ.</p>
+
+<h3 id="qim">2.7. QIM là gì? Giải thích bằng trục số</h3>
+<p><strong>QIM</strong> (<em>Quantization Index Modulation</em>) nghe phức tạp nhưng ý tưởng chỉ là: <strong>chia trục số thành các mốc, rồi dùng mốc chẵn cho bit 0 và mốc lẻ cho bit 1</strong>.</p>
+<div class="numberline">...  -20   -10     0     10     20     30     40  ...
+      bit0  bit1  bit0   bit1   bit0   bit1   bit0
+               khoảng cách giữa hai mốc = Δ</div>
+<p>Nếu bước lượng tử Δ = 10:</p>
+<ul><li>bit 0 dùng các mốc ... −20, 0, 20, 40, ...</li><li>bit 1 dùng các mốc ... −10, 10, 30, 50, ...</li></ul>
+<div class="example"><h4>Ví dụ QIM</h4><p>Giả sử con số chứa bit hiện tại là v = 27.</p><ul><li>Nếu muốn bit 1, 27 gần mốc 30 → đổi rất ít.</li><li>Nếu muốn bit 0, 27 gần mốc 20 hơn mốc 40 → kéo về phía vùng của mốc 20.</li></ul><p>Trích xuất chỉ cần lấy v/Δ, làm tròn thành số nguyên q rồi xem q chẵn hay lẻ.</p><div class="eq">\[\widehat w=\operatorname{round}(v/\Delta)\bmod 2.\]<span class="num">(7)</span></div></div>
+<p>Code còn dùng một <strong>vùng an toàn</strong> quanh mốc để tránh trường hợp v nằm sát biên giữa bit 0 và bit 1. Từ “margin” trong code chỉ có nghĩa là <strong>khoảng cách an toàn khỏi biên quyết định</strong><sup><a href="#fn-margin">[4]</a></sup>.</p>
+</section>
+
+<section id="m1">
+<h2>3. Phương pháp 1 — DCT + QR</h2>
+<p class="official">Tên trong code: <code>DCT-QR Pairwise Coset-Optimized Gain-Normalized QIM</code></p>
+<div class="tip"><strong>Câu nhớ:</strong> DCT tạo “con số chứa bit”; QIM biến con số đó thành 0 hoặc 1; QR chỉ giúp quyết định block nào cần nhúng mạnh hơn và hỗ trợ bù suy hao khi trích xuất.</div>
+
+<h3>3.1. Nhúng watermark từng bước</h3>
+<div class="step"><div class="numc">1</div><div><h4>Nhận ảnh và watermark</h4><p>Watermark 64 × 64 có 4096 bit. Ảnh được chia thành các block 8 × 8.</p></div></div>
+<div class="step"><div class="numc">2</div><div><h4>Đổi RGB thành một trường độ sáng–màu F</h4><p>Code dùng:</p><div class="eq">\[F=0.299R+0.587G+0.114B+0.07\left(R-\frac{G+B}{2}\right).\]<span class="num">(8)</span></div><p>Không cần nhớ hệ số. Chỉ cần hiểu F biến ba kênh RGB thành một con số cho mỗi pixel, nhưng vẫn giữ một chút thông tin đối lập màu.</p></div></div>
+<div class="step"><div class="numc">3</div><div><h4>Thực hiện DCT trên từng block</h4><p>Mỗi block 8 × 8 trở thành 64 hệ số DCT.</p></div></div>
+<div class="step"><div class="numc">4</div><div><h4>Tạo con số chứa bit</h4><div class="eq">\[v=\frac{C_{0,1}-C_{1,0}}{2}.\]<span class="num">(9)</span></div><p>Đây là đại lượng mà QIM sẽ điều khiển.</p></div></div>
+<div class="step"><div class="numc">5</div><div><h4>QR đánh giá “độ ổn định” của block</h4><p>Code lấy vùng DCT thấp tần 4 × 4, tạo ma trận phân tích rồi phân rã QR. Từ R và định thức, code cho mỗi block một điểm ổn định từ thấp đến cao.</p><p><strong>Không có bit nào được ghi vào Q hay R ở bước này.</strong></p></div></div>
+<div class="step"><div class="numc">6</div><div><h4>Chọn độ mạnh QIM theo độ ổn định</h4><p>Public config hiện tại dùng ba mức:</p><table><tr><th>Nhóm block</th><th>Bước Δ</th><th>Ý nghĩa</th></tr><tr><td>20% yếu nhất</td><td>18.25</td><td>Nhúng mạnh hơn để khó mất bit.</td></tr><tr><td>40% ở giữa</td><td>13.25</td><td>Mức trung bình.</td></tr><tr><td>40% ổn định nhất</td><td>10.25</td><td>Thay đổi ít hơn để giảm méo ảnh.</td></tr></table></div></div>
+<div class="step"><div class="numc">7</div><div><h4>Xáo watermark bằng Arnold transform</h4><p>Code đổi vị trí các bit trước khi nhúng. Đây chỉ là <strong>trộn vị trí</strong>; không thay đổi số bit 0/1.</p></div></div>
+<div class="step"><div class="numc">8</div><div><h4>Ghép hai block có độ ổn định gần nhau và chọn nhãn ít méo hơn</h4><p>Source gọi bước này là <em>pairwise coset optimization</em><sup><a href="#fn-coset">[5]</a></sup>. Cách hiểu đơn giản:</p><ul><li>Hai block tạo thành một cặp.</li><li>Code thử hai lựa chọn: giữ bit như cũ, hoặc lật cả hai bit bằng XOR 1.</li><li>Chọn lựa chọn làm tổng thay đổi QIM nhỏ hơn.</li><li>Thông tin “cặp này có lật hay không” được lưu trong key để đảo lại khi trích xuất.</li></ul><div class="simple"><strong>Ví dụ:</strong> watermark của một cặp là [1, 0]. Nếu lựa chọn [0, 1] làm ảnh thay đổi ít hơn, code nhúng [0, 1] và lưu “flip = 1”. Khi đọc ra [0, 1], XOR lại với 1 → [1, 0].</div></div></div>
+<div class="step"><div class="numc">9</div><div><h4>Đẩy v vào vùng QIM của bit cần nhúng</h4><p>Bit 0 → vùng quanh mốc chẵn. Bit 1 → vùng quanh mốc lẻ. Với <code>rho_frac = 0.45</code>, code giữ v khá gần tâm của mốc để có khoảng an toàn.</p></div></div>
+<div class="step"><div class="numc">10</div><div><h4>Biến thay đổi DCT thành thay đổi pixel RGB</h4><p>Code dùng hai mẫu DCT tương ứng với C<sub>0,1</sub> và C<sub>1,0</sub>, sau đó thay đổi RGB theo hướng có chuẩn nhỏ nhất. Giá trị pixel được làm tròn về số nguyên 0…255.</p></div></div>
+<div class="step"><div class="numc">11</div><div><h4>Kiểm tra lại sau khi làm tròn pixel</h4><p>Làm tròn uint8 có thể khiến v lệch một chút. Code cho phép sửa từng đơn vị pixel trong block để bảo đảm bit vẫn rơi đúng vùng QIM. Đây là lý do source có cụm từ <em>integer-lattice closure</em>; bạn có thể hiểu là <strong>“chốt lại sau khi pixel trở thành số nguyên”</strong>.</p></div></div>
+<div class="step"><div class="numc">12</div><div><h4>Lưu tham chiếu QR để bù suy hao khi trích xuất</h4><p>Code đo một thang cục bộ từ QR của ảnh đã nhúng. Sau này nếu ảnh bị làm mờ hoặc nén khiến biên độ giảm, thang này giúp ước lượng mức suy hao.</p></div></div>
+
+<h3 id="m1example">3.2. Ví dụ số đầy đủ cho một block</h3>
+<div class="example"><h4>Giả sử block có v = 36.245 và thuộc nhóm Δ = 13.25</h4>
+<p>Khoảng an toàn dùng ρ = 0.45Δ = 5.9625.</p>
+<p><strong>Nếu cần nhúng bit 1:</strong> mốc lẻ gần nhất là q = 3, tâm = 3 × 13.25 = 39.75. Vùng an toàn quanh tâm là khoảng [39.0875, 40.4125]. Vì v = 36.245 nằm thấp hơn, code chỉ cần đẩy v lên khoảng <strong>39.0875</strong>. Thay đổi ≈ +2.842.</p>
+<p><strong>Nếu cần nhúng bit 0:</strong> mốc chẵn gần nhất về phía dưới là q = 2, tâm = 26.5. Vùng an toàn trên cùng của mốc này kết thúc ở 27.1625. Code phải kéo v xuống khoảng <strong>27.1625</strong>. Thay đổi ≈ −9.083.</p>
+<p class="result">Kết luận: với block này, nhúng bit 1 ít méo hơn bit 0. Đây chính là lý do bước ghép cặp/lật nhãn có thể giảm tổng méo.</p></div>
+
+<h3 id="m1extract">3.3. Trích xuất bit</h3>
+<div class="flow"><div class="fbox">Ảnh cần kiểm tra</div><div class="arrow">↓</div><div class="fbox">Căn chỉnh bằng pilot nếu cần</div><div class="arrow">↓</div><div class="fbox">Tính lại DCT → v = (C01 − C10)/2</div><div class="arrow">↓</div><div class="fbox">Dùng QR reference để bù gain cục bộ</div><div class="arrow">↓</div><div class="fbox">q = round(v/Δ); parity q → bit</div><div class="arrow">↓</div><div class="fbox">XOR lại mask cặp nếu lúc nhúng đã flip</div><div class="arrow">↓</div><div class="fbox">Inverse Arnold → watermark</div></div>
+<p>Trong code, phần bù gain có dạng khái niệm:</p><div class="eq">\[\widetilde v_b=\frac{v_b}{\alpha_b^{\gamma}},\qquad \alpha_b=\frac{s_b}{s_b^{(0)}}.\]<span class="num">(10)</span></div><p>Hiểu đơn giản: nếu block hiện tại bị giảm biên độ còn 80% so với lúc nhúng, code cố bù một phần trước khi quyết định 0/1.</p>
+</section>
+
+<section id="m2">
+<h2>4. Phương pháp 2 — DCT + Schur</h2>
+<p class="official">Tên trong code: <code>DCT-Schur Spectrum-Preserving Orthogonal Coupling QIM</code></p>
+<div class="tip"><strong>Câu nhớ:</strong> Mỗi block lấy 6 hệ số DCT. Sáu số đó được trộn theo 3 công thức độc lập. Mỗi công thức mang một bản sao đã hoán vị của watermark. QIM vẫn dùng chẵn/lẻ như phương pháp 1.</div>
+
+<h3>4.1. Sáu số DCT nào được dùng?</h3>
+<p>Code lấy sáu vị trí:</p><div class="eq">\[(0,1),(1,0),(0,2),(1,1),(2,0),(1,2).\]<span class="num">(11)</span></div>
+<p>Gọi chúng lần lượt là:</p><div class="eq">\[n=[n_1,n_2,n_3,n_4,n_5,n_6].\]<span class="num">(12)</span></div>
+<p>Sáu số này được đặt vào sáu vị trí phía trên đường chéo của một ma trận Schur 4 × 4 ảo. Bốn số đường chéo lấy từ các vị trí DCT khác và không bị thay đổi bởi luật nhúng chính.</p>
+
+<h3>4.2. Ba “cách phối hợp” sáu số</h3>
+<p>Code có ba hướng trực giao. Viết theo dạng dễ đọc:</p>
+<div class="eq">\[c_1=\frac{n_1-n_2}{\sqrt2},\]<span class="num">(13)</span></div>
+<div class="eq">\[c_2=\frac{n_1+n_2-n_3-n_4}{2},\]<span class="num">(14)</span></div>
+<div class="eq">\[c_3=\frac{n_1+n_2+n_3+n_4-2n_5-2n_6}{\sqrt{12}}.\]<span class="num">(15)</span></div>
+<p>Ba số c<sub>1</sub>, c<sub>2</sub>, c<sub>3</sub> là ba “con số chứa bit” độc lập.</p>
+<div class="simple"><strong>Tại sao cần 3 carrier?</strong> Nếu một phép tấn công làm một carrier khó đọc, hai carrier còn lại vẫn có thể bỏ phiếu. Đây giống như viết cùng một thông tin theo ba cách khác nhau rồi lấy ý kiến đa số.</div>
+
+<h3>4.3. Nhúng từng bước</h3>
+<div class="step"><div class="numc">1</div><div><h4>Arnold-scramble watermark</h4><p>Watermark được xáo vị trí trước khi nhúng.</p></div></div>
+<div class="step"><div class="numc">2</div><div><h4>Tạo ba hoán vị khác nhau của 4096 bit</h4><p>Code dùng cùng seed để tạo ba permutation. Vì vậy cùng một watermark được rải theo ba cách khác nhau trên các block.</p></div></div>
+<div class="step"><div class="numc">3</div><div><h4>DCT từng block và lấy sáu hệ số n</h4></div></div>
+<div class="step"><div class="numc">4</div><div><h4>Tính c1, c2, c3</h4><p>Dùng ba công thức (13)–(15).</p></div></div>
+<div class="step"><div class="numc">5</div><div><h4>Áp dụng QIM parity cho từng carrier</h4><p>Public config dùng Δ = 9. Mỗi c<sub>k</sub> được đưa tới bội của 9 có chẵn/lẻ đúng với bit tương ứng.</p></div></div>
+<div class="step"><div class="numc">6</div><div><h4>Tính thay đổi nhỏ nhất cho sáu hệ số</h4><p>Thay vì sửa từng n<sub>i</sub> một cách tùy ý, code tính một nghiệm đóng:</p><div class="eq">\[n^*=n+H^T(t-Hn).\]<span class="num">(16)</span></div><p>Ý nghĩa thực tế: <strong>đi từ vector n hiện tại đến điểm gần nhất thỏa cả ba carrier mục tiêu</strong>. Không cần người đọc tính ma trận H bằng tay.</p></div></div>
+<div class="step"><div class="numc">7</div><div><h4>Inverse DCT để trở lại ảnh</h4><p>Các hệ số đã sửa được biến ngược thành trường ảnh; sau đó code chiếu thay đổi sang RGB và làm tròn 0…255.</p></div></div>
+<div class="step"><div class="numc">8</div><div><h4>Closure: kiểm tra ba bản sao sau làm tròn</h4><p>Nếu làm tròn pixel khiến một bản sao sai, code lặp lại phép chiếu từ ảnh hiện tại. Mặc định tối đa 2 vòng.</p></div></div>
+<div class="step"><div class="numc">9</div><div><h4>Lưu thang phổ cục bộ vào key</h4><p>Dùng để bù thay đổi biên độ khi ảnh bị xử lý.</p></div></div>
+
+<h3 id="m2example">4.4. Ví dụ số đầy đủ</h3>
+<div class="example"><h4>Giả sử sáu hệ số là n = [18, 12, 9, 7, 4, 3]</h4>
+<p>Từ ba công thức trên:</p><ul><li>c1 ≈ 4.243</li><li>c2 = 7.000</li><li>c3 ≈ 9.238</li></ul>
+<p>Giả sử ba bit cần nhúng là <strong>[1, 0, 1]</strong>, Δ = 9.</p>
+<ul><li>carrier 1 cần mốc lẻ → gần nhất là 9;</li><li>carrier 2 cần mốc chẵn → gần nhất là 0;</li><li>carrier 3 cần mốc lẻ → 9.</li></ul>
+<p>Code tìm thay đổi nhỏ nhất và thu được một ví dụ:</p><div class="eq">\[n^*\approx[17.795,\;5.067,\;12.431,\;10.431,\;4.137,\;3.137].\]</div>
+<p>Khi tính lại ba carrier từ n<sup>*</sup>, ta thu được xấp xỉ:</p><div class="eq">\[[9,\;0,\;9].\]</div>
+<p class="result">Parity tương ứng là [lẻ, chẵn, lẻ] = [1, 0, 1], đúng ba bit cần nhúng.</p></div>
+
+<h3 id="m2extract">4.5. Trích xuất</h3>
+<div class="flow"><div class="fbox">Ảnh cần kiểm tra</div><div class="arrow">↓</div><div class="fbox">DCT → lấy 6 hệ số mỗi block</div><div class="arrow">↓</div><div class="fbox">Tính 3 carrier c1,c2,c3</div><div class="arrow">↓</div><div class="fbox">Bù gain nếu bật</div><div class="arrow">↓</div><div class="fbox">round(c/9) → chẵn/lẻ → 3 phiếu</div><div class="arrow">↓</div><div class="fbox">Đảo ba permutation, cộng evidence</div><div class="arrow">↓</div><div class="fbox">Inverse Arnold + MAP làm sạch lỗi cục bộ</div></div>
+<div class="note"><strong>“Spectrum-preserving” nghĩa là gì?</strong> Trong ma trận Schur ảo, code chỉ thay các phần tử phía trên đường chéo, giữ đường chéo. Với ma trận tam giác, trị riêng nằm trên đường chéo, nên phổ/trace/determinant của ma trận ảo được giữ trong phép tính floating-point trước khi chiếu về pixel.</div>
+</section>
+
+<section id="m3">
+<h2>5. Phương pháp 3 — Spatial + DetQR</h2>
+<p class="official">Tên trong code: <code>Spatial Normalized-Residual DetQR</code></p>
+<div class="tip"><strong>Câu nhớ:</strong> Không dùng DCT. Chọn một pattern +/− trong block, tính độ sáng trung bình hai nhóm u và v. Bit 1 muốn u &gt; v; bit 0 muốn u &lt; v. QR/định thức dùng để viết điều kiện này theo dạng toán học ổn định.</div>
+
+<h3 id="patterns-real">5.1. Pattern thật trong code là gì?</h3>
+<p>Code bắt đầu từ ma trận Hadamard 4 × 4<sup><a href="#fn-hadamard">[6]</a></sup>, lấy tích ngoài để tạo 15 pattern khác nhau, rồi phóng mỗi ô 4 × 4 thành vùng 2 × 2 để được pattern 8 × 8. Mặc định chỉ xét <strong>10 pattern đầu</strong> có biên tương đối đơn giản.</p>
+<p>Dưới đây là bốn pattern đầu đúng theo code:</p>
+<table><tr><th>Pattern 0</th><th>Pattern 1</th></tr><tr><td><div class="numberline">+ + + + - - - -
++ + + + - - - -
++ + + + - - - -
++ + + + - - - -
++ + + + - - - -
++ + + + - - - -
++ + + + - - - -
++ + + + - - - -</div></td><td><div class="numberline">+ + + + + + + +
++ + + + + + + +
++ + + + + + + +
++ + + + + + + +
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -
+- - - - - - - -</div></td></tr><tr><th>Pattern 2</th><th>Pattern 3</th></tr><tr><td><div class="numberline">+ + - - - - + +
++ + - - - - + +
++ + - - - - + +
++ + - - - - + +
++ + - - - - + +
++ + - - - - + +
++ + - - - - + +
++ + - - - - + +</div></td><td><div class="numberline">+ + + + - - - -
++ + + + - - - -
++ + + + - - - -
++ + + + - - - -
+- - - - + + + +
+- - - - + + + +
+- - - - + + + +
+- - - - + + + +</div></td></tr></table>
+<p>Với mỗi pattern:</p><ul><li><strong>u</strong> = độ sáng trung bình của tất cả pixel ở vùng +;</li><li><strong>v</strong> = độ sáng trung bình của tất cả pixel ở vùng −.</li></ul>
+
+<h3>5.2. Tại sao QR và determinant xuất hiện?</h3>
+<p>Từ u và v, code tạo:</p><div class="eq">\[A=\begin{bmatrix}u&1\\v&1\end{bmatrix}=QR.\]<span class="num">(17)</span></div>
+<p>Định thức:</p><div class="eq">\[\det(A)=u-v.\]<span class="num">(18)</span></div>
+<p>Vì vậy:</p><table><tr><th>Dấu</th><th>Ý nghĩa</th><th>Bit code mong muốn</th></tr><tr><td>u − v &gt; 0</td><td>vùng + sáng hơn vùng −</td><td>1</td></tr><tr><td>u − v &lt; 0</td><td>vùng + tối hơn vùng −</td><td>0</td></tr></table>
+<p>Code còn dùng một đại lượng QR đã chuẩn hóa:</p><div class="eq">\[z(A)=\frac{u-v}{\sqrt{u^2+v^2}}.\]<span class="num">(19)</span></div>
+<p>Thay vì chỉ yêu cầu dấu đúng, code yêu cầu dấu đúng <strong>và đủ xa 0</strong>. Điều này tạo khoảng an toàn.</p>
+
+<h3>5.3. Nhúng từng bước</h3>
+<div class="step"><div class="numc">1</div><div><h4>Đổi ảnh RGB thành luminance Y</h4><div class="eq">\[Y=0.299R+0.587G+0.114B.\]<span class="num">(20)</span></div></div></div>
+<div class="step"><div class="numc">2</div><div><h4>Với mỗi block, thử tối đa 10 pattern</h4><p>Mỗi pattern cho một cặp u,v khác nhau.</p></div></div>
+<div class="step"><div class="numc">3</div><div><h4>Đổi bit thành dấu mong muốn</h4><p>bit 1 → s = +1; bit 0 → s = −1.</p></div></div>
+<div class="step"><div class="numc">4</div><div><h4>Tính lượng thay đổi nguyên nhỏ nhất a</h4><p>Code dùng công thức đóng. Gọi d = u − v, k = u + v, μ là normalized margin, δ là determinant margin:</p><div class="eq">\[a^*=\max\left(0,\left\lceil\frac{\max\left(\delta,\;\mu |k|/\sqrt{2-\mu^2}\right)-sd}{2}\right\rceil\right).\]<span class="num">(21)</span></div><p>Bạn không cần học thuộc. Ý nghĩa duy nhất: <strong>tìm số nguyên nhỏ nhất phải cộng/trừ để dấu đúng và đủ xa 0</strong>.</p></div></div>
+<div class="step"><div class="numc">5</div><div><h4>Chọn pattern có chi phí nhỏ nhất</h4><p>Chi phí ưu tiên a nhỏ, đồng thời phạt pattern có quá nhiều biên. Vì vậy code cố chọn cách sửa block nhẹ nhất.</p></div></div>
+<div class="step"><div class="numc">6</div><div><h4>Sửa pixel trực tiếp</h4><p>Với pattern p ∈ {+1,−1}:</p><div class="eq">\[\text{pixel}'=\operatorname{clip}(\text{pixel}+s\,a\,p,0,255).\]<span class="num">(22)</span></div><p>Toàn bộ ba kênh RGB của pixel được cộng/trừ cùng số nguyên theo pattern.</p></div></div>
+<div class="step"><div class="numc">7</div><div><h4>Nhúng các pilot</h4><p>Pilot là một số block tham chiếu đã biết trước<sup><a href="#fn-pilot">[7]</a></sup>. Chúng giúp code phát hiện ảnh bị xoay/shear nhẹ rồi thử căn chỉnh lại.</p></div></div>
+<div class="step"><div class="numc">8</div><div><h4>Lưu pattern đã chọn vào key</h4><p>Khác với DCT-QIM, decoder cần biết block nào dùng pattern nào để tính lại đúng u và v.</p></div></div>
+
+<h3 id="m3example">5.4. Ví dụ số đầy đủ</h3>
+<div class="example"><h4>Ví dụ 1: bit 1 đã đúng sẵn</h4><p>u = 120, v = 118 → d = 2 &gt; 0. Nếu bit cần nhúng là 1 thì s = +1. Với tham số mặc định μ = 0.005, δ = 0.10, ngưỡng cần thiết khoảng 0.841. Vì d = 2 đã lớn hơn ngưỡng nên <strong>a = 0</strong>: không cần sửa block.</p></div>
+<div class="example"><h4>Ví dụ 2: cùng block nhưng cần bit 0</h4><p>u = 120, v = 118 → d = 2 nhưng bit 0 cần dấu âm. Công thức code cho <strong>a = 2</strong>.</p><p>Sau update:</p><div class="eq">\[u'=u-a=118,\qquad v'=v+a=120,\]</div><div class="eq">\[u'-v'=-2<0.\]</div><p class="result">Dấu đã đổi sang âm → decoder đọc bit 0.</p></div>
+<div class="example"><h4>Ví dụ 3: hai nhóm bằng nhau</h4><p>u = v = 100 nên determinant = 0. Code không chấp nhận vì ma trận suy biến. Với bit 1, a = 1 là đủ để tạo u' − v' = 2 &gt; 0. Với bit 0, a = 1 cho u' − v' = −2 &lt; 0.</p></div>
+
+<h3 id="m3extract">5.5. Trích xuất</h3>
+<div class="flow"><div class="fbox">Ảnh cần kiểm tra</div><div class="arrow">↓</div><div class="fbox">Dùng pilot để thử căn chỉnh affine nhẹ nếu cần</div><div class="arrow">↓</div><div class="fbox">Theo pattern lưu trong key, tính u và v cho từng block</div><div class="arrow">↓</div><div class="fbox">Tạo ma trận A = [[u,1],[v,1]] và canonical QR</div><div class="arrow">↓</div><div class="fbox">Tính determinant; det &gt; 0 → 1, det &lt; 0 → 0</div><div class="arrow">↓</div><div class="fbox">Bỏ mask payload nếu có → watermark</div></div>
+<div class="warning"><strong>Khác hai phương pháp đầu:</strong> Spatial DetQR hiện tại <strong>không dùng Arnold transform</strong> để xáo watermark. Nó có payload mask/pilot schedule riêng.</div>
+</section>
+
+<section id="compare">
+<h2>6. So sánh ba phương pháp bằng ngôn ngữ đơn giản</h2>
+<table>
+<tr><th>Câu hỏi</th><th>DCT + QR</th><th>DCT + Schur</th><th>Spatial + DetQR</th></tr>
+<tr><td>Bit nằm “ở đâu”?</td><td>Trong chẵn/lẻ của một số v = (C01−C10)/2.</td><td>Trong chẵn/lẻ của ba số c1,c2,c3 tạo từ 6 hệ số DCT.</td><td>Trong dấu của u−v giữa hai nhóm pixel.</td></tr>
+<tr><td>DCT?</td><td>Có, rất quan trọng.</td><td>Có, rất quan trọng.</td><td>Không.</td></tr>
+<tr><td>QR?</td><td>Dùng để đo độ ổn định và gain; không trực tiếp chứa bit.</td><td>Không dùng engine DCT-QR; proposal độc lập.</td><td>Dùng trực tiếp trong feature 2×2 và determinant/residual.</td></tr>
+<tr><td>Schur?</td><td>Không trong public DCT-QR.</td><td>Có, dưới dạng ma trận Schur ảo từ DCT coefficients.</td><td>Không.</td></tr>
+<tr><td>Hessenberg?</td><td>Không.</td><td>Không.</td><td>Không.</td></tr>
+<tr><td>Pattern +/−?</td><td>Mẫu DCT basis nội bộ, không phải pattern Hadamard chọn lựa.</td><td>Không dùng pattern spatial Hadamard.</td><td>Có; thử tối đa 10 pattern để chọn cách sửa ít méo.</td></tr>
+<tr><td>Luật quyết định 0/1</td><td>Parity QIM.</td><td>Parity QIM + 3 phiếu/evidence.</td><td>Dấu determinant.</td></tr>
+<tr><td>Arnold?</td><td>Có.</td><td>Có.</td><td>Không.</td></tr>
+</table>
+<div class="check"><strong>Nếu chỉ nhớ một dòng:</strong><br><strong>Method 1:</strong> DCT number → QIM bit; QR = trợ lý đánh giá.<br><strong>Method 2:</strong> 6 DCT numbers → 3 Schur-coupling numbers → 3 QIM votes.<br><strong>Method 3:</strong> pixels +/− → u,v → sign(u−v) = bit.</div>
+</section>
+
+<section id="pdfvsrepo">
+<h2>7. PDF Hessenberg và repository hiện tại khác nhau ở đâu?</h2>
+<p>PDF tham khảo mô tả một phương pháp Hessenberg dual-domain: mỗi block 4 × 4 được phân rã A = QHQ<sup>T</sup>; watermark có thể được nhúng vào q<sub>2,2</sub>, q<sub>3,2</sub> hoặc h<sub>2,2</sub>, sau đó chọn candidate gây méo nhỏ hơn.</p>
+<p>Repository hiện tại công bố ba proposal khác. Vì vậy PDF hữu ích để học <strong>cách trình bày một thuật toán watermarking</strong>, nhưng không nên dùng công thức Hessenberg của PDF để mô tả sai implementation hiện tại.</p>
+<table><tr><th>Điểm</th><th>PDF Hessenberg</th><th>Code hiện tại</th></tr><tr><td>Block</td><td>4 × 4</td><td>8 × 8</td></tr><tr><td>Nơi nhúng</td><td>Q/H của Hessenberg</td><td>DCT-QIM, DCT-Schur coupling, hoặc spatial determinant</td></tr><tr><td>Chọn candidate</td><td>Hai candidate Q-domain và H-domain</td><td>Mỗi proposal có luật riêng; không phải hai candidate Hessenberg</td></tr><tr><td>Ba proposal public?</td><td>Không</td><td><code>dct_qr</code>, <code>dct_schur_rescue</code>, <code>spatial_cd_detqr</code></td></tr></table>
+<div class="important"><strong>Điểm cần tránh khi viết paper/document:</strong> không viết “DCT-QR nhúng vào Q” chỉ vì tên có QR. Trong code, bit của DCT-QR nằm ở carrier DCT; QR được dùng cho reliability/gain. Tương tự, không viết proposal 2 “thực hiện Schur decomposition cho mọi block” vì code xây dựng Schur-coordinate matrix ảo từ DCT coefficients.</div>
+</section>
+
+<section id="glossary">
+<h2>8. Từ điển thuật ngữ — đọc một lần là đủ</h2>
+<table>
+<tr><th>Từ trong code/paper</th><th>Hiểu đơn giản</th></tr>
+<tr><td>Carrier</td><td>Một con số được dùng để mang bit.</td></tr>
+<tr><td>Pattern</td><td>Mặt nạ +/− chọn nhóm pixel sẽ tăng và nhóm sẽ giảm.</td></tr>
+<tr><td>DCT coefficient</td><td>Con số đo độ mạnh của một kiểu biến thiên sáng–tối trong block.</td></tr>
+<tr><td>QR decomposition</td><td>Tách A thành Q và R để phân tích hướng và độ lớn.</td></tr>
+<tr><td>Hessenberg</td><td>Dạng ma trận gần tam giác; thuộc phương pháp trong PDF mẫu, không phải carrier của ba proposal hiện tại.</td></tr>
+<tr><td>Schur</td><td>Dạng tam giác trên gắn với trị riêng; proposal 2 xây một Schur-coordinate matrix ảo.</td></tr>
+<tr><td>Determinant</td><td>Một số cho biết ma trận có suy biến hay không và, trong ma trận 2×2 của method 3, đúng bằng u−v.</td></tr>
+<tr><td>QIM</td><td>Dùng mốc chẵn/lẻ trên trục số để biểu diễn 0/1.</td></tr>
+<tr><td>Parity</td><td>Tính chẵn/lẻ.</td></tr>
+<tr><td>Margin</td><td>Khoảng an toàn khỏi biên quyết định.</td></tr>
+<tr><td>Reliability</td><td>Điểm cho biết block có ổn định để giữ watermark hay không.</td></tr>
+<tr><td>Gain normalization</td><td>Bù việc tín hiệu trong block bị co/giãn biên độ sau xử lý ảnh.</td></tr>
+<tr><td>Pilot</td><td>Một số dấu mốc watermark đã biết trước, dùng để kiểm tra/căn chỉnh hình học.</td></tr>
+<tr><td>Closure</td><td>Kiểm tra lại sau khi số thực bị làm tròn thành pixel nguyên 0…255.</td></tr>
+<tr><td>Coset flip</td><td>Lật nhãn 0↔1 cho cả một cặp để giảm méo, rồi lưu thông tin lật trong key để đảo lại.</td></tr>
+<tr><td>Blind extraction</td><td>Không cần ảnh host gốc lúc trích xuất; vẫn cần key của thuật toán.</td></tr>
+</table>
+</section>
+
+<section id="source">
+<h2>9. Đối chiếu với source code</h2>
+<table><tr><th>Nội dung</th><th>File chính</th><th>Hàm/biến quan trọng</th></tr>
+<tr><td>Registry ba proposal</td><td><code>src/qr64_certified/proposals/proposal_registry.py</code></td><td><code>SUPPORTED_PROPOSAL_METHODS</code></td></tr>
+<tr><td>DCT + QR</td><td><code>src/qr64_certified/proposals/method.py</code></td><td><code>_dct_qim_carrier</code>, <code>_pairwise_coset_optimize</code>, <code>embed</code>, <code>extract</code></td></tr>
+<tr><td>QIM và sửa pixel của DCT + QR</td><td><code>src/qr64_certified/_jilp_core/engine.py</code></td><td><code>_project_qim_margin</code>, <code>_embed_one_carrier_jilp</code></td></tr>
+<tr><td>QR reliability/gain</td><td><code>src/qr64_certified/proposals/certificate.py</code></td><td><code>analysis_matrices</code>, <code>compute_qr_certificate</code>, <code>qr_gain_scale</code></td></tr>
+<tr><td>DCT + Schur</td><td><code>src/qr64_certified/proposals/schur_coupling_qim.py</code></td><td><code>SCHUR_COUPLING_POSITIONS</code>, <code>SCHUR_COUPLING_BASIS</code>, <code>_embed_coupling_constraints</code></td></tr>
+<tr><td>Spatial + DetQR</td><td><code>src/qr64_certified/proposals/cd_detqr.py</code></td><td><code>_spatial_partitions</code>, <code>qr_residual_features</code>, <code>minimum_integer_amplitude</code></td></tr></table>
+<p>Để kiểm tra tính nhất quán của ba mô tả trên, bộ test tập trung của repository hiện tại chạy thành công <strong>15/15 test</strong> cho DCT-QR pairwise coset, DCT-Schur proposal và CD-DetQR.</p>
+</section>
+
+<section class="footnotes">
+<h2>Chú thích toán học</h2>
+<ol>
+<li id="fn-dct"><strong>Hệ số DCT:</strong> giá trị của phép chiếu block lên một mẫu cosine. Chỉ cần hiểu nó là “độ mạnh của một mẫu biến thiên”.</li>
+<li id="fn-carrier"><strong>Carrier:</strong> trong watermarking, đây là đại lượng mà decoder quan sát để quyết định bit. Nó có thể là một hệ số, hiệu hai hệ số, hoặc dấu determinant.</li>
+<li id="fn-orthogonal"><strong>Vuông góc/orthogonal:</strong> hai hướng độc lập theo nghĩa tích vô hướng bằng 0. Trong QR, các cột của Q được chuẩn hóa và trực giao.</li>
+<li id="fn-margin"><strong>Margin:</strong> nếu biên giữa 0 và 1 giống như vạch giữa hai làn đường, margin là khoảng cách ta buộc tín hiệu phải đứng xa khỏi vạch để nhiễu nhẹ không làm đổi làn.</li>
+<li id="fn-coset"><strong>Coset:</strong> thuật ngữ đại số cho các lớp lưới. Trong tài liệu này không cần lý thuyết nhóm; implementation thực tế chỉ chọn giữa hai nhãn nhị phân “không flip” và “flip” cho mỗi cặp.</li>
+<li id="fn-hadamard"><strong>Hadamard:</strong> ma trận chỉ chứa +1/−1 với các hàng/cột trực giao. Code dùng nó như nguồn sinh các pattern cân bằng.</li>
+<li id="fn-pilot"><strong>Pilot:</strong> bit/dấu mốc tham chiếu biết trước. Decoder nhìn pilot để đo xem ảnh có bị dịch, xoay hoặc biến đổi nhẹ không.</li>
+<li><strong>Determinant:</strong> nếu det(A)=0 thì ma trận không khả nghịch. Trong method 3, cấu trúc A đặc biệt khiến det(A)=u−v nên determinant đồng thời trở thành một carrier dấu rất dễ hiểu.</li>
+<li><strong>Frobenius norm:</strong> căn bậc hai của tổng bình phương mọi phần tử ma trận. “Minimum-Frobenius update” chỉ nghĩa là tìm cách đổi các hệ số ít nhất theo thước đo này.</li>
+<li><strong>XOR:</strong> phép lật bit có điều kiện: x XOR 0 = x; x XOR 1 = 1−x.</li>
+</ol>
+</section>
+
+</article></div></body></html>
