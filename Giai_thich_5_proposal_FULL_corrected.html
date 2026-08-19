@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Năm phương pháp watermarking trong Hanoi-main — bản đối chiếu code</title>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{--ink:#171717;--muted:#5f646b;--paper:#fff;--bg:#edf0f2;--line:#c8cdd2;--soft:#f6f7f8;--blue:#284f73;--green:#eef8f0;--yellow:#fff8e5;--red:#fff1f1;--purple:#f5f1fa}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.66;font-size:16.5px}
+.wrap{max-width:1400px;margin:auto;display:grid;grid-template-columns:300px minmax(0,980px);gap:24px;padding:24px 16px 70px}nav{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 28px);overflow:auto;background:#fff;border:1px solid var(--line);padding:16px}
+nav h3{font:700 14px Arial,sans-serif;text-transform:uppercase;margin:0 0 10px;color:#333}nav a{display:block;text-decoration:none;color:#30343a;padding:5px 7px;font:14px/1.35 Arial,sans-serif;border-left:2px solid transparent}nav a:hover{background:#f3f5f6;border-left-color:var(--blue)}nav .sub{padding-left:20px;font-size:13px;color:#555}
+article{background:var(--paper);border:1px solid var(--line);box-shadow:0 7px 25px rgba(0,0,0,.06);padding:50px 64px}h1,h2,h3,h4{line-height:1.27;color:#111}h1{text-align:center;font-size:34px;margin:0 0 10px}.subtitle{text-align:center;color:#444b52;max-width:820px;margin:0 auto 20px;font-size:18px}.meta{text-align:center;color:#6b7076;font:14px Arial,sans-serif;margin-bottom:32px}
+h2{font-size:27px;margin-top:46px;padding-top:16px;border-top:1.5px solid #222}h3{font-size:21px;margin-top:30px}h4{font-size:18px;margin-top:20px}p{margin:9px 0 13px}li{margin:6px 0}code{font:0.89em Consolas,"Courier New",monospace;background:#f0f2f3;padding:1px 4px;border-radius:3px}
+.box,.tip,.warning,.important,.paper,.status{padding:13px 16px;margin:16px 0;border-left:4px solid var(--blue);background:#eef5fb}.tip{background:var(--green);border-left-color:#4f8159}.warning{background:var(--yellow);border-left-color:#a87817}.important{background:var(--red);border-left-color:#a64242}.paper{background:var(--purple);border-left-color:#70508e}.status{background:#f4f5f6;border-left-color:#6d747a;font:14px/1.55 Arial,sans-serif}
+.eq{text-align:center;padding:6px 15px;margin:13px 0;overflow-x:auto}.flow{max-width:780px;margin:18px auto;text-align:center;font:14px/1.4 Arial,sans-serif}.fbox{border:1px solid #686d72;background:#fafafa;padding:9px 12px;margin:auto;max-width:720px}.arrow{font-size:20px;line-height:1.05;margin:3px;color:#444}
+table{width:100%;border-collapse:collapse;margin:15px 0 22px;font-size:14.5px}th,td{border:1px solid #aeb5bb;padding:8px 9px;vertical-align:top}th{background:#f0f2f4;text-align:left;font:700 13.5px Arial,sans-serif}.steps{counter-reset:x}.step{display:grid;grid-template-columns:42px 1fr;gap:11px;border-top:1px solid #dedede;padding:13px 0}.num{width:34px;height:34px;border:1.5px solid #333;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 14px Arial,sans-serif}.step h4{margin:1px 0 4px}.step p{margin:4px 0}.tag{display:inline-block;font:12px Arial,sans-serif;padding:3px 7px;border:1px solid #b8bec4;background:#f7f8f9;border-radius:12px;margin:2px 4px 2px 0}.one-line{font:700 16px/1.5 Arial,sans-serif;background:#f7f8f9;border:1px solid #d1d5d9;padding:12px 14px;margin:14px 0}.compare td:first-child{font-weight:bold;width:18%}.small{font-size:14px;color:#5e6369}.source{font:13px/1.55 Consolas,"Courier New",monospace;background:#f7f7f7;border:1px solid #d1d1d1;padding:12px 14px;overflow:auto}.matrix{font-family:Consolas,"Courier New",monospace;white-space:pre;display:inline-block;background:#f7f7f7;border:1px solid #ddd;padding:8px 12px;line-height:1.45}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr;padding:8px}.wrap nav{position:relative;max-height:none;top:0}article{padding:34px 23px}}@media print{body{background:#fff;font-size:11pt}.wrap{display:block;max-width:none;padding:0}nav{display:none}article{border:0;box-shadow:none;padding:0 8mm}.step,.box,.tip,.warning,.important,.paper,.status,.flow{break-inside:avoid}h2{page-break-before:always}}
+</style>
+</head>
+<body><div class="wrap">
+<nav>
+<h3>Mục lục</h3>
+<a href="#correct">0. Điều được sửa</a>
+<a href="#overview">1. Tổng quan 5 proposal</a>
+<a href="#common">2. Khung chung</a>
+<a href="#p1">3. P1 — DCT–QR Adaptive QIM</a>
+<a class="sub" href="#p1embed">3.1 Nhúng</a><a class="sub" href="#p1extract">3.2 Trích xuất</a><a class="sub" href="#p1novel">3.3 Idea / invariant</a>
+<a href="#p2">4. P2 — Direct-R Differential</a>
+<a class="sub" href="#p2embed">4.1 Nhúng</a><a class="sub" href="#p2extract">4.2 Trích xuất</a><a class="sub" href="#p2novel">4.3 Idea / invariant</a>
+<a href="#p3">5. P3 — Direct-R11</a>
+<a class="sub" href="#p3embed">5.1 Nhúng</a><a class="sub" href="#p3extract">5.2 Trích xuất</a><a class="sub" href="#p3novel">5.3 Idea / invariant</a>
+<a href="#p4">6. P4 — DCT–Schur SP-SCQIM</a>
+<a class="sub" href="#p4embed">6.1 Nhúng</a><a class="sub" href="#p4extract">6.2 Trích xuất</a><a class="sub" href="#p4novel">6.3 Idea / invariant</a>
+<a href="#p5">7. P5 — Spatial DetQR</a>
+<a class="sub" href="#p5embed">7.1 Nhúng</a><a class="sub" href="#p5extract">7.2 Trích xuất</a><a class="sub" href="#p5novel">7.3 Idea / invariant</a>
+<a href="#compare">8. So sánh 5 proposal</a>
+<a href="#paper">9. Cách chia thành bài báo</a>
+<a href="#source">10. Đối chiếu source</a>
+<a href="#claims">11. Claim nên / không nên viết</a>
+</nav>
+<article>
+<h1>NĂM PHƯƠNG PHÁP WATERMARKING TRONG REPOSITORY</h1>
+<p class="subtitle">Bản sửa đầy đủ theo <code>Hanoi-main</code>: mỗi proposal được tách thành <strong>idea mới → embedding → extraction → invariant → contribution → khác bốn phương pháp còn lại</strong>.</p>
+<p class="meta">Đối chiếu trực tiếp với <code>proposal_registry.py</code> và implementation public trong repository.</p>
+
+<section id="correct"><h2>0. Điều được sửa so với bản trước</h2>
+<div class="important"><strong>Bản 3-proposal trước là thiếu.</strong> Registry hiện tại public đúng <strong>5 method ID</strong>: <code>dct_qr</code>, <code>dct_qr_direct_r</code>, <code>dct_qr_r11_qim</code>, <code>dct_schur_rescue</code>, <code>spatial_cd_detqr</code>.</div>
+<p>Bản này không tự gộp ba phương pháp DCT–QR thành một. Lý do: ba phương pháp đó có <strong>carrier khác nhau</strong>, nơi nhúng khác nhau và câu chuyện toán học khác nhau.</p>
+<div class="one-line">Câu hỏi cần trả lời cho mỗi proposal: <em>“Bit watermark được biến thành tính chất toán học nào của block?”</em></div>
+</section>
+
+<section id="overview"><h2>1. Tổng quan chính xác 5 proposal</h2>
+<table>
+<tr><th>#</th><th>Method ID</th><th>Tên trong registry</th><th>Bit nằm ở đâu?</th><th>Trạng thái trong registry</th></tr>
+<tr><td>1</td><td><code>dct_qr</code></td><td>DCT-QR Pairwise Coset-Optimized Gain-Normalized QIM</td><td>Parity QIM của carrier DCT</td><td>validated proposal</td></tr>
+<tr><td>2</td><td><code>dct_qr_direct_r</code></td><td>Transform-Domain DCT-QR Direct-R Differential QIM</td><td>Parity của \((R_{12}-R_{13})/2\)</td><td>new proposal; smoke-validated</td></tr>
+<tr><td>3</td><td><code>dct_qr_r11_qim</code></td><td>Transform-Domain DCT-QR Direct-R11 QIM</td><td>Parity của \(R_{11}\)</td><td>new proposal; smoke-validated</td></tr>
+<tr><td>4</td><td><code>dct_schur_rescue</code></td><td>DCT-Schur Spectrum-Preserving Orthogonal Coupling QIM</td><td>Parity của 3 coupling carriers từ 6 DCT coefficients</td><td>independent proposal; performance gate under validation</td></tr>
+<tr><td>5</td><td><code>spatial_cd_detqr</code></td><td>Spatial Normalized-Residual DetQR</td><td>Dấu determinant \(u-v\) + normalized QR residual margin</td><td>validated proposal</td></tr>
+</table>
+<div class="tip"><strong>Năm câu nhớ ngắn:</strong><br>
+1) P1: <strong>DCT mang bit; QR quyết định cách nhúng.</strong><br>
+2) P2: <strong>QR mang bit qua hiệu R12–R13.</strong><br>
+3) P3: <strong>QR mang bit trực tiếp qua R11.</strong><br>
+4) P4: <strong>6 DCT numbers → 3 orthogonal carriers, giữ Schur diagonal.</strong><br>
+5) P5: <strong>Không DCT; bit là dấu chênh lệch giữa hai nhóm pixel.</strong></div>
+</section>
+
+<section id="common"><h2>2. Khung chung trước khi đọc từng proposal</h2>
+<p>Protocol của repository dùng watermark nhị phân \(64\times64\), tức 4096 bit. Với host \(512\times512\), chia thành block \(8\times8\) cho đúng 4096 block; do đó các phương pháp transform-domain có thể gán một payload bit cho một block mà không cần tăng capacity.</p>
+<p><strong>QIM parity</strong> trong P1–P4 có ý tưởng chung: lượng tử hóa carrier theo bước \(\Delta\), rồi dùng chẵn/lẻ của index làm bit:</p>
+<div class="eq">\[\widehat b=\operatorname{round}(v/\Delta)\bmod 2.\]</div>
+<p>P5 không dùng QIM. Nó dùng dấu determinant và một margin chuẩn hóa.</p>
+<div class="warning"><strong>Đừng đồng nhất “cùng dùng QR” với “cùng phương pháp”.</strong> P1 dùng QR như certificate/reliability; P2 và P3 nhúng trực tiếp trong ma trận \(R\); P5 dùng QR của ma trận 2×2 spatial để tạo determinant/residual.</div>
+</section>
+
+<section id="p1"><h2>3. Proposal 1 — DCT–QR Pairwise Coset-Optimized Gain-Normalized QIM</h2>
+<p><span class="tag">ID: dct_qr</span><span class="tag">validated proposal</span><span class="tag">fully blind</span></p>
+<div class="one-line">Idea một câu: <strong>giữ carrier DCT-QIM, nhưng dùng QR reliability để phân bổ độ mạnh, ghép các block tương đồng và chọn một binary coset label làm giảm năng lượng biến đổi; QR gain còn được dùng để bù suy hao khi đọc.</strong></div>
+<h3>3.1 Bit thực sự nằm ở đâu?</h3>
+<p>Watermark <strong>không nằm trong Q hoặc R</strong>. Carrier lõi vẫn là một đại lượng DCT:</p>
+<div class="eq">\[v_b=\frac{C_{0,1}^{(b)}-C_{1,0}^{(b)}}{2}.\]</div>
+<p>QR được tính trên một ma trận phân tích 4×4 từ các hệ số AC-DCT (có lift), rồi tạo reliability/certificate cho block.</p>
+
+<h3 id="p1embed">3.2 Embedding — từng bước</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Chuẩn bị payload</h4><p>Nhận watermark 64×64, chuyển thành bit và Arnold-scramble payload.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Tạo lịch block payload/pilot</h4><p>Code dùng keyed schedules; pilots phục vụ synchronization.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Tính DCT carrier</h4><p>Mỗi payload block có carrier \(v_b=(C_{01}-C_{10})/2\).</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Tính QR certificate</h4><p>QR của ma trận phân tích thấp tần cung cấp reliability cho từng block và điều kiện nonsingularity.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Phân lớp QIM step</h4><p>Block QR yếu nhận separation lớn hơn; block ổn định nhận separation nhỏ hơn để giảm distortion.</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Sắp block theo reliability và tạo nhóm/cặp</h4><p>Các block có mức reliability gần nhau được nhóm theo thứ tự reliability.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Pairwise/group coset optimization</h4><p>Với mỗi nhóm, thử nhãn \(s=0\) hoặc \(s=1\); \(s=1\) tương đương XOR cả nhóm với 1. Chọn nhãn làm tổng bình phương khoảng dịch QIM nhỏ nhất.</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>QIM embedding</h4><p>Nhúng encoded bit vào carrier DCT với local step và guard margin tương ứng.</p></div></div>
+<div class="step"><div class="num">9</div><div><h4>Integer-lattice closure</h4><p>Sau khi biến đổi quay lại pixel integer, code sửa closure để clean extraction đúng.</p></div></div>
+<div class="step"><div class="num">10</div><div><h4>Lưu side information cần thiết</h4><p>Key lưu schedules, local step classes, packed coset flip mask và QR/decomposition gain reference; không lưu ảnh host gốc.</p></div></div>
+</div>
+
+<h3 id="p1extract">3.3 Extraction</h3>
+<div class="flow"><div class="fbox">Attacked image</div><div class="arrow">↓</div><div class="fbox">Pilot/certificate alignment</div><div class="arrow">↓</div><div class="fbox">DCT carrier \((C_{01}-C_{10})/2\)</div><div class="arrow">↓</div><div class="fbox">QR/decomposition gain compensation nếu bật</div><div class="arrow">↓</div><div class="fbox">Local-step QIM parity → encoded bits</div><div class="arrow">↓</div><div class="fbox">XOR ngược coset flip mask</div><div class="arrow">↓</div><div class="fbox">Inverse Arnold; MAP chỉ dùng khi không còn ở clean/high-confidence path</div></div>
+
+<h3 id="p1novel">3.4 Invariant / contribution / khác 4 method</h3>
+<div class="paper"><strong>Điểm toán học có thể viết:</strong> Với một group \(G\), code chọn
+\[s^*=\arg\min_{s\in\{0,1\}}\sum_{b\in G}\left|P_{u_b\oplus s}(v_b)-v_b\right|^2.\]
+Vì \(s=0\) luôn là nghiệm khả thi, năng lượng projection sau optimization <strong>không thể lớn hơn</strong> labeling gốc trong floating-point projection.</div>
+<p><strong>Khác P2/P3:</strong> P1 không nhúng vào R. <strong>Khác P4:</strong> chỉ có một DCT carrier cho mỗi bit thay vì 3 orthogonal Schur carriers. <strong>Khác P5:</strong> nằm trong transform domain và dùng QIM parity, không dùng determinant sign spatial.</p>
+<div class="paper"><strong>Câu contribution có thể dùng:</strong> “A QR-conditioned DCT-QIM framework is introduced in which matrix reliability controls local quantization separation and homogeneous block groups admit an exact binary coset selection that cannot increase the floating-point QIM projection energy, while decomposition-derived gain references support blind compensation.”</div>
+<div class="warning"><strong>Không viết:</strong> “watermark is embedded in QR coefficients.” Điều đó sai với P1.</div>
+</section>
+
+<section id="p2"><h2>4. Proposal 2 — Transform-Domain DCT–QR Direct-R Differential QIM</h2>
+<p><span class="tag">ID: dct_qr_direct_r</span><span class="tag">new proposal; smoke-validated</span><span class="tag">fully blind</span></p>
+<div class="one-line">Idea một câu: <strong>sau DCT mới thực hiện QR, rồi nhúng trực tiếp vào differential carrier của hàng đầu tiên R bằng một update đối xứng giữ R11 và giữ tổng R12+R13.</strong></div>
+<h3>4.1 Cấu trúc transform-domain</h3>
+<p>Mỗi block 8×8 được DCT. Lấy khối thấp tần 4×4 \(A\), regularize bằng:</p><div class="eq">\[A_\lambda=A+\lambda I,\]</div>
+<p>rồi canonical QR:</p><div class="eq">\[A_\lambda=QR,\]</div>
+<p>với diagonal của \(R\) được canonicalize không âm. Carrier là:</p><div class="eq">\[v=\frac{R_{12}-R_{13}}{2}.\]</div>
+
+<h3 id="p2embed">4.2 Embedding — từng bước</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>RGB → luminance</h4><p>Dùng \(Y=0.299R+0.587G+0.114B\).</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>8×8 DCT</h4><p>Tính DCT cho toàn bộ block.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Lấy low-frequency 4×4</h4><p>Tạo \(A\), rồi \(A_\lambda=A+\lambda I\) để tránh matrix singular trong QR path.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Canonical QR</h4><p>Tính \(Q,R\) trực tiếp trong miền DCT.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Tính differential carrier</h4><p>\(v=(R_{12}-R_{13})/2\).</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Parity-QIM target</h4><p>Đưa \(v\) tới bội của \(\Delta\) có parity bằng bit. Public default hiện tại: \(\Delta=8\).</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Update đối xứng</h4><p>Nếu \(\delta=v^*-v\), code đặt \(R'_{12}=R_{12}+\delta\), \(R'_{13}=R_{13}-\delta\).</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Reconstruct transform matrix</h4><p>Giữ \(Q\), tính \(Q R'\), sau đó trừ \(\lambda I\) và ghi lại vào 4×4 low-frequency DCT region.</p></div></div>
+<div class="step"><div class="num">9</div><div><h4>IDCT và minimum-L2 RGB correction</h4><p>Đổi thay đổi luminance thành hướng RGB có chuẩn L2 nhỏ nhất trước clipping/rounding.</p></div></div>
+<div class="step"><div class="num">10</div><div><h4>Closure rounds</h4><p>Mặc định 2 vòng để sửa parity error do uint8 lattice và saturation.</p></div></div>
+</div>
+
+<h3 id="p2extract">4.3 Extraction</h3>
+<div class="flow"><div class="fbox">Image</div><div class="arrow">↓</div><div class="fbox">Luminance → 8×8 DCT</div><div class="arrow">↓</div><div class="fbox">4×4 \(A+\lambda I\) → canonical QR</div><div class="arrow">↓</div><div class="fbox">\(v=(R_{12}-R_{13})/2\)</div><div class="arrow">↓</div><div class="fbox">\(q=\operatorname{round}(v/\Delta)\)</div><div class="arrow">↓</div><div class="fbox">\(q\bmod2\) → watermark bit</div></div>
+<p>Block order được tái tạo từ seed; key không chứa host coefficient map nên extraction không cần ảnh gốc.</p>
+
+<h3 id="p2novel">4.4 Invariant / contribution / khác 4 method</h3>
+<div class="paper"><strong>Invariant của update trong R-domain trước IDCT/rounding:</strong>
+\[R'_{12}+R'_{13}=R_{12}+R_{13},\qquad R'_{11}=R_{11}.\]
+Carrier thay đổi đúng \(\delta\):
+\[\frac{R'_{12}-R'_{13}}{2}=\frac{R_{12}-R_{13}}{2}+\delta.\]</div>
+<p><strong>Khác P1:</strong> QR không còn là trợ lý; watermark thật sự nằm trong R. <strong>Khác P3:</strong> không sửa energy anchor \(R_{11}\), mà dùng differential off-diagonal. <strong>Khác P4:</strong> chỉ một carrier QR, không dựng 3 Schur coupling. <strong>Khác P5:</strong> transform-domain, không spatial.</p>
+<div class="paper"><strong>Câu contribution có thể dùng:</strong> “A direct transform-domain QR embedding rule is proposed using the first-row differential \((R_{12}-R_{13})/2\), with an antisymmetric update that changes the payload carrier while preserving both \(R_{11}\) and the common component \(R_{12}+R_{13}\) at the QR embedding stage.”</div>
+<div class="warning"><strong>Giới hạn claim:</strong> invariant trên là invariant của phép sửa \(R\) trong floating transform-domain. Sau IDCT, RGB rounding/clipping và re-analysis, không nên tuyên bố mọi giá trị R vẫn giữ “exact” tuyệt đối.</div>
+</section>
+
+<section id="p3"><h2>5. Proposal 3 — Transform-Domain DCT–QR Direct-R11 QIM</h2>
+<p><span class="tag">ID: dct_qr_r11_qim</span><span class="tag">new proposal; smoke-validated</span><span class="tag">fully blind</span></p>
+<div class="one-line">Idea một câu: <strong>dùng chính \(R_{11}\) của canonical QR trên low-frequency DCT matrix làm một energy-like carrier và áp parity-QIM trực tiếp lên nó.</strong></div>
+<h3>5.1 Tại sao R11 có ý nghĩa?</h3>
+<p>Với canonical QR, \(R_{11}\) dương và bằng chuẩn Euclid của cột đầu tiên của ma trận DCT thấp tần đã regularize:</p><div class="eq">\[R_{11}=\|A_\lambda[:,1]\|_2\quad\text{(theo indexing toán học cột đầu)}.\]</div>
+<p>Do đó code xem \(R_{11}\) như một carrier năng lượng thấp tần mạnh.</p>
+
+<h3 id="p3embed">5.2 Embedding — từng bước</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>RGB → luminance → 8×8 DCT</h4><p>Cùng analysis path với Direct-R.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Tạo \(A_\lambda\)</h4><p>Lấy low-frequency 4×4 rồi cộng \(\lambda I\).</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Canonical QR</h4><p>Tính \(A_\lambda=QR\) với diagonal \(R\) không âm.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Chọn carrier R11</h4><p>Với payload block, lấy \(r=R_{11}\).</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Positive parity-QIM</h4><p>Ép \(R_{11}\) đến bội \(\Delta\) có parity tương ứng bit, đồng thời buộc target > 0. Public default: \(\Delta=12\).</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Chỉ sửa R11 một cách explicit</h4><p>Đặt \(R'_{11}=R_{11}^*\); các entry R khác không bị sửa trực tiếp.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>QR reconstruction → IDCT → RGB</h4><p>Tính \(QR'\), bỏ regularization, thay 4×4 DCT region, IDCT và minimum-L2 RGB correction.</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Closure</h4><p>Lặp mặc định 2 vòng; code còn kiểm tra số clean bit error sau closure.</p></div></div>
+</div>
+
+<h3 id="p3extract">5.3 Extraction</h3>
+<div class="flow"><div class="fbox">Image → luminance → DCT</div><div class="arrow">↓</div><div class="fbox">4×4 low-frequency + \(\lambda I\)</div><div class="arrow">↓</div><div class="fbox">canonical QR</div><div class="arrow">↓</div><div class="fbox">đọc \(R_{11}\)</div><div class="arrow">↓</div><div class="fbox">round(\(R_{11}/\Delta\)) mod 2</div></div>
+
+<h3 id="p3novel">5.4 Invariant / contribution / khác 4 method</h3>
+<div class="paper"><strong>Cấu trúc cốt lõi:</strong> chỉ \(R_{11}\) được thay một cách explicit trong \(R\) trước reconstruction; canonical positive diagonal loại ambiguity dấu cho parity-QIM và có một positive safety floor cho trường hợp gần zero.</div>
+<p><strong>Khác P1:</strong> bit nằm trực tiếp trong QR, không phải DCT carrier. <strong>Khác P2:</strong> P3 sửa energy carrier \(R_{11}\), trong khi P2 cố ý giữ \(R_{11}\) và sửa differential off-diagonal. <strong>Khác P4:</strong> một carrier thay vì ba orthogonal carriers. <strong>Khác P5:</strong> DCT→QR transform domain thay vì spatial determinant.</p>
+<div class="paper"><strong>Câu contribution có thể dùng:</strong> “A canonical transform-domain QR carrier is defined by directly quantizing the positive \(R_{11}\) coefficient, which equals the first-column norm of the regularized low-frequency DCT matrix, thereby yielding a simple fully blind parity-QIM rule.”</div>
+<div class="warning"><strong>Điểm yếu về novelty:</strong> Đây là method sạch và dễ trình bày, nhưng chỉ “chọn R11 + parity-QIM” có thể bị reviewer xem là incremental nếu không có phân tích/theorem hoặc kết quả robustness đủ mạnh.</div>
+</section>
+
+<section id="p4"><h2>6. Proposal 4 — DCT–Schur Spectrum-Preserving Orthogonal Coupling QIM (SP-SCQIM)</h2>
+<p><span class="tag">ID: dct_schur_rescue</span><span class="tag">independent proposal</span><span class="tag">performance gate under validation</span></p>
+<div class="one-line">Idea một câu: <strong>lấy 6 hệ số DCT làm 6 strict-upper Schur coordinates, chiếu chúng lên 3 hướng trực giao để mang 3 interleaved copies của watermark, rồi dùng nghiệm minimum-Frobenius để thỏa đồng thời 3 parity constraints trong khi giữ nguyên diagonal spectrum của ma trận Schur được dựng.</strong></div>
+<div class="important"><strong>Điểm phải viết đúng:</strong> code <u>không thực hiện Schur decomposition đầy đủ của mỗi DCT block</u>. Nó <strong>construct</strong> một upper-triangular Schur-coordinate matrix từ các DCT coefficients đã chọn.</div>
+
+<h3>6.1 Sáu coupling coordinates và bốn diagonal coordinates</h3>
+<p>Sáu coupling positions đúng theo code:</p>
+<div class="eq">\[(0,1),(1,0),(0,2),(1,1),(2,0),(1,2).\]</div>
+<p>Gọi vector:</p><div class="eq">\[n=[n_1,n_2,n_3,n_4,n_5,n_6].\]</div>
+<p>Chúng được diễn giải như các strict-upper coordinates \((t_{12},t_{13},t_{14},t_{23},t_{24},t_{34})\) của:</p>
+<div style="text-align:center"><span class="matrix">[ d1  n1  n2  n3 ]
+[  0  d2  n4  n5 ]
+[  0   0  d3  n6 ]
+[  0   0   0  d4 ]</span></div>
+<p>Bốn diagonal DCT positions khác được giữ khỏi embedding update chính. Khi dựng matrix để kiểm tra spectrum, code còn cộng một <em>Schur lift</em> lên diagonal nhằm tránh determinant gần zero.</p>
+
+<h3>6.2 Ba orthogonal carriers</h3>
+<div class="eq">\[c_1=\frac{n_1-n_2}{\sqrt2},\]</div>
+<div class="eq">\[c_2=\frac{n_1+n_2-n_3-n_4}{2},\]</div>
+<div class="eq">\[c_3=\frac{n_1+n_2+n_3+n_4-2n_5-2n_6}{\sqrt{12}}.\]</div>
+<p>Ba row vectors tạo các carrier trên được normalize thành một basis \(H\) có các hàng trực chuẩn.</p>
+
+<h3 id="p4embed">6.3 Embedding — từng bước</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Opponent field + DCT</h4><p>Code tạo một trường intensity/opponent bằng tham số \(\eta\), rồi 8×8 DCT.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Arnold scramble</h4><p>Watermark 64×64 được Arnold-scramble.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Tạo 3 permutations</h4><p>Cùng payload sau scramble được rải theo ba permutation seed-based khác nhau.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Lấy 6 couplings</h4><p>Tạo vector \(n\) cho mỗi block.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Tính 3 carriers</h4><p>\(c=Hn\).</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Chọn 3 parity-QIM targets</h4><p>Mỗi carrier nhận một bit từ một payload permutation. Public default \(\Delta=9\).</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Minimum-Frobenius simultaneous projection</h4><p>Với target vector \(t\), code dùng:</p><div class="eq">\[n^*=n+H^T(t-Hn).\]</div><p>Vì các hàng của \(H\) trực chuẩn, đây là orthogonal projection đến nghiệm gần nhất thỏa cả 3 constraints.</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Ghi 6 couplings mới về DCT</h4><p>Chỉ sáu vị trí coupling được update bởi core embedding constraint.</p></div></div>
+<div class="step"><div class="num">9</div><div><h4>IDCT → RGB + closure</h4><p>Đưa thay đổi field trở lại RGB và lặp closure để khắc phục rounding.</p></div></div>
+<div class="step"><div class="num">10</div><div><h4>Lưu spectral reference</h4><p>Key chứa local spectral scale reference phục vụ gain normalization; do đó cách mô tả chặt hơn là <strong>key-assisted blind</strong>: không cần host gốc, nhưng key chứa content-dependent reference.</p></div></div>
+</div>
+
+<h3 id="p4extract">6.4 Extraction</h3>
+<div class="flow"><div class="fbox">Candidate image</div><div class="arrow">↓</div><div class="fbox">DCT → 6 couplings/block</div><div class="arrow">↓</div><div class="fbox">3 carriers \(c_1,c_2,c_3\)</div><div class="arrow">↓</div><div class="fbox">gain normalization bằng spectral reference nếu bật</div><div class="arrow">↓</div><div class="fbox">3 parity/evidence maps</div><div class="arrow">↓</div><div class="fbox">undo 3 permutations → fusion</div><div class="arrow">↓</div><div class="fbox">inverse Arnold; decoder có candidate/MAP robustness enhancements</div></div>
+
+<h3 id="p4novel">6.5 Invariant / contribution / khác 4 method</h3>
+<div class="paper"><strong>Hai kết quả toán học mạnh nhất:</strong><br>
+(1) Vì \(H H^T=I\), update \(n^*=n+H^T(t-Hn)\) là nghiệm minimum-Euclidean/Frobenius duy nhất thỏa \(Hn^*=t\).<br>
+(2) Core update chỉ thay strict-upper coordinates; diagonal \(d_1,\ldots,d_4\) của constructed triangular matrix không đổi. Vì vậy ở floating-point construction, <strong>spectrum, trace và determinant</strong> của matrix đó được giữ (sai số máy aside).</div>
+<p><strong>Khác P1:</strong> ba carriers và invariant spectrum thay vì QR-conditioned 1D DCT carrier. <strong>Khác P2/P3:</strong> không thực hiện QR embedding. <strong>Khác P5:</strong> transform-domain và parity-QIM thay vì spatial sign.</p>
+<div class="paper"><strong>Câu contribution có thể dùng:</strong> “We construct a Schur-coordinate representation from selected DCT coefficients and embed three interleaved payload copies on mutually orthogonal strict-upper coupling directions. An orthogonal-projection update gives the unique minimum-Frobenius solution for the three parity constraints while preserving the diagonal spectrum, trace, and determinant of the constructed triangular form.”</div>
+<div class="warning"><strong>Không viết:</strong> “we perform Schur decomposition of every DCT block” hoặc “eigenvalues of the actual image block are preserved.” Code chỉ chứng minh invariant cho <strong>constructed triangular Schur-coordinate matrix</strong> ở core floating-point update.</div>
+</section>
+
+<section id="p5"><h2>7. Proposal 5 — Spatial Normalized-Residual DetQR</h2>
+<p><span class="tag">ID: spatial_cd_detqr</span><span class="tag">validated proposal</span><span class="tag">spatial domain</span></p>
+<div class="one-line">Idea một câu: <strong>không dùng DCT; mỗi 8×8 block thử nhiều Hadamard ± patterns, tạo hai luminance means \(u,v\), rồi tìm amplitude nguyên nhỏ nhất để determinant có đúng dấu bit và normalized QR residual đủ xa 0.</strong></div>
+
+<h3>7.1 Carrier QR spatial</h3>
+<p>Với một pattern, lấy:</p><ul><li>\(u\): mean luminance ở vị trí pattern +1;</li><li>\(v\): mean luminance ở vị trí pattern −1.</li></ul>
+<p>Tạo:</p><div class="eq">\[A=\begin{bmatrix}u&1\\v&1\end{bmatrix}=QR.\]</div>
+<p>Signed determinant và normalized QR residual:</p>
+<div class="eq">\[\det(A)=u-v,\qquad z(A)=\det(Q)r_{22}=\frac{u-v}{\sqrt{u^2+v^2}}.\]</div>
+
+<h3 id="p5embed">7.2 Embedding — từng bước</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>RGB → luminance</h4><p>Không DCT.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Sinh Hadamard partition patterns</h4><p>Từ Hadamard 4×4 tạo 15 candidates, sort theo boundary complexity, expand lên 8×8; config mặc định xét tối đa 10 pattern.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Payload masking</h4><p>Nếu bật, XOR payload với mask seed-based trước khi ánh xạ bit thành sign.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Bit → desired sign</h4><p>coded bit 1 → \(s=+1\), coded bit 0 → \(s=-1\).</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Tính exact minimum integer amplitude</h4><p>Với \(d=u-v\), \(k=u+v\), normalized margin \(\mu\), determinant margin \(\delta\):</p>
+<div class="eq">\[a^*=\max\!\left(0,\left\lceil\frac{\max\left(\delta,\mu|k|/\sqrt{2-\mu^2}\right)-sd}{2}\right\rceil\right).\]</div></div></div>
+<div class="step"><div class="num">6</div><div><h4>Chọn pattern rẻ nhất</h4><p>Cost chủ yếu là \(a^2\), cộng boundary penalty và một tie preference từ normalized residual.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Antisymmetric spatial update</h4><p>Mỗi pixel RGB trong block được cập nhật theo \(\text{RGB}'=\operatorname{clip}(\text{RGB}+s a p,0,255)\), trong đó \(p\in\{+1,-1\}\).</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Pilot embedding</h4><p>Chọn pilot blocks/patterns để phục vụ affine synchronization.</p></div></div>
+<div class="step"><div class="num">9</div><div><h4>Closure</h4><p>Đảm bảo clean determinant sign và normalized margin sau integer clipping.</p></div></div>
+<div class="step"><div class="num">10</div><div><h4>Lưu pattern schedule trong key</h4><p>Decoder phải biết pattern của từng payload block và pilots.</p></div></div>
+</div>
+
+<h3 id="p5extract">7.3 Extraction</h3>
+<div class="flow"><div class="fbox">Image</div><div class="arrow">↓</div><div class="fbox">pilot-based affine alignment nếu được chấp nhận</div><div class="arrow">↓</div><div class="fbox">theo payload pattern trong key → tính u,v</div><div class="arrow">↓</div><div class="fbox">canonical QR → signed determinant</div><div class="arrow">↓</div><div class="fbox">det&gt;0 → coded 1; det&lt;0 → coded 0</div><div class="arrow">↓</div><div class="fbox">nếu pilot detected → unmask payload</div></div>
+
+<h3 id="p5novel">7.4 Invariant / contribution / khác 4 method</h3>
+<div class="paper"><strong>Invariant của antisymmetric mean update:</strong> \(u'=u+sa\), \(v'=v-sa\), do đó
+\[u'+v'=u+v,\qquad (u'-v')=(u-v)+2sa.\]
+Vì tổng \(k=u+v\) được giữ, constraint normalized residual quy về một inequality một chiều và cho phép công thức đóng chính xác cho \(a^*\). Code đồng thời buộc determinant margin nên tránh carrier suy biến.</div>
+<p><strong>Khác P1–P4:</strong> P5 là proposal duy nhất hoàn toàn spatial; không DCT và không parity-QIM. <strong>Khác P1:</strong> QR không chỉ đánh giá reliability. <strong>Khác P2/P3:</strong> không sửa R của một DCT matrix. <strong>Khác P4:</strong> không có Schur spectrum.</p>
+<div class="paper"><strong>Câu contribution có thể dùng:</strong> “A spatial DetQR carrier is defined from two Hadamard-partition luminance means, and an antisymmetric integer update yields a closed-form minimum amplitude that simultaneously enforces a signed normalized-QR margin and determinant nonsingularity while preserving the two-group mean sum.”</div>
+</section>
+
+<section id="compare"><h2>8. So sánh trực tiếp 5 proposal</h2>
+<table class="compare">
+<tr><th>Câu hỏi</th><th>P1 DCT–QR adaptive</th><th>P2 Direct-R</th><th>P3 R11</th><th>P4 DCT–Schur</th><th>P5 Spatial DetQR</th></tr>
+<tr><td>Miền nhúng</td><td>DCT</td><td>DCT → QR</td><td>DCT → QR</td><td>DCT Schur-coordinates</td><td>Spatial</td></tr>
+<tr><td>Carrier</td><td>\((C_{01}-C_{10})/2\)</td><td>\((R_{12}-R_{13})/2\)</td><td>\(R_{11}\)</td><td>\(c_1,c_2,c_3\)</td><td>\(\det(A)=u-v\), \(z(A)\)</td></tr>
+<tr><td>Bit rule</td><td>QIM parity</td><td>QIM parity</td><td>QIM parity</td><td>3× QIM parity/evidence</td><td>determinant sign</td></tr>
+<tr><td>QR đóng vai trò gì?</td><td>Reliability, grouping, gain, sync gate</td><td>Chính nơi chứa bit</td><td>Chính nơi chứa bit</td><td>Không phải engine chính</td><td>Định nghĩa determinant/residual spatial</td></tr>
+<tr><td>Invariant nổi bật</td><td>Coset projection energy ≤ original labeling</td><td>Giữ R11 và R12+R13 tại R-update</td><td>Chỉ R11 sửa explicit; canonical positive carrier</td><td>Minimum-Frobenius; giữ constructed Schur diagonal/spectrum</td><td>Giữ u+v; exact minimum integer amplitude</td></tr>
+<tr><td>Số evidence/carriers</td><td>1 bit carrier + QR reliability</td><td>1</td><td>1</td><td>3</td><td>1 sign carrier/pattern</td></tr>
+<tr><td>Arnold</td><td>Có</td><td>Không trong direct method</td><td>Không trong direct method</td><td>Có</td><td>Không; dùng payload mask</td></tr>
+<tr><td>Ảnh gốc khi extract?</td><td>Không</td><td>Không</td><td>Không</td><td>Không; key có spectral reference</td><td>Không; cần embedding key</td></tr>
+</table>
+<div class="one-line">Nếu chỉ nhìn “nơi chứa bit”: <strong>DCT carrier → R differential → R11 → 3 Schur couplings → determinant sign.</strong> Đây là cách nhanh nhất để không lẫn 5 proposal.</div>
+</section>
+
+<section id="paper"><h2>9. Nếu mục tiêu là viết bài báo: nên hiểu contribution thế nào?</h2>
+<h3>9.1 P1 — mạnh ở framework/adaptation</h3><p>Story phù hợp: QR-conditioned adaptive embedding + exact coset distortion reduction + gain compensation. Không nên bán nó như “QR coefficient embedding”.</p>
+<h3>9.2 P2 — clean transform-domain QR proposal</h3><p>Story phù hợp: direct QR differential carrier + symmetric invariant. Đây là proposal có hình flowchart rất sạch.</p>
+<h3>9.3 P3 — simple QR energy carrier</h3><p>Story phù hợp: canonical \(R_{11}\) as low-frequency energy-like carrier. Nên dùng theorem/analysis hoặc ablation để tăng novelty.</p>
+<h3>9.4 P4 — story toán học rõ nhất</h3><p>Story phù hợp: constructed Schur coordinates + three orthogonal carriers + minimum-Frobenius projection + diagonal spectral invariance. Nhưng registry vẫn ghi performance gate under validation, nên cần kết quả thực nghiệm tốt trước khi claim hoàn thiện.</p>
+<h3>9.5 P5 — story closed-form spatial optimization</h3><p>Story phù hợp: normalized QR residual + determinant nonsingularity + exact minimum integer update + pattern search. Không nên gọi là DCT/transform method.</p>
+<div class="tip"><strong>Gợi ý tổ chức một manuscript duy nhất:</strong> nếu thật sự muốn đưa cả 5 method vào một bài, cần một câu hỏi nghiên cứu chung rõ ràng (ví dụ: “carrier design under decomposition-informed constraints”), sau đó coi 5 method là 5 variants/instantiations. Nếu không, 5 proposal quá khác nhau dễ làm paper giống nhiều bài ghép lại.</div>
+</section>
+
+<section id="source"><h2>10. Đối chiếu source code</h2>
+<table>
+<tr><th>Proposal</th><th>File chính</th><th>Điểm source quan trọng</th></tr>
+<tr><td>Registry</td><td><code>src/qr64_certified/proposals/proposal_registry.py</code></td><td><code>SUPPORTED_PROPOSAL_METHODS</code>, aliases, default config, dispatch</td></tr>
+<tr><td>P1 DCT–QR adaptive</td><td><code>proposals/method.py</code></td><td><code>_pairwise_coset_optimize</code>, <code>_embed_reliability_conditioned</code>, <code>_dct_qim_carrier</code>, <code>embed</code>, <code>extract</code></td></tr>
+<tr><td>P2 Direct-R</td><td><code>proposals/dct_qr_direct_r.py</code></td><td><code>_canonical_qr</code>, <code>_project_parity_qim</code>, <code>_embed_once</code>, <code>embed</code>, <code>extract</code></td></tr>
+<tr><td>P3 R11</td><td><code>proposals/dct_qr_r11_qim.py</code></td><td><code>_positive_r11_targets</code>, <code>_embed_once</code>, <code>embed</code>, <code>extract</code></td></tr>
+<tr><td>P4 Schur</td><td><code>proposals/schur_coupling_qim.py</code></td><td><code>SCHUR_COUPLING_POSITIONS</code>, <code>SCHUR_COUPLING_BASIS</code>, <code>_embed_coupling_constraints</code>, constructed Schur checks, <code>embed</code>, <code>extract</code></td></tr>
+<tr><td>P5 Spatial DetQR</td><td><code>proposals/cd_detqr.py</code></td><td><code>_spatial_partitions</code>, <code>qr_residual_features</code>, <code>minimum_integer_amplitude</code>, pattern selection, pilots, <code>embed</code>, <code>extract</code></td></tr>
+</table>
+<div class="source">Public method IDs verified in proposal_registry.py:
+dct_qr
+dct_qr_direct_r
+dct_qr_r11_qim
+dct_schur_rescue
+spatial_cd_detqr</div>
+</section>
+
+<section id="claims"><h2>11. Những claim nên và không nên viết</h2>
+<table>
+<tr><th>Proposal</th><th>Nên viết</th><th>Không nên viết</th></tr>
+<tr><td>P1</td><td>QR-conditioned DCT-QIM; exact binary coset selection; gain compensation.</td><td>Watermark embedded in Q/R.</td></tr>
+<tr><td>P2</td><td>Direct transform-domain QR differential carrier; symmetric R update.</td><td>R invariants remain mathematically exact after every RGB rounding/attack.</td></tr>
+<tr><td>P3</td><td>Canonical positive R11, first-column norm, direct parity-QIM.</td><td>R11 alone is automatically a fundamentally novel robust carrier without evidence.</td></tr>
+<tr><td>P4</td><td>Constructed triangular Schur-coordinate matrix; 3 orthogonal couplings; minimum-Frobenius update; constructed-spectrum invariance.</td><td>Full Schur decomposition is performed for every image block; actual image-block eigenvalues are preserved.</td></tr>
+<tr><td>P5</td><td>Spatial QR determinant/residual; closed-form minimum integer amplitude; determinant nonsingularity.</td><td>DCT-domain or transform-domain embedding.</td></tr>
+</table>
+<div class="important"><strong>Kết luận để chị viết thuật toán:</strong> Mỗi method phải bắt đầu bằng một câu “bit nằm ở đâu”. Nếu câu đó chưa rõ, phần Method sẽ tiếp tục khó đọc dù thêm nhiều công thức.</div>
+</section>
+
+</article></div></body></html>
