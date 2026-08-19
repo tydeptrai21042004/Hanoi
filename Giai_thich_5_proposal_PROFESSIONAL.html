@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Năm phương pháp watermarking trong Hanoi-main — mô tả thuật toán, cơ sở toán học và ví dụ tính toán</title>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};
+</script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{--ink:#171717;--muted:#5f646b;--paper:#fff;--bg:#edf0f2;--line:#c8cdd2;--soft:#f6f7f8;--blue:#284f73;--green:#eef8f0;--yellow:#fff8e5;--red:#fff1f1;--purple:#f5f1fa;--teal:#eef8f7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.67;font-size:16.5px}
+.wrap{max-width:1410px;margin:auto;display:grid;grid-template-columns:300px minmax(0,990px);gap:24px;padding:24px 16px 70px}nav{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 28px);overflow:auto;background:#fff;border:1px solid var(--line);padding:16px}
+nav h3{font:700 14px Arial,sans-serif;text-transform:uppercase;margin:0 0 10px;color:#333}nav a{display:block;text-decoration:none;color:#30343a;padding:5px 7px;font:14px/1.35 Arial,sans-serif;border-left:2px solid transparent}nav a:hover{background:#f3f5f6;border-left-color:var(--blue)}nav .sub{padding-left:20px;font-size:13px;color:#555}
+article{background:var(--paper);border:1px solid var(--line);box-shadow:0 7px 25px rgba(0,0,0,.06);padding:50px 64px}h1,h2,h3,h4{line-height:1.27;color:#111}h1{text-align:center;font-size:34px;margin:0 0 10px}.subtitle{text-align:center;color:#444b52;max-width:840px;margin:0 auto 20px;font-size:18px}.meta{text-align:center;color:#6b7076;font:14px Arial,sans-serif;margin-bottom:32px}
+h2{font-size:27px;margin-top:46px;padding-top:16px;border-top:1.5px solid #222}h3{font-size:21px;margin-top:30px}h4{font-size:18px;margin-top:20px}p{margin:9px 0 13px}li{margin:6px 0}code{font:0.89em Consolas,"Courier New",monospace;background:#f0f2f3;padding:1px 4px;border-radius:3px}
+.box,.tip,.warning,.important,.paper,.mathbox,.sourcebox,.plain{padding:13px 16px;margin:16px 0;border-left:4px solid var(--blue);background:#eef5fb}.tip{background:var(--green);border-left-color:#4f8159}.warning{background:var(--yellow);border-left-color:#a87817}.important{background:var(--red);border-left-color:#a64242}.paper{background:var(--purple);border-left-color:#70508e}.mathbox{background:var(--teal);border-left-color:#3b7d78}.sourcebox{background:#f5f6f7;border-left-color:#70777e;font:13.5px/1.58 Arial,sans-serif}.plain{background:#f8f8f8;border-left-color:#7c7c7c}
+.eq{text-align:center;padding:6px 15px;margin:13px 0;overflow-x:auto}.flow{max-width:800px;margin:18px auto;text-align:center;font:14px/1.4 Arial,sans-serif}.fbox{border:1px solid #686d72;background:#fafafa;padding:9px 12px;margin:auto;max-width:730px}.arrow{font-size:20px;line-height:1.05;margin:3px;color:#444}
+table{width:100%;border-collapse:collapse;margin:15px 0 22px;font-size:14.5px}th,td{border:1px solid #aeb5bb;padding:8px 9px;vertical-align:top}th{background:#f0f2f4;text-align:left;font:700 13.5px Arial,sans-serif}.steps{counter-reset:x}.step{display:grid;grid-template-columns:42px 1fr;gap:11px;border-top:1px solid #dedede;padding:13px 0}.num{width:34px;height:34px;border:1.5px solid #333;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 14px Arial,sans-serif}.step h4{margin:1px 0 4px}.step p{margin:4px 0}.tag{display:inline-block;font:12px Arial,sans-serif;padding:3px 7px;border:1px solid #b8bec4;background:#f7f8f9;border-radius:12px;margin:2px 4px 2px 0}.one-line{font:700 16px/1.5 Arial,sans-serif;background:#f7f8f9;border:1px solid #d1d5d9;padding:12px 14px;margin:14px 0}.compare td:first-child{font-weight:bold;width:20%}.small{font-size:14px;color:#5e6369}.source{font:13px/1.55 Consolas,"Courier New",monospace;background:#f7f7f7;border:1px solid #d1d1d1;padding:12px 14px;overflow:auto}.matrix{font-family:Consolas,"Courier New",monospace;white-space:pre;display:inline-block;background:#f7f7f7;border:1px solid #ddd;padding:8px 12px;line-height:1.45}.proof{font-size:15px;background:#fbfbfb;border:1px solid #d5d8da;padding:11px 13px;margin-top:9px}.why{font-weight:bold;color:#204865}.avoid{font-weight:bold;color:#8c3535}.ok{font-weight:bold;color:#356d43}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr;padding:8px}.wrap nav{position:relative;max-height:none;top:0}article{padding:34px 23px}}@media print{body{background:#fff;font-size:11pt}.wrap{display:block;max-width:none;padding:0}nav{display:none}article{border:0;box-shadow:none;padding:0 8mm}.step,.box,.tip,.warning,.important,.paper,.mathbox,.sourcebox,.plain,.flow{break-inside:avoid}h2{page-break-before:always}}
+
+.calculation{background:#f8f8f8;border:1px solid #c8cdd2;border-left:4px solid #4d6275;padding:14px 16px;margin:17px 0}
+.calculation h4{margin:0 0 8px;font:700 16px/1.35 Arial,sans-serif;color:#263746}.calculation p{margin:6px 0}.calculation .result{font-weight:700}
+.citation-note{font-size:13.5px;color:#555f67;margin-top:7px}
+</style>
+</head>
+<body><div class="wrap">
+<nav>
+<h3>Mục lục</h3>
+<a href="#p1">1. P1 — DCT–QR adaptive QIM</a>
+<a class="sub" href="#p1idea">1.1 Idea mới</a><a class="sub" href="#p1embed">1.2 Nhúng</a><a class="sub" href="#p1extract">1.3 Trích xuất</a><a class="sub" href="#p1math">1.4 Toán / tính chất</a><a class="sub" href="#p1diff">1.5 Khác 4 phương pháp</a>
+<a href="#p2">2. P2 — DCT–QR Direct-R</a>
+<a class="sub" href="#p2idea">2.1 Idea mới</a><a class="sub" href="#p2embed">2.2 Nhúng</a><a class="sub" href="#p2extract">2.3 Trích xuất</a><a class="sub" href="#p2math">2.4 Toán / tính chất</a><a class="sub" href="#p2diff">2.5 Khác 4 phương pháp</a>
+<a href="#p3">3. P3 — DCT–QR Direct-R11</a>
+<a class="sub" href="#p3idea">3.1 Idea mới</a><a class="sub" href="#p3embed">3.2 Nhúng</a><a class="sub" href="#p3extract">3.3 Trích xuất</a><a class="sub" href="#p3math">3.4 Toán / tính chất</a><a class="sub" href="#p3diff">3.5 Khác 4 phương pháp</a>
+<a href="#p4">4. P4 — DCT–Schur</a>
+<a class="sub" href="#p4idea">4.1 Idea mới</a><a class="sub" href="#p4embed">4.2 Nhúng</a><a class="sub" href="#p4extract">4.3 Trích xuất</a><a class="sub" href="#p4math">4.4 Toán / định lý</a><a class="sub" href="#p4diff">4.5 Khác 4 phương pháp</a>
+<a href="#p5">5. P5 — Spatial DetQR</a>
+<a class="sub" href="#p5idea">5.1 Idea mới</a><a class="sub" href="#p5embed">5.2 Nhúng</a><a class="sub" href="#p5extract">5.3 Trích xuất</a><a class="sub" href="#p5math">5.4 Toán / định lý</a><a class="sub" href="#p5diff">5.5 Khác 4 phương pháp</a>
+<a href="#compare">6. So sánh năm phương pháp</a>
+<a href="#refs">7. Căn cứ code &amp; tài liệu toán</a>
+</nav>
+<article>
+<h1>NĂM PHƯƠNG PHÁP WATERMARKING TRONG HANOI-MAIN</h1>
+<p class="subtitle">Mô tả thuật toán, cơ sở toán học và ví dụ tính toán; đối chiếu trực tiếp với implementation public trong repository.</p>
+<p class="meta">Tài liệu kỹ thuật tiếng Việt · 5 proposal methods · public implementation</p>
+<section id="p1">
+<h2>1. Proposal 1 — DCT–QR Pairwise Coset-Optimized Gain-Normalized QIM</h2>
+<p><span class="tag">method: dct_qr</span><span class="tag">file: proposals/method.py</span></p>
+<h3 id="p1idea">1.1. Idea mới</h3>
+<div class="one-line">P1 biểu diễn mỗi bit bằng tính chẵn/lẻ của chỉ số lượng tử của đại lượng DCT \(x_b=(C_{0,1}^{(b)}-C_{1,0}^{(b)})/2\). Phân rã QR không trực tiếp chứa bit; QR được dùng để phân loại độ ổn định block, điều chỉnh bước lượng tử, tối ưu nhãn theo cặp và bù suy hao khi trích xuất.</div>
+<p>Với block thứ \(b\), sau DCT ta lấy hai hệ số \(C_{0,1}^{(b)}\) và \(C_{1,0}^{(b)}\), rồi tạo số</p>
+<div class="eq">\[x_b=\frac{C_{0,1}^{(b)}-C_{1,0}^{(b)}}{2}.\]</div>
+<p><strong>Ý nghĩa:</strong> phương pháp không nhúng độc lập vào từng hệ số; thay vào đó, nó sử dụng <strong>độ chênh giữa hai kiểu biến thiên sáng–tối vuông góc</strong>. Số \(x_b\) chính là số mà decoder sẽ trích xuất lại.</p>
+<p>Bit 0 và bit 1 được biểu diễn bằng hai họ mốc lượng tử xen kẽ. Nếu bước là \(\Delta_b\), decoder tính</p>
+<div class="eq">\[k_b=\operatorname{round}(x_b/\Delta_b),\qquad \widehat w_b=k_b\bmod 2.\]</div>
+<p>Quy tắc giải mã: <strong>k chẵn đọc 0, k lẻ đọc 1.</strong></p>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>proposals/method.py:378–388</code> tính đúng \((C_{01}-C_{10})/2\); <code>method.py:641–673</code> xác nhận QR reliability dùng để phân bổ QIM spacing và ghép các block tương đồng; <code>proposal_registry.py:48–57</code> mô tả cùng vai trò.</div>
+<h3 id="p1embed">1.2. Thuật toán nhúng</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Tiền xử lý watermark</h4><p>Watermark được xáo vị trí bằng Arnold transform trước khi ghi, để các bit không còn nằm theo thứ tự không gian ban đầu.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Biến đổi DCT theo block 8×8</h4><p>Mỗi block ảnh được đổi từ miền pixel sang 64 hệ số DCT.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Xác định đại lượng biểu diễn bit</h4><p>Với mỗi block, tính \(x_b=(C_{01}-C_{10})/2\).</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Đánh giá độ ổn định bằng QR</h4><p>Code tạo một ma trận phân tích từ các hệ số DCT thấp tần và QR-decompose nó. Từ đó sinh một điểm reliability: block yếu/khó giữ thông tin được tách khỏi block ổn định.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Phân bổ bước lượng tử theo độ ổn định</h4><p>Block yếu nhận bước lượng tử lớn hơn để 0 và 1 cách xa nhau hơn; block ổn định có thể dùng bước nhỏ hơn để giảm méo ảnh.</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Tối ưu nhãn theo cặp block</h4><p>Trong mỗi nhóm/cặp, code thử hai khả năng: giữ các bit như cũ hoặc lật đồng thời 0↔1. Nó chọn khả năng làm tổng lượng thay đổi nhỏ hơn.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Chiếu \(x_b\) vào miền QIM tương ứng</h4><p>Bit cần ghi là 0 thì chọn mốc có chỉ số chẵn; bit cần ghi là 1 thì chọn mốc có chỉ số lẻ.</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Tái tạo ảnh và kiểm tra trên lưới giá trị nguyên uint8</h4><p>Sau IDCT và làm tròn RGB về số nguyên 0…255, code kiểm tra lại bit; nếu việc làm tròn làm sai bit thì bước kiểm tra sau lượng tử hóa thực hiện hiệu chỉnh bổ sung.</p></div></div>
+<div class="step"><div class="num">9</div><div><h4>Lưu thang QR phục vụ bù biên độ</h4><p>Ở ảnh đã nhúng, code lưu một thang đo QR theo block. Khi ảnh bị nén/làm mờ và biên độ giảm, decoder dùng tỷ lệ thang hiện tại/thang đã lưu để bù một phần suy hao.</p></div></div>
+</div>
+<h3 id="p1extract">1.3. Thuật toán trích xuất</h3>
+<div class="flow"><div class="fbox">Ảnh cần kiểm tra</div><div class="arrow">↓</div><div class="fbox">DCT từng block</div><div class="arrow">↓</div><div class="fbox">Tính lại \(x_b=(C_{01}-C_{10})/2\)</div><div class="arrow">↓</div><div class="fbox">Dùng QR scale để bù suy hao cục bộ</div><div class="arrow">↓</div><div class="fbox">Chia cho \(\Delta_b\), làm tròn → chẵn = 0, lẻ = 1</div><div class="arrow">↓</div><div class="fbox">Đảo thông tin flip của từng nhóm + inverse Arnold</div></div>
+<p>Phần bù biên độ trong implementation có dạng</p>
+<div class="eq">\[\widetilde x_b=\frac{x_b}{\alpha_b^{\gamma}},\qquad \alpha_b=\frac{s_b}{s_b^{(0)}}.\]</div>
+<p>Trong đó \(s_b^{(0)}\) là thang QR lưu lúc nhúng, \(s_b\) là thang QR đo trên ảnh đang kiểm tra.</p>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>method.py:402–439</code> thực hiện đúng phép bù \(x_b/\alpha_b^\gamma\); <code>certificate.py:214–241</code> định nghĩa QR scale và giải thích trường hợp dùng \(r_{11}\).</div>
+<h3 id="p1math">1.4. Cơ sở toán học và bất biến</h3>
+<div class="mathbox"><strong>Tính chất QIM — phép chiếu khoảng cách nhỏ nhất.</strong><p>Với một bit đã cho, tập mốc hợp lệ là một tập rời rạc. Chọn mốc hợp lệ gần \(x\) nhất chính là nghiệm của bài toán</p><div class="eq">\[\min_{t\in\mathcal L_w}|t-x|^2.\]</div><p>Đây là lý do phép “đẩy tới mốc chẵn/lẻ gần nhất” là thay đổi nhỏ nhất theo một chiều.</p></div><div class="calculation">
+<h4>Ví dụ tính toán P1 — chiếu QIM với khoảng an toàn</h4>
+<p>Giả sử một block có \(C_{0,1}=72.49\) và \(C_{1,0}=0\). Khi đó</p>
+<div class="eq">\[x=\frac{72.49-0}{2}=36.245.\]</div>
+<p>Với block thuộc nhóm dùng bước mặc định trung gian \(\Delta=13.25\), repository đặt \(\rho=0.45\Delta=5.9625\). Độ rộng nửa khoảng an toàn quanh mỗi tâm lượng tử là</p>
+<div class="eq">\[\frac{\Delta}{2}-\rho=6.625-5.9625=0.6625.\]</div>
+<p>Nếu cần nhúng bit 1, tâm lẻ gần nhất là \(3\Delta=39.75\), nên miền an toàn là \([39.0875,40.4125]\). Vì \(36.245&lt;39.0875\), phép chiếu tối thiểu đưa \(x\) tới \(39.0875\):</p>
+<div class="eq">\[\Delta x=39.0875-36.245=2.8425.\]</div>
+<p>Nếu cần nhúng bit 0, tâm chẵn gần nhất phía dưới là \(2\Delta=26.5\), miền an toàn là \([25.8375,27.1625]\), nên</p>
+<div class="eq">\[\Delta x=27.1625-36.245=-9.0825.\]</div>
+<p class="result">Trong block này, biểu diễn bit 1 cần thay đổi nhỏ hơn biểu diễn bit 0. Đây là loại chi phí mà bước tối ưu nhãn theo cặp sử dụng.</p>
+<p class="citation-note">Tham số: <code>QR64Config.public_dct_qr()</code>; phép chiếu có khoảng an toàn: <code>_project_qim_margin</code>.</p>
+</div>
+<div class="mathbox"><strong>Mệnh đề P1 — tối ưu nhãn nhị phân theo nhóm không làm tăng năng lượng chiếu QIM trong mô hình số thực.</strong><p>Code chọn</p><div class="eq">\[s_j=\arg\min_{s\in\{0,1\}}\sum_{b\in G_j}\left|P_{w_b\oplus s}(x_b)-x_b\right|^2.\]</div><div class="proof"><strong>Chứng minh:</strong> lựa chọn \(s=0\) chính là phương án không tối ưu hóa và luôn nằm trong tập hai lựa chọn. Vì code lấy giá trị nhỏ hơn giữa chi phí \(s=0\) và \(s=1\), chi phí sau bước này không thể lớn hơn chi phí ban đầu. Đây đúng là điều docstring của <code>_pairwise_coset_optimize</code> nêu tại <code>method.py:141–150</code>.</div></div>
+<div class="mathbox"><strong>Cơ sở QR cho bù biên độ [1].</strong><p>Nếu \(A=QR\), cột đầu tiên thỏa \(a_1=q_1r_{11}\). Vì \(\|q_1\|_2=1\), với QR đã chuẩn hóa dấu ta có</p><div class="eq">\[r_{11}=\|a_1\|_2.\]</div><p>Vì vậy \(r_{11}\) đo chuẩn Euclid của cột đầu tiên và được implementation sử dụng làm thang tham chiếu cho biến đổi biên độ cục bộ. Theo tính chất chuẩn của phân rã QR, xem [1].</p></div>
+<div class="paper"><strong>Đóng góp phương pháp:</strong> QR không phải nơi ghi watermark ở P1. Điểm đóng góp là <strong>nhúng thích nghi theo QR</strong>: độ ổn định QR điều khiển khoảng cách lượng tử, sắp các block tương đồng để tối thiểu hóa chi phí lật nhóm, và cung cấp thang bù suy hao khi giải mã.</div>
+<h3 id="p1diff">1.5. So sánh với bốn phương pháp còn lại</h3>
+<ul><li>Khác P2/P3: P1 <strong>không sửa trực tiếp ma trận R</strong>.</li><li>Khác P4: P1 chỉ dùng một đại lượng DCT cho mỗi block, không tạo ba phép phối hợp trực giao từ sáu hệ số.</li><li>Khác P5: P1 hoạt động trong miền DCT và dùng chẵn/lẻ lượng tử, không dùng dấu định thức của hai nhóm pixel.</li></ul>
+<div class="warning"><span class="avoid">Giới hạn diễn giải:</span> “watermark is embedded in QR coefficients” cho P1. Implementation hiện tại không thực hiện phép nhúng này.</div>
+</section>
+<section id="p2">
+<h2>2. Proposal 2 — DCT–QR Direct-R Differential QIM</h2>
+<p><span class="tag">method: dct_qr_direct_r</span><span class="tag">file: proposals/dct_qr_direct_r.py</span></p>
+<h3 id="p2idea">2.1. Idea mới</h3>
+<div class="one-line">P2 nhúng trực tiếp sau phép phân rã QR. Bit được biểu diễn bởi tính chẵn/lẻ của chỉ số lượng tử của \(x=(R_{12}-R_{13})/2\), trong khi \(R_{12}\) và \(R_{13}\) được cập nhật đối xứng để giữ nguyên tổng của chúng và không thay đổi \(R_{11}\) ở bước sửa ma trận \(R\).</div>
+<p>Mỗi block 8×8 được DCT. Code lấy góc thấp tần 4×4, gọi là \(A\), rồi thêm một lượng nhỏ trên đường chéo:</p>
+<div class="eq">\[A_\lambda=A+\lambda I.\]</div>
+<p>Sau đó QR:</p><div class="eq">\[A_\lambda=QR.\]</div>
+<p>Con số được dùng để biểu diễn bit là</p><div class="eq">\[x=\frac{R_{12}-R_{13}}{2}.\]</div>
+<p>Bit 0/1 tiếp tục được mã hóa bằng chẵn/lẻ của mốc lượng tử của \(x\).</p>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>dct_qr_direct_r.py:3–23</code> mô tả pipeline và công thức; <code>161–170</code> thực hiện DCT → \(A+\lambda I\) → QR với quy ước đường chéo \(R\) không âm; <code>198–211</code> là phép sửa trực tiếp \(R_{12},R_{13}\) rồi dựng lại.</div>
+<h3 id="p2embed">2.2. Thuật toán nhúng</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Chuyển RGB sang luminance</h4><p>Dùng \(Y=0.299R+0.587G+0.114B\).</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Biến đổi DCT theo block 8×8</h4><p>Mỗi block trở thành ma trận 8×8 hệ số DCT.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Trích xuất ma trận DCT thấp tần 4×4</h4><p>Lấy góc trên-trái \(A\), rồi dùng \(A_\lambda=A+\lambda I\) để tránh các trường hợp gần suy biến trong phép QR.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Phân rã QR trong miền DCT</h4><p>Tính \(A_\lambda=QR\), chuẩn hóa dấu để đường chéo \(R\) không âm.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Xác định đại lượng biểu diễn bit</h4><p>\(x=(R_{12}-R_{13})/2\).</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Xác định mục tiêu lượng tử</h4><p>Gọi giá trị hợp lệ gần nhất cho bit cần ghi là \(t\), rồi đặt \(\delta=t-x\).</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Cập nhật đối xứng ma trận R</h4><p>Thực hiện \(R_{12}'=R_{12}+\delta\), \(R_{13}'=R_{13}-\delta\).</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Tái tạo ma trận DCT thấp tần</h4><p>Tính \(A_\lambda'=QR'\), sau đó trừ \(\lambda I\) và đặt trở lại vùng 4×4.</p></div></div>
+<div class="step"><div class="num">9</div><div><h4>IDCT, ánh xạ về RGB và lượng tử hóa uint8</h4><p>Code tính thay đổi luminance, chiếu sang RGB theo nghiệm L2 nhỏ, clip và làm tròn uint8.</p></div></div>
+<div class="step"><div class="num">10</div><div><h4>Kiểm tra và hiệu chỉnh sau lượng tử hóa</h4><p>Nếu làm tròn pixel làm tính chẵn/lẻ sai, chạy thêm vòng nhúng từ ảnh hiện tại.</p></div></div>
+</div>
+<h3 id="p2extract">2.3. Thuật toán trích xuất</h3>
+<div class="flow"><div class="fbox">RGB → Y → block 8×8 → DCT</div><div class="arrow">↓</div><div class="fbox">Lấy 4×4, cộng \(\lambda I\), QR</div><div class="arrow">↓</div><div class="fbox">Tính \(x=(R_{12}-R_{13})/2\)</div><div class="arrow">↓</div><div class="fbox">\(k=\operatorname{round}(x/\Delta)\)</div><div class="arrow">↓</div><div class="fbox">k chẵn → 0; k lẻ → 1</div></div>
+<p>Phương pháp này không cần ảnh gốc khi đọc; khóa giải mã (key) chỉ lưu cấu hình, kích thước và thứ tự block.</p>
+<h3 id="p2math">2.4. Cơ sở toán học và bất biến</h3>
+<div class="mathbox"><strong>Mệnh đề P2.1 — phép sửa đối xứng đưa đúng độ chênh tới giá trị mục tiêu.</strong><p>Ban đầu</p><div class="eq">\[x=\frac{R_{12}-R_{13}}2.\]</div><p>Sau cập nhật</p><div class="eq">\[R_{12}'=R_{12}+\delta,\qquad R_{13}'=R_{13}-\delta.\]</div><p>Do đó</p><div class="eq">\[\frac{R_{12}'-R_{13}'}2=\frac{R_{12}-R_{13}+2\delta}{2}=x+\delta=t.\]</div><p>Vì vậy ở mức ma trận \(R\), giá trị dùng để biểu diễn bit được đưa <strong>chính xác</strong> tới mốc QIM mục tiêu.</p></div>
+<div class="mathbox"><strong>Mệnh đề P2.2 — hai đại lượng được giữ nguyên trong phép sửa R.</strong><div class="eq">\[R_{11}'=R_{11},\qquad R_{12}'+R_{13}'=R_{12}+R_{13}.\]</div><div class="proof">Đẳng thức thứ hai do \(+\delta\) và \(-\delta\) triệt tiêu nhau. Đây là bất biến chính xác của bước cập nhật trong QR domain.</div></div><div class="calculation">
+<h4>Ví dụ tính toán P2 — cập nhật đối xứng \(R_{12},R_{13}\)</h4>
+<p>Giả sử sau QR thu được \(R_{11}=30\), \(R_{12}=18\), \(R_{13}=10\). Với bước mặc định \(\Delta=8\):</p>
+<div class="eq">\[x=\frac{18-10}{2}=4.\]</div>
+<p>Cần nhúng bit 1. Chỉ số gần nhất hiện tại là \(\operatorname{round}(4/8)=0\), có chỉ số chẵn, nên mục tiêu lẻ gần nhất là \(t=8\). Do đó</p>
+<div class="eq">\[\delta=t-x=8-4=4.\]</div>
+<p>Cập nhật:</p>
+<div class="eq">\[R'_{12}=18+4=22,\qquad R'_{13}=10-4=6.\]</div>
+<p>Kiểm tra:</p>
+<div class="eq">\[\frac{22-6}{2}=8,\qquad 22+6=28=18+10,\qquad R'_{11}=30.\]</div>
+<p class="result">Độ chênh đạt đúng mốc QIM cho bit 1, trong khi tổng \(R_{12}+R_{13}\) và \(R_{11}\) được giữ nguyên ở bước cập nhật QR.</p>
+<p class="citation-note">Tham số mặc định: <code>DCTQRDirectRConfig.step = 8.0</code>.</p>
+</div>
+<div class="mathbox"><strong>Cơ sở QR [1].</strong><p>Với \(Q\) trực giao, dựng lại \(A_\lambda'=QR'\) là phép ánh xạ chính xác từ ma trận \(R'\) mới về ma trận hệ số thấp tần mới trước khi IDCT.</p></div>
+<div class="important"><strong>Phạm vi của bất biến:</strong> \(R_{11}\) và \(R_{12}+R_{13}\) được giữ tại bước sửa \(R\) trong số thực. Sau IDCT, chiếu RGB, clip và làm tròn, khi phân tích lại ảnh uint8 chúng có thể lệch nhẹ; do đó implementation thực hiện bước kiểm tra và hiệu chỉnh sau lượng tử hóa.</div>
+<div class="paper"><strong>Đóng góp phương pháp:</strong> một luật nhúng trực tiếp sau QR dựa trên <strong>độ chênh hàng đầu của R</strong>, trong đó bit watermark được điều khiển bởi hiệu \(R_{12}-R_{13}\) còn phần tổng \(R_{12}+R_{13}\) và \(R_{11}\) được giữ ở bước cập nhật.</div>
+<h3 id="p2diff">2.5. So sánh với bốn phương pháp còn lại</h3>
+<ul><li>Khác P1: P2 nhúng bit <strong>sau QR</strong>, P1 ghi trong DCT trước khi QR chỉ đóng vai trò hỗ trợ.</li><li>Khác P3: P2 dùng hiệu hai phần tử ngoài đường chéo; P3 dùng trực tiếp \(R_{11}\).</li><li>Khác P4: P2 chỉ có một đại lượng cho mỗi block, không có ba hướng trực giao và không dùng cấu trúc Schur.</li><li>Khác P5: P2 ở miền DCT–QR, không sửa pixel trực tiếp theo mặt nạ (pattern).</li></ul>
+</section>
+<section id="p3">
+<h2>3. Proposal 3 — DCT–QR Direct-\(R_{11}\) QIM</h2>
+<p><span class="tag">method: dct_qr_r11_qim</span><span class="tag">file: proposals/dct_qr_r11_qim.py</span></p>
+<h3 id="p3idea">3.1. Idea mới</h3>
+<div class="one-line">P3 sử dụng trực tiếp \(R_{11}\) của QR với quy ước đường chéo \(R\) không âm làm đại lượng biểu diễn bit. Với quy ước đường chéo dương, \(R_{11}\) bằng chuẩn Euclid của cột đầu tiên của ma trận DCT thấp tần sau khi cộng \(\lambda I\).</div>
+<p>Pipeline đầu giống P2:</p><div class="eq">\[\text{RGB}\to Y\to\text{DCT}_{8\times8}\to A_{4\times4}+\lambda I\to QR.\]</div>
+<p>Nhưng thay vì sử dụng hiệu \(R_{12}-R_{13}\), P3 chỉ nhìn \(R_{11}\).</p>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>dct_qr_r11_qim.py:3–14</code> nêu trực tiếp ý tưởng; <code>112–120</code> tạo mốc QIM dương; <code>137–148</code> chỉ thay \(R_{11}\), rồi dựng lại \(QR'\); <code>195–219</code> kiểm tra tính chẵn/lẻ sau bước hiệu chỉnh.</div>
+<h3 id="p3embed">3.2. Thuật toán nhúng</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Chuyển RGB sang luminance và DCT</h4><p>Chuyển ảnh sang luminance, chia block 8×8 và DCT.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Tạo ma trận DCT thấp tần sau khi cộng \(\lambda I\)</h4><p>\(A_\lambda=A+\lambda I\).</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Phân rã QR với quy ước đường chéo \(R\) không âm</h4><p>Tính \(A_\lambda=QR\) và chọn dấu để các phần tử đường chéo R dương/không âm một cách nhất quán.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Xác định \(R_{11}\)</h4><p>Đây là đại lượng duy nhất được code dùng để biểu diễn bit.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Chiếu \(R_{11}\) vào miền QIM tương ứng</h4><p>Bit 0 → mốc QIM dương có index chẵn; bit 1 → mốc dương có index lẻ.</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Cập nhật riêng \(R_{11}\)</h4><p>Chỉ gán \(R_{11}'=t\); code không trực tiếp sửa các entry còn lại.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Tái tạo ảnh và kiểm tra sau lượng tử hóa</h4><p>\(A_\lambda'=QR'\), trừ \(\lambda I\), IDCT, chiếu sang RGB, làm tròn; sau đó lặp bước hiệu chỉnh nếu cần.</p></div></div>
+</div>
+<h3 id="p3extract">3.3. Thuật toán trích xuất</h3>
+<div class="flow"><div class="fbox">DCT block → 4×4 + \(\lambda I\) → QR với quy ước đường chéo \(R\) không âm</div><div class="arrow">↓</div><div class="fbox">Lấy \(R_{11}\)</div><div class="arrow">↓</div><div class="fbox">\(k=\operatorname{round}(R_{11}/\Delta)\)</div><div class="arrow">↓</div><div class="fbox">k chẵn → 0; k lẻ → 1</div></div>
+<h3 id="p3math">3.4. Cơ sở toán học và bất biến</h3>
+<div class="mathbox"><strong>Cơ sở QR [1].</strong><p>Gọi cột đầu tiên của \(A_\lambda\) là \(a_1\). Từ \(A_\lambda=QR\), cột đầu thỏa</p><div class="eq">\[a_1=q_1R_{11}.\]</div><p>Vì \(q_1\) là vector đơn vị,</p><div class="eq">\[\|a_1\|_2=|R_{11}|.\]</div><p>QR với quy ước đường chéo \(R\) không âm ép dấu đường chéo dương, nên</p><div class="eq">\[R_{11}=\|a_1\|_2\ge0.\]</div><p>Vì vậy \(R_{11}\) có ý nghĩa cụ thể: nó là <strong>độ lớn Euclid của cột thấp tần đầu tiên</strong>, không phải một đại lượng được chọn ngẫu nhiên.</p></div><div class="calculation">
+<h4>Ví dụ tính toán P3 — lượng tử hóa trực tiếp \(R_{11}\)</h4>
+<p>Giả sử QR với quy ước đường chéo \(R\) không âm cho \(R_{11}=29\) và bước mặc định là \(\Delta=12\). Cần nhúng bit 1.</p>
+<p>Chỉ số gần nhất hiện tại là</p>
+<div class="eq">\[k_0=\operatorname{round}(29/12)=2,\]</div>
+<p>nhưng \(k_0=2\) là chẵn. Hai mốc lẻ lân cận là \(12\) và \(36\); khoảng cách lần lượt là \(17\) và \(7\). Vì vậy mục tiêu gần nhất là</p>
+<div class="eq">\[R'_{11}=36,\qquad \Delta R_{11}=36-29=7.\]</div>
+<p>Trích xuất trên ảnh lý tưởng:</p>
+<div class="eq">\[\operatorname{round}(36/12)\bmod 2=3\bmod2=1.\]</div>
+<p class="result">Bit 1 được xác định trực tiếp từ tính chẵn/lẻ của chỉ số lượng tử của \(R_{11}\).</p>
+<p class="citation-note">Tham số mặc định: <code>DCTQRR11QIMConfig.step = 12.0</code>.</p>
+</div>
+<div class="mathbox"><strong>Mệnh đề P3 — luật bit.</strong><p>Nếu sau nhúng \(R_{11}'=k\Delta\) với \(k\equiv w\pmod 2\), thì trong số thực sạch</p><div class="eq">\[\operatorname{round}(R_{11}'/\Delta)\bmod2=w.\]</div><p>Bước hiệu chỉnh sau lượng tử hóa xử lý sai số phát sinh khi ánh xạ trở lại lattice pixel uint8.</p></div>
+<div class="plain"><strong>Quy ước dấu dương của \(R_{11}\).</strong> Vì QR với quy ước đường chéo \(R\) không âm cần quy ước dấu nhất quán. Hàm <code>_positive_r11_targets</code> còn có safety floor để tránh trường hợp hiếm khi mốc gần 0 làm mất tính ổn định của tính chẵn/lẻ.</div>
+<div class="paper"><strong>Đóng góp phương pháp:</strong> sử dụng trực tiếp chuẩn của cột thấp tần đầu tiên, biểu diễn bởi \(R_{11}\) của QR với quy ước đường chéo \(R\) không âm, làm đại lượng nhúng một chiều có diễn giải trực tiếp theo chuẩn Euclid.</div>
+<h3 id="p3diff">3.5. So sánh với bốn phương pháp còn lại</h3>
+<ul><li>Khác P1: QR ở P3 là nơi trực tiếp nhúng bit.</li><li>Khác P2: không dùng hiệu hai entry; chỉ thay một phần tử đường chéo \(R_{11}\).</li><li>Khác P4: không tạo ba bản sao/ba hướng từ sáu hệ số.</li><li>Khác P5: không dùng sign của chênh lệch hai nhóm pixel.</li></ul>
+<div class="warning"><span class="avoid">Giới hạn diễn giải:</span> Phạm vi diễn giải: \(R_{11}\) bằng chuẩn Euclid của cột đầu tiên của ma trận 4×4 thấp tần sau khi cộng \(\lambda I\); đại lượng này không đại diện cho toàn bộ năng lượng của block.</div>
+</section>
+<section id="p4">
+<h2>4. Proposal 4 — DCT–Schur Spectrum-Preserving Orthogonal Coupling QIM</h2>
+<p><span class="tag">method: dct_schur_rescue</span><span class="tag">file: proposals/schur_coupling_qim.py</span></p>
+<h3 id="p4idea">4.1. Idea mới</h3>
+<div class="one-line">P4 sử dụng sáu hệ số DCT để tạo ba tổ hợp tuyến tính trực giao. Ba giá trị này lần lượt biểu diễn ba bản sao được hoán vị của watermark; phép chiếu đóng thỏa đồng thời ba mục tiêu QIM với thay đổi Euclid nhỏ nhất và giữ nguyên đường chéo của cấu trúc Schur tam giác được dựng.</div>
+<p>Gọi sáu hệ số được chọn là</p><div class="eq">\[n=(n_1,n_2,n_3,n_4,n_5,n_6)^T.\]</div>
+<p>Code dùng ba hàng đã chuẩn hóa:</p>
+<div class="eq">\[
+H=\begin{bmatrix}
+\frac1{\sqrt2}&amp;-\frac1{\sqrt2}&amp;0&amp;0&amp;0&amp;0\\
+\frac12&amp;\frac12&amp;-\frac12&amp;-\frac12&amp;0&amp;0\\
+\frac1{\sqrt{12}}&amp;\frac1{\sqrt{12}}&amp;\frac1{\sqrt{12}}&amp;\frac1{\sqrt{12}}&amp;-\frac2{\sqrt{12}}&amp;-\frac2{\sqrt{12}}
+\end{bmatrix}.
+\]</div>
+<p>Ba số dùng để biểu diễn ba bit là</p><div class="eq">\[c=Hn=(c_1,c_2,c_3)^T.\]</div>
+<p>Viết riêng:</p>
+<div class="eq">\[c_1=\frac{n_1-n_2}{\sqrt2},\quad c_2=\frac{n_1+n_2-n_3-n_4}{2},\quad c_3=\frac{n_1+n_2+n_3+n_4-2n_5-2n_6}{\sqrt{12}}.\]</div>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>schur_coupling_qim.py:43–69</code> chỉ rõ 6 vị trí DCT và 3 vector trực giao; <code>294–345</code> tính ba giá trị và phép cập nhật tối thiểu; <code>637–650</code> ghi metadata về chuẩn Frobenius nhỏ nhất projection và kiểm tra phổ trị riêng/vết/định thức.</div>
+<div class="important"><strong>Lưu ý về implementation:</strong> code hiện tại <strong>không lấy từng block rồi gọi một hàm Schur decomposition đầy đủ</strong>. Sáu hệ số DCT được xem như sáu phần tử nằm phía trên đường chéo của một ma trận tam giác Schur được dựng. Đây là cấu trúc toán của proposal.</div>
+<h3 id="p4embed">4.2. Thuật toán nhúng</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Tiền xử lý watermark</h4><p>Arnold-scramble watermark rồi tạo ba permutation khác nhau của cùng 4096 bit.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Biến đổi DCT theo block</h4><p>Lấy sáu hệ số DCT tại sáu vị trí cố định của code.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Tính ba tổ hợp trực giao</h4><p>Tính \(c=Hn\). Mỗi \(c_k\) sẽ biểu diễn một bản sao đã permutation của watermark.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Xác định ba mục tiêu lượng tử</h4><p>Với từng \(c_k\), chọn mốc \(t_k\) gần nhất có chẵn/lẻ đúng với bit của copy thứ k.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Chiếu đồng thời sáu hệ số với chuẩn thay đổi nhỏ nhất</h4><p>Không sửa từng điều kiện lần lượt. Code dùng một công thức duy nhất</p><div class="eq">\[n^*=n+H^T(t-Hn).\]</div></div></div>
+<div class="step"><div class="num">6</div><div><h4>Giữ nguyên đường chéo của cấu trúc Schur tam giác</h4><p>Chỉ sáu phần tử phía trên đường chéo thay đổi; bốn phần tử đường chéo lấy từ các hệ số DCT khác không đổi trong luật nhúng lõi.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Tái tạo ảnh và kiểm tra sau lượng tử hóa</h4><p>Sau chiếu về ảnh uint8, code tính lại cả ba điều kiện; nếu một copy sai thì re-project từ ảnh hiện tại.</p></div></div>
+</div>
+<h3 id="p4extract">4.3. Thuật toán trích xuất</h3>
+<div class="flow"><div class="fbox">Ảnh → DCT → lấy 6 số \(n\)</div><div class="arrow">↓</div><div class="fbox">Tính \(c_1,c_2,c_3\)</div><div class="arrow">↓</div><div class="fbox">Mỗi \(c_k/\Delta\) → làm tròn → chẵn/lẻ</div><div class="arrow">↓</div><div class="fbox">Thu ba dãy bit</div><div class="arrow">↓</div><div class="fbox">Đảo ba permutation, gộp evidence</div><div class="arrow">↓</div><div class="fbox">Inverse Arnold → watermark</div></div>
+<h3 id="p4math">4.4. Cơ sở toán học và bất biến</h3>
+<div class="mathbox"><strong>Mệnh đề P4.1 — ba phép phối hợp thực sự trực giao.</strong><p>Ba hàng của \(H\) được chuẩn hóa và có tích vô hướng đôi một bằng 0, nên</p><div class="eq">\[HH^T=I_3.\]</div><p>Điều này có nghĩa là ba phép cộng–trừ đo ba hướng độc lập trong không gian sáu hệ số.</p></div>
+<div class="mathbox"><strong>Mệnh đề P4.2 — phép chiếu đạt đồng thời ba mục tiêu lượng tử.</strong><p>Đặt</p><div class="eq">\[n^*=n+H^T(t-Hn).\]</div><p>Khi đó</p><div class="eq">\[Hn^*=Hn+HH^T(t-Hn)=Hn+(t-Hn)=t.\]</div><p>Vậy cả ba đại lượng \(c_1,c_2,c_3\) được đưa đúng tới ba mục tiêu QIM cùng lúc.</p></div>
+<div class="mathbox"><strong>Mệnh đề P4.3 — nghiệm có chuẩn Euclid nhỏ nhất.</strong><p>Xét mọi vector \(m\) thỏa \(Hm=t\). Vì các hàng của \(H\) trực chuẩn, \(H^T(t-Hn)\) là hình chiếu vuông góc từ \(n\) tới affine subspace \(\{m:Hm=t\}\). Do đó \(n^*\) là nghiệm duy nhất của</p><div class="eq">\[\min_m\|m-n\|_2^2\quad\text{s.t.}\quad Hm=t.\]</div><p>Đây chính là ý nghĩa của cụm “chuẩn Frobenius nhỏ nhất/thay đổi nhỏ nhất” trong code.</p></div><div class="calculation">
+<h4>Ví dụ tính toán P4 — ba ràng buộc trực giao được thỏa đồng thời</h4>
+<p>Giả sử sáu hệ số được chọn là</p>
+<div class="eq">\[n=[18,12,9,7,4,3]^T.\]</div>
+<p>Từ ba hàng trực chuẩn của \(H\):</p>
+<div class="eq">\[c=Hn\approx[4.243,\;7.000,\;9.238]^T.\]</div>
+<p>Với \(\Delta=9\), giả sử ba bit cần nhúng là \([1,0,1]\). Các mục tiêu lượng tử gần nhất có tính chẵn/lẻ tương ứng là</p>
+<div class="eq">\[t=[9,0,9]^T.\]</div>
+<p>Áp dụng phép chiếu</p>
+<div class="eq">\[n^*=n+H^T(t-Hn),\]</div>
+<p>thu được</p>
+<div class="eq">\[n^*\approx[17.795,\;5.067,\;12.431,\;10.431,\;4.137,\;3.137]^T.\]</div>
+<p>Kiểm tra lại:</p>
+<div class="eq">\[Hn^*\approx[9,0,9]^T.\]</div>
+<p>Do đó các chỉ số lượng tử là \([1,0,1]\), đúng ba bit yêu cầu. Chuẩn thay đổi của sáu hệ số trong ví dụ này là</p>
+<div class="eq">\[\|n^*-n\|_2\approx8.467.\]</div>
+<p class="result">Một phép chiếu duy nhất thỏa đồng thời cả ba điều kiện; không cần sửa tuần tự từng tổ hợp.</p>
+<p class="citation-note">Tham số mặc định: <code>DirectSchurRescueConfig.step = 9.0</code>.</p>
+</div>
+<div class="mathbox"><strong>Tính chất ma trận tam giác — bảo toàn phổ, vết và định thức khi giữ đường chéo.</strong><p>Ma trận tam giác Schur được dựng có dạng</p><div class="eq">\[T=\begin{bmatrix}d_1&amp;*&amp;*&amp;*\\0&amp;d_2&amp;*&amp;*\\0&amp;0&amp;d_3&amp;*\\0&amp;0&amp;0&amp;d_4\end{bmatrix}.\]</div><p>Theo tính chất chuẩn của ma trận tam giác [2]:</p><div class="eq">\[\lambda_i(T)=d_i,\qquad \operatorname{tr}(T)=\sum_i d_i,\qquad \det(T)=\prod_i d_i.\]</div><p>Do proposal chỉ đổi các dấu * phía trên đường chéo và giữ \(d_1,\ldots,d_4\), ba đại lượng trên không đổi ở mức ma trận Schur được dựng.</p></div>
+<div class="important"><strong>Phạm vi phát biểu:</strong> phổ trị riêng/vết/định thức được bảo toàn cho <strong>constructed triangular Schur matrix trong bước số thực dấu phẩy động</strong>. Sau IDCT và làm tròn RGB, code không giả định chúng vẫn chính xác tuyệt đối; bước kiểm tra sau lượng tử hóa xác nhận lại các bit.</div>
+<div class="paper"><strong>Đóng góp phương pháp:</strong> ba phép phối hợp trực giao từ sáu hệ số DCT cho phép biểu diễn ba bản sao watermark; phép chiếu đóng \(n^*=n+H^T(t-Hn)\) thỏa đồng thời ba ràng buộc với thay đổi nhỏ nhất, trong khi diagonal của cấu trúc Schur được giữ nên phổ trị riêng/vết/định thức của cấu trúc này không đổi.</div>
+<h3 id="p4diff">4.5. So sánh với bốn phương pháp còn lại</h3>
+<ul><li>Khác P1/P2/P3: một block tạo <strong>ba đại lượng độc lập</strong>, không chỉ một đại lượng.</li><li>Khác P1: QR không phải thành phần lõi của engine này.</li><li>Khác P2/P3: không nhúng vào \(R\).</li><li>Khác P5: vẫn ở miền DCT, không sửa trực tiếp hai nhóm pixel.</li></ul>
+<div class="warning"><span class="avoid">Giới hạn diễn giải:</span> “Schur decomposition is computed for each DCT block” nếu paper phải khớp code hiện tại. Chính xác hơn là “a triangular Schur-coordinate structure is constructed from selected DCT coefficients”.</div>
+</section>
+<section id="p5">
+<h2>5. Proposal 5 — Spatial Normalized-Residual DetQR</h2>
+<p><span class="tag">method: spatial_cd_detqr</span><span class="tag">file: proposals/cd_detqr.py</span></p>
+<h3 id="p5idea">5.1. Idea mới</h3>
+<div class="one-line">P5 hoạt động trong miền không gian. Mỗi mặt nạ (pattern) chia block thành hai nhóm pixel có trung bình \(u\) và \(v\); bit được biểu diễn bởi dấu của \(u-v=\det(A)\), đồng thời ràng buộc QR residual chuẩn hóa tạo khoảng an toàn cho quyết định.</div>
+<p>Gọi</p><ul><li>\(u\): độ sáng trung bình của các pixel thuộc nhóm “+”;</li><li>\(v\): độ sáng trung bình của các pixel thuộc nhóm “−”.</li></ul>
+<p>Code dựng ma trận</p><div class="eq">\[A=\begin{bmatrix}u&amp;1\\v&amp;1\end{bmatrix}.\]</div>
+<p>Định thức là</p><div class="eq">\[\det(A)=u-v.\]</div>
+<p>Do đó quy tắc giải mã được xác định trực tiếp:</p><table><tr><th>Điều kiện</th><th>Ý nghĩa</th><th>Bit</th></tr><tr><td>\(u-v&gt;0\)</td><td>nhóm “+” sáng hơn</td><td>1</td></tr><tr><td>\(u-v&lt;0\)</td><td>nhóm “−” sáng hơn</td><td>0</td></tr></table>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>cd_detqr.py:3–20</code> nêu chính xác \(A\), định thức và residual chuẩn hóa; <code>81–110</code> tính các đại lượng bằng QR với quy ước đường chéo \(R\) không âm; <code>119–158</code> chứa công thức closed-form cho mức sửa nguyên nhỏ nhất; <code>478–562</code> là thuật toán nhúng và bước kiểm tra sau lượng tử hóa.</div>
+<h3 id="p5embed">5.2. Thuật toán nhúng</h3>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>Chuyển RGB sang luminance</h4><p>\(Y=0.299R+0.587G+0.114B\).</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>Đánh giá tập mặt nạ (pattern) không gian</h4><p>Các pattern sinh từ Hadamard. Mỗi pattern chia 64 pixel của block thành hai nhóm.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>Tính trung bình hai nhóm pixel</h4><p>Với từng pattern, lấy trung bình độ sáng của nhóm “+” và nhóm “−”.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>Ánh xạ bit sang dấu mục tiêu</h4><p>Bit 1 → \(s=+1\); bit 0 → \(s=-1\).</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>Tính biên độ nguyên tối thiểu</h4><p>Code không dò thử nhiều giá trị. Nó có công thức đóng để tìm \(a^*\) nhỏ nhất sao cho dấu đúng, định thức không gần 0 và khoảng an toàn chuẩn hóa đủ lớn.</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>Chọn mặt nạ có chi phí nhỏ nhất</h4><p>Ưu tiên pattern cần \(a\) nhỏ và phạt mặt nạ có nhiều đường biên.</p></div></div>
+<div class="step"><div class="num">7</div><div><h4>Cập nhật pixel trong miền không gian</h4><p>Pixel ở nhóm phù hợp được cộng \(sa\), nhóm còn lại trừ \(sa\), rồi clip 0…255.</p></div></div>
+<div class="step"><div class="num">8</div><div><h4>Nhúng pilot và kiểm tra sau lượng tử hóa</h4><p>Pilot hỗ trợ căn chỉnh affine nhẹ; bước kiểm tra sau lượng tử hóa xác nhận tính đúng đắn của trích xuất trên ảnh không bị tấn công sau clipping/rounding.</p></div></div>
+</div>
+<h3 id="p5extract">5.3. Thuật toán trích xuất</h3>
+<div class="flow"><div class="fbox">Dùng pilot để căn chỉnh nếu cần</div><div class="arrow">↓</div><div class="fbox">Theo pattern lưu trong key, tính lại \(u,v\)</div><div class="arrow">↓</div><div class="fbox">QR ma trận \(A=[[u,1],[v,1]]\)</div><div class="arrow">↓</div><div class="fbox">Tính dấu định thức</div><div class="arrow">↓</div><div class="fbox">det &gt; 0 → 1; det &lt; 0 → 0</div><div class="arrow">↓</div><div class="fbox">Loại bỏ mặt nạ dữ liệu nếu pilot được xác nhận</div></div>
+<div class="sourcebox"><strong>Căn cứ code:</strong> <code>cd_detqr.py:650–706</code> trích xuất lại định thức, quyết định bit bằng <code>payload_det &gt; 0</code>, xử lý pilot/mask và trả watermark.</div>
+<h3 id="p5math">5.4. Cơ sở toán học và bất biến</h3>
+<div class="mathbox"><strong>Mệnh đề P5.1 — định thức chính là chênh lệch hai nhóm.</strong><div class="eq">\[\det\begin{bmatrix}u&amp;1\\v&amp;1\end{bmatrix}=u-v.\]</div><p>Vì vậy dấu của định thức trùng đúng với dấu của chênh lệch trung bình giữa hai nhóm pixel.</p></div>
+<div class="mathbox"><strong>Mệnh đề P5.2 — QR residual chuẩn hóa có công thức đóng.</strong><p>Với QR với quy ước đường chéo \(R\) không âm \(A=QR\), cột đầu là \((u,v)^T\), nên</p><div class="eq">\[r_{11}=\sqrt{u^2+v^2}.\]</div><p>Đồng thời</p><div class="eq">\[\det(A)=\det(Q)r_{11}r_{22}.\]</div><p>Suy ra</p><div class="eq">\[z=\det(Q)r_{22}=\frac{\det(A)}{r_{11}}=\frac{u-v}{\sqrt{u^2+v^2}}.\]</div><p>Do đó \(z\) là chênh lệch đã được chuẩn hóa theo độ lớn tổng quát của \(u,v\).</p></div>
+<div class="mathbox"><strong>Mệnh đề P5.3 — biên độ nguyên nhỏ nhất thỏa hai ràng buộc.</strong><p>Gọi \(d=u-v\), \(k=u+v\), và \(s\in\{-1,+1\}\) là dấu mong muốn. Update đối xứng</p><div class="eq">\[u'=u+sa,\qquad v'=v-sa\]</div><p>cho</p><div class="eq">\[d'=d+2sa,\qquad k'=k.\]</div><p>Điều kiện khoảng an toàn chuẩn hóa \(sz(A')\ge\mu\) tương đương</p><div class="eq">\[sd'\ge\frac{\mu|k|}{\sqrt{2-\mu^2}}.\]</div><p>Kết hợp thêm \(|d'|\ge\delta\), code nhận được số nguyên nhỏ nhất</p><div class="eq">\[a^*=\max\!\left(0,\left\lceil\frac{\max\!\left(\delta,\frac{\mu|k|}{\sqrt{2-\mu^2}}\right)-sd}{2}\right\rceil\right).\]</div><div class="proof">Vì \(a\) chỉ làm \(sd'\) tăng tuyến tính mỗi lần 2 đơn vị, lấy ceiling của ngưỡng cần bù cho ta số nguyên nhỏ nhất thỏa đồng thời hai bất đẳng thức. Đây là đúng công thức trong docstring <code>minimum_integer_amplitude</code>, lines 126–140.</div></div><div class="calculation">
+<h4>Ví dụ tính toán P5 — biên độ nguyên tối thiểu</h4>
+<p>Giả sử một pattern cho \(u=120\), \(v=118\). Cần nhúng bit 0 nên \(s=-1\). Với tham số mặc định \(\mu=0.005\) và \(\delta=0.10\):</p>
+<div class="eq">\[d=u-v=2,\qquad k=u+v=238.\]</div>
+<p>Ngưỡng từ residual chuẩn hóa là</p>
+<div class="eq">\[\frac{\mu|k|}{\sqrt{2-\mu^2}}\approx\frac{0.005\times238}{\sqrt{1.999975}}\approx0.84146.\]</div>
+<p>Do đó</p>
+<div class="eq">\[a^*=\left\lceil\frac{\max(0.10,0.84146)-(-1)(2)}{2}\right\rceil=\lceil1.42073\rceil=2.\]</div>
+<p>Cập nhật đối xứng:</p>
+<div class="eq">\[u'=120-2=118,\qquad v'=118+2=120.\]</div>
+<p>Kiểm tra định thức và residual chuẩn hóa:</p>
+<div class="eq">\[\det(A')=u'-v'=-2&lt;0,\]</div>
+<div class="eq">\[z(A')=\frac{-2}{\sqrt{118^2+120^2}}\approx-0.01188,\qquad sz(A')\approx0.01188&gt;0.005.\]</div>
+<p class="result">\(a=2\) là số nguyên nhỏ nhất thỏa đồng thời dấu bit 0, ngưỡng định thức và ngưỡng residual chuẩn hóa.</p>
+<p class="citation-note">Tham số mặc định: <code>CDDetQRConfig.target_margin = 0.005</code>, <code>embedded_determinant_margin = 0.10</code>.</p>
+</div>
+<div class="mathbox"><strong>Bất biến P5 — tổng hai trung bình không đổi trước clipping.</strong><div class="eq">\[u'+v'=(u+sa)+(v-sa)=u+v.\]</div><p>Như vậy phép cập nhật thay đổi trực tiếp độ chênh \(u-v\) trong khi giữ nguyên tổng \(u+v\) ở mô hình lý tưởng trước clipping.</p></div>
+<div class="paper"><strong>Đóng góp phương pháp:</strong> một luật nhúng trong miền không gian có nghiệm đóng cho thay đổi nguyên nhỏ nhất, trong đó bit được gắn trực tiếp với dấu định thức \(u-v\), đồng thời áp đặt cả biên an toàn định thức và ngưỡng QR residual chuẩn hóa.</div>
+<h3 id="p5diff">5.5. So sánh với bốn phương pháp còn lại</h3>
+<ul><li>P5 là phương pháp duy nhất trong 5 proposal <strong>không dùng DCT</strong>.</li><li>P5 không dùng QIM theo chẵn/lẻ chỉ số lượng tử; bit là dấu dương/âm.</li><li>P5 thử nhiều mặt nạ không gian và lưu pattern đã chọn trong key.</li><li>QR ở P5 là QR của ma trận 2×2 tạo bởi hai trung bình pixel, không phải QR của ma trận DCT 4×4.</li></ul>
+</section>
+<section id="compare">
+<h2>6. So sánh năm phương pháp</h2>
+<table class="compare"><tr><th>Phương pháp</th><th>Con số/dấu hiệu được dùng để biểu diễn bit</th><th>Luật 0/1</th><th>Cơ sở toán học chính</th></tr>
+<tr><td>P1 — DCT–QR adaptive</td><td>\((C_{01}-C_{10})/2\)</td><td>mốc lượng tử chẵn/lẻ</td><td>Bước lượng tử thích nghi theo độ ổn định QR và tối ưu nhãn theo cặp không làm tăng chi phí chiếu trong mô hình số thực</td></tr>
+<tr><td>P2 — Direct-R</td><td>\((R_{12}-R_{13})/2\)</td><td>mốc lượng tử chẵn/lẻ</td><td>cập nhật đối xứng đạt đúng mục tiêu, giữ \(R_{11}\) và \(R_{12}+R_{13}\)</td></tr>
+<tr><td>P3 — Direct-R11</td><td>\(R_{11}=\|a_1\|_2\)</td><td>mốc lượng tử chẵn/lẻ</td><td>giải thích QR rõ ràng: \(R_{11}\) là norm của cột đầu</td></tr>
+<tr><td>P4 — DCT–Schur</td><td>ba đại lượng \(Hn\)</td><td>ba QIM theo chẵn/lẻ chỉ số lượng tử</td><td>orthogonal projection tối thiểu + giữ diagonal của ma trận tam giác</td></tr>
+<tr><td>P5 — Spatial DetQR</td><td>\(\det(A)=u-v\)</td><td>dấu +/−</td><td>residual chuẩn hóa + nghiệm đóng số nguyên tối thiểu cập nhật</td></tr></table>
+<div class="tip"><strong>Nguyên tắc trình bày:</strong> mỗi proposal nên được giới thiệu trước bằng đại lượng toán học trực tiếp biểu diễn bit, sau đó mới trình bày phép biến đổi, luật nhúng và bất biến liên quan.</div>
+</section>
+<section id="refs">
+<h2>7. Căn cứ mã nguồn và tài liệu toán học</h2>
+<h3>7.1. Mã nguồn được dùng để đối chiếu</h3>
+<table><tr><th>Proposal</th><th>Source chính</th><th>Đoạn quan trọng</th></tr>
+<tr><td>P1</td><td><code>proposals/method.py</code>, <code>proposals/certificate.py</code></td><td><code>method.py:132–190</code> tối ưu nhãn theo nhóm; <code>378–388</code> số DCT dùng để trích xuất bit; <code>402–439</code> bù biên độ; <code>641–716</code> vai trò QR.</td></tr>
+<tr><td>P2</td><td><code>proposals/dct_qr_direct_r.py</code></td><td><code>3–23</code> định nghĩa method; <code>145–158</code> QIM theo chẵn/lẻ chỉ số lượng tử; <code>161–170</code> DCT→QR; <code>198–211</code> cập nhật \(R_{12},R_{13}\).</td></tr>
+<tr><td>P3</td><td><code>proposals/dct_qr_r11_qim.py</code></td><td><code>3–14</code> diễn giải \(R_{11}\); <code>112–120</code> positive QIM target; <code>137–155</code> direct \(R_{11}\) cập nhật.</td></tr>
+<tr><td>P4</td><td><code>proposals/schur_coupling_qim.py</code></td><td><code>43–69</code> 6 vị trí và 3 hướng trực giao; <code>294–345</code> phép chiếu; <code>637–650</code> invariant checks.</td></tr>
+<tr><td>P5</td><td><code>proposals/cd_detqr.py</code></td><td><code>3–20</code> công thức nền; <code>81–110</code> QR đại lượngs; <code>119–158</code> nghiệm đóng; <code>650–706</code> extraction.</td></tr></table>
+<h3>7.2. Tài liệu toán học nền tảng (ngoài repository)</h3>
+<ol>
+<li><strong>G. H. Golub and C. F. Van Loan, <em>Matrix Computations</em>, 4th ed., Johns Hopkins University Press, 2013.</strong> Dùng cho QR factorization, tính trực chuẩn của \(Q\), và hệ quả \(r_{11}=\|a_1\|_2\) khi chọn quy ước dấu dương.</li>
+<li><strong>R. A. Horn and C. R. Johnson, <em>Matrix Analysis</em>, 2nd ed., Cambridge University Press, 2012.</strong> Dùng cho tính chất ma trận tam giác: eigenvalues là các phần tử đường chéo, vết là tổng đường chéo, định thức là tích đường chéo; đồng thời là nền cho các phép chiếu trực giao trong không gian Euclid.</li>
+<li><strong>B. Chen and G. W. Wornell, “Quantization Index Modulation: A Class of Provably Good Methods for Digital Watermarking and Information Embedding,” <em>IEEE Transactions on Information Theory</em>, 47(4), 1423–1443, 2001.</strong> Dùng làm nền tảng khái niệm QIM: thông tin được biểu diễn bằng lựa chọn giữa các tập lượng tử khác nhau.</li>
+</ol>
+<div class="warning"><strong>Phạm vi trích dẫn:</strong> các tài liệu [1]–[3] hỗ trợ các kết quả toán học chung về QR, ma trận tam giác và QIM. Các công thức đặc thù của năm proposal được đối chiếu với implementation trong repository và cần được trích dẫn bằng bài báo/phần phương pháp tương ứng khi xuất bản.</div>
+</section>
+</article></div></body></html>
