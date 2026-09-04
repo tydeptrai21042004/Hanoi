@@ -12,19 +12,22 @@ from qr64_certified.proposals.proposal_registry import (
     DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
+    SPATIAL_QR,
+    SPATIAL_QR_DIRECT_R,
+    SPATIAL_QR_R11_QIM,
     SUPPORTED_PROPOSAL_METHODS,
     normalize_proposal_method_id,
 )
 
 from .types import BenchmarkMethodSpec
 
-PROPOSAL_IDS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
+PROPOSAL_IDS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, SPATIAL_QR, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
 
 def proposal_spec(method_id: str) -> BenchmarkMethodSpec:
     canonical = normalize_proposal_method_id(method_id)
     metadata = SUPPORTED_PROPOSAL_METHODS[canonical]
-    direct_blind = canonical in {DCT_QR_DIRECT_R, DCT_QR_R11_QIM}
+    direct_blind = canonical in {DCT_QR_DIRECT_R, DCT_QR_R11_QIM, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM}
     return BenchmarkMethodSpec(
         method_id=canonical,
         method_kind="proposal",

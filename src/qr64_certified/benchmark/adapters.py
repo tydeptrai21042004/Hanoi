@@ -13,12 +13,18 @@ from qr64_certified.proposals.config import QR64Config
 from qr64_certified.proposals.dct_qr_direct_r import DCTQRDirectRConfig
 from qr64_certified.proposals.dct_qr_r11_qim import DCTQRR11QIMConfig
 from qr64_certified.proposals.direct_schur_rescue import DirectSchurRescueConfig
+from qr64_certified.proposals.spatial_qr import SpatialQRConfig
+from qr64_certified.proposals.spatial_qr_direct_r import SpatialQRDirectRConfig
+from qr64_certified.proposals.spatial_qr_r11_qim import SpatialQRR11QIMConfig
 from qr64_certified.proposals.proposal_registry import (
     DCT_QR,
     DCT_QR_DIRECT_R,
     DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
+    SPATIAL_QR,
+    SPATIAL_QR_DIRECT_R,
+    SPATIAL_QR_R11_QIM,
     default_config_for_method,
     embed_proposal,
     extract_proposal,
@@ -56,6 +62,12 @@ def _load_proposal_config(spec: BenchmarkMethodSpec, root: Path):
         return DCTQRR11QIMConfig.from_mapping(raw)
     if spec.method_id == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig.from_mapping(raw)
+    if spec.method_id == SPATIAL_QR:
+        return SpatialQRConfig.from_mapping(raw)
+    if spec.method_id == SPATIAL_QR_DIRECT_R:
+        return SpatialQRDirectRConfig.from_mapping(raw)
+    if spec.method_id == SPATIAL_QR_R11_QIM:
+        return SpatialQRR11QIMConfig.from_mapping(raw)
     allowed = set(CDDetQRConfig.__dataclass_fields__)
     config = CDDetQRConfig(**{key: value for key, value in raw.items() if key in allowed})
     config.validate()
@@ -76,6 +88,8 @@ def _proposal_config_for_seed(method_id: str, config: Any, seed: int):
     if method_id == DCT_QR_R11_QIM:
         return replace(config, seed=int(seed)).validated()
     if method_id == DCT_SCHUR_RESCUE:
+        return replace(config, seed=int(seed)).validated()
+    if method_id in {SPATIAL_QR, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM}:
         return replace(config, seed=int(seed)).validated()
     if method_id == SPATIAL_CD_DETQR:
         varied = replace(

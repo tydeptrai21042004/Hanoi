@@ -32,6 +32,24 @@ from .dct_qr_r11_qim import (
     embed as embed_dct_qr_r11_qim,
     extract as extract_dct_qr_r11_qim,
 )
+from .spatial_qr import (
+    SpatialQRConfig,
+    SpatialQRKey,
+    embed as embed_spatial_qr,
+    extract as extract_spatial_qr,
+)
+from .spatial_qr_direct_r import (
+    SpatialQRDirectRConfig,
+    SpatialQRDirectRKey,
+    embed as embed_spatial_qr_direct_r,
+    extract as extract_spatial_qr_direct_r,
+)
+from .spatial_qr_r11_qim import (
+    SpatialQRR11QIMConfig,
+    SpatialQRR11QIMKey,
+    embed as embed_spatial_qr_r11_qim,
+    extract as extract_spatial_qr_r11_qim,
+)
 from .method import QR64Key, embed as embed_certified, extract as extract_certified
 
 DCT_QR = "dct_qr"
@@ -39,6 +57,9 @@ DCT_QR_DIRECT_R = "dct_qr_direct_r"
 DCT_QR_R11_QIM = "dct_qr_r11_qim"
 DCT_SCHUR_RESCUE = "dct_schur_rescue"
 SPATIAL_CD_DETQR = "spatial_cd_detqr"
+SPATIAL_QR = "spatial_qr"
+SPATIAL_QR_DIRECT_R = "spatial_qr_direct_r"
+SPATIAL_QR_R11_QIM = "spatial_qr_r11_qim"
 
 # Compatibility aliases retained for old commands.
 QR_CERTIFIED = DCT_QR
@@ -90,6 +111,38 @@ SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
             "spectrum, trace, and determinant while using an independent decoder and key."
         ),
     },
+    SPATIAL_QR: {
+        "id": SPATIAL_QR,
+        "display_name": "Spatial-QR Pairwise Coset-Optimized Gain-Normalized QIM",
+        "domain": "Direct spatial luminance differential carrier with QR reliability grouping and R11 gain normalization; no DCT",
+        "scientific_status": "new non-DCT proposal; smoke-validated",
+        "description": (
+            "A directional spatial luminance difference carries parity-QIM bits. A mean-centered "
+            "central 4x4 spatial QR certificate assigns step classes and pairwise cosets, while "
+            "R11 provides attack-time gain normalization. No DCT or IDCT is used."
+        ),
+    },
+    SPATIAL_QR_DIRECT_R: {
+        "id": SPATIAL_QR_DIRECT_R,
+        "display_name": "Spatial-QR Direct-R Differential QIM",
+        "domain": "Direct QR of a central 4x4 spatial luminance patch; QIM on (R12-R13)/2; no DCT",
+        "scientific_status": "new non-DCT proposal; smoke-validated",
+        "description": (
+            "The payload is embedded directly after QR of the spatial luminance patch. The "
+            "minimum-Frobenius antisymmetric update modifies R12 and R13 with equal and opposite "
+            "increments, preserving their sum and all diagonal entries."
+        ),
+    },
+    SPATIAL_QR_R11_QIM: {
+        "id": SPATIAL_QR_R11_QIM,
+        "display_name": "Spatial-QR Direct-R11 QIM",
+        "domain": "Direct QR of a central 4x4 spatial luminance patch; parity-QIM on R11; no DCT",
+        "scientific_status": "new non-DCT proposal; smoke-validated",
+        "description": (
+            "The watermark bit is embedded directly in canonical positive R11 of a spatial QR "
+            "factorization and the patch is reconstructed without any transform-domain stage."
+        ),
+    },
     SPATIAL_CD_DETQR: {
         "id": SPATIAL_CD_DETQR,
         "display_name": "Spatial Normalized-Residual DetQR",
@@ -121,6 +174,12 @@ METHOD_ALIASES = {
     "cd_detqr": SPATIAL_CD_DETQR,
     "detqr": SPATIAL_CD_DETQR,
     "spatial_cd_detqr": SPATIAL_CD_DETQR,
+    "spatial_qr": SPATIAL_QR,
+    "spatial_pairwise_qr": SPATIAL_QR,
+    "spatial_qr_direct_r": SPATIAL_QR_DIRECT_R,
+    "spatial_direct_r_qr": SPATIAL_QR_DIRECT_R,
+    "spatial_qr_r11_qim": SPATIAL_QR_R11_QIM,
+    "spatial_r11_qim": SPATIAL_QR_R11_QIM,
 }
 
 
@@ -146,6 +205,12 @@ def default_config_for_method(method_id: str):
         return DCTQRR11QIMConfig().validated()
     if method == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig().validated()
+    if method == SPATIAL_QR:
+        return SpatialQRConfig().validated()
+    if method == SPATIAL_QR_DIRECT_R:
+        return SpatialQRDirectRConfig().validated()
+    if method == SPATIAL_QR_R11_QIM:
+        return SpatialQRR11QIMConfig().validated()
     return CDDetQRConfig()
 
 
@@ -154,10 +219,31 @@ def embed_proposal(
     host_rgb: np.ndarray,
     watermark_binary: np.ndarray,
     *,
-    config: QR64Config | DCTQRDirectRConfig | DCTQRR11QIMConfig | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
+    config: QR64Config | DCTQRDirectRConfig | DCTQRR11QIMConfig | SpatialQRConfig | SpatialQRDirectRConfig | SpatialQRR11QIMConfig | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
     return_metadata: bool = False,
 ):
     method = normalize_proposal_method_id(method_id)
+    if method == SPATIAL_QR:
+        return embed_spatial_qr(
+            host_rgb,
+            watermark_binary,
+            config=SpatialQRConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
+    if method == SPATIAL_QR_DIRECT_R:
+        return embed_spatial_qr_direct_r(
+            host_rgb,
+            watermark_binary,
+            config=SpatialQRDirectRConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
+    if method == SPATIAL_QR_R11_QIM:
+        return embed_spatial_qr_r11_qim(
+            host_rgb,
+            watermark_binary,
+            config=SpatialQRR11QIMConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
     if method == DCT_QR_DIRECT_R:
         return embed_dct_qr_direct_r(
             host_rgb,
@@ -216,10 +302,22 @@ def embed_proposal(
 
 def extract_proposal(
     possibly_attacked_rgb: np.ndarray,
-    key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey,
+    key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | SpatialQRKey | SpatialQRDirectRKey | SpatialQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey,
     *,
     return_metadata: bool = False,
 ):
+    if isinstance(key, SpatialQRKey):
+        return extract_spatial_qr(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
+    if isinstance(key, SpatialQRDirectRKey):
+        return extract_spatial_qr_direct_r(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
+    if isinstance(key, SpatialQRR11QIMKey):
+        return extract_spatial_qr_r11_qim(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
     if isinstance(key, DCTQRDirectRKey):
         return extract_dct_qr_direct_r(
             possibly_attacked_rgb, key, return_metadata=return_metadata
@@ -247,7 +345,13 @@ def extract_proposal(
     )
 
 
-def method_id_from_key(key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey) -> str:
+def method_id_from_key(key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | SpatialQRKey | SpatialQRDirectRKey | SpatialQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey) -> str:
+    if isinstance(key, SpatialQRKey):
+        return SPATIAL_QR
+    if isinstance(key, SpatialQRDirectRKey):
+        return SPATIAL_QR_DIRECT_R
+    if isinstance(key, SpatialQRR11QIMKey):
+        return SPATIAL_QR_R11_QIM
     if isinstance(key, DCTQRDirectRKey):
         return DCT_QR_DIRECT_R
     if isinstance(key, DCTQRR11QIMKey):
@@ -265,6 +369,9 @@ __all__ = [
     "DCT_QR_R11_QIM",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",
+    "SPATIAL_QR",
+    "SPATIAL_QR_DIRECT_R",
+    "SPATIAL_QR_R11_QIM",
     "QR_CERTIFIED",
     "DIRECT_SCHUR_RESCUE",
     "SUPPORTED_PROPOSAL_METHODS",

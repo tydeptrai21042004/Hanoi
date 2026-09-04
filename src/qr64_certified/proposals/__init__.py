@@ -12,12 +12,18 @@ from .direct_schur_rescue import DirectSchurRescueConfig, DirectSchurRescueKey
 from .cd_detqr import CDDetQRConfig, CDDetQRKey, BlindCDDetQR
 from .dct_qr_direct_r import DCTQRDirectRConfig, DCTQRDirectRKey
 from .dct_qr_r11_qim import DCTQRR11QIMConfig, DCTQRR11QIMKey
+from .spatial_qr import SpatialQRConfig, SpatialQRKey
+from .spatial_qr_direct_r import SpatialQRDirectRConfig, SpatialQRDirectRKey
+from .spatial_qr_r11_qim import SpatialQRR11QIMConfig, SpatialQRR11QIMKey
 from .proposal_registry import (
     DCT_QR,
     DCT_QR_DIRECT_R,
     DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
+    SPATIAL_QR,
+    SPATIAL_QR_DIRECT_R,
+    SPATIAL_QR_R11_QIM,
     QR_CERTIFIED,
     DIRECT_SCHUR_RESCUE,
     SUPPORTED_PROPOSAL_METHODS,
@@ -42,6 +48,12 @@ __all__ = [
     "DCTQRDirectRKey",
     "DCTQRR11QIMConfig",
     "DCTQRR11QIMKey",
+    "SpatialQRConfig",
+    "SpatialQRKey",
+    "SpatialQRDirectRConfig",
+    "SpatialQRDirectRKey",
+    "SpatialQRR11QIMConfig",
+    "SpatialQRR11QIMKey",
     "ABLATION_FLAGS",
     "HYPERPARAMETER_FLAGS",
     "apply_proposal_flags",
@@ -50,6 +62,9 @@ __all__ = [
     "DCT_QR_R11_QIM",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",
+    "SPATIAL_QR",
+    "SPATIAL_QR_DIRECT_R",
+    "SPATIAL_QR_R11_QIM",
     "QR_CERTIFIED",
     "DIRECT_SCHUR_RESCUE",
     "SUPPORTED_PROPOSAL_METHODS",
