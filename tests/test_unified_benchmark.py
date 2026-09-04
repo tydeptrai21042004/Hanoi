@@ -18,8 +18,8 @@ def _host() -> np.ndarray:
 
 def test_method_selectors_include_proposals_and_primary_baselines():
     methods = resolve_methods("paper_comparison")
-    assert len(methods) == 10
-    assert sum(spec.method_kind == "proposal" for spec in methods) == 5
+    assert len(methods) == 13
+    assert sum(spec.method_kind == "proposal" for spec in methods) == 8
     assert sum(spec.method_kind == "baseline" for spec in methods) == 5
 
 

@@ -3,9 +3,9 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "three-proposal-blind-watermark"
-version = "2.3.0"
-description = "Unified blind-watermark research package with proposals, baselines and attacks"
+name = "multi-proposal-blind-watermark"
+version = "2.4.0"
+description = "Unified watermark research package with eight proposals, baselines and attacks"
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=2.0",

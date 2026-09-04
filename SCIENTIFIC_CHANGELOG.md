@@ -1,5 +1,27 @@
 # Scientific revision changelog
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
+## 2026-09-04 — Three non-DCT Spatial-QR proposals
+
+Added three independent proposal IDs that remove DCT/IDCT from the corresponding QR research questions:
+
+- `spatial_qr`: directional spatial luminance carrier, QR reliability step classes, exact pairwise coset selection, and `R11` gain normalization.
+- `spatial_qr_direct_r`: direct QR of a central 4×4 spatial luminance patch with minimum-Frobenius antisymmetric QIM on `(R12-R13)/2`.
+- `spatial_qr_r11_qim`: direct parity-QIM on spatial-domain `R11`, with a selective same-parity downward closure rescue for saturated blocks.
+
+Engineering/scientific integration:
+
+- extended the public proposal registry from five to eight methods;
+- extended unified benchmark selectors and adapters;
+- extended ABC configuration dispatch and fixed the direct-R fall-through to the Spatial CD-DetQR schema;
+- added `before` and `after_abc` config files for all three spatial methods;
+- added clean/no-DCT tests;
+- updated all Markdown documentation, with historical documents explicitly labeled rather than rewriting old result claims;
+- added machine-readable `results/spatial_qr_family_clean_13host.json` and `results/spatial_qr_family_lenna_15attack.json`.
+
+Validation: all three methods achieve clean NC = 1.0 on all 13 supplied hosts. Mean clean PSNR is approximately 51.81, 50.73, and 50.58 dB respectively. On Lenna/15 moderate attacks, current mean NC is approximately 0.9141, 0.8507, and 0.7059. These are new proposal results, not publication-level claims.
+
 ## 2026 Artificial Bee Colony optimizer migration
 
 - Replaced the proposal-level Particle Swarm Optimization driver with a

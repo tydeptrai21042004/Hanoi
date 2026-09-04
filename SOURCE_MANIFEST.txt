@@ -1,6 +1,11 @@
 ABC_MIGRATION_REPORT.md
 BLIND_CD_DETQR_PSNR54_REPORT_VI.md
 COMPLETION_REPORT.md
+Giai_thich.html
+Giai_thich_5_proposal_FULL_corrected.html
+Giai_thich_5_proposal_PROFESSIONAL.html
+Huong_dan_toan_hoc_luat_nhung_trich_xuat_3_proposal.html
+Huong_dan_toan_hoc_luat_nhung_trich_xuat_3_proposal.md
 LICENSE_BASE_CODE
 README.md
 RESULTS_BEFORE_AFTER.md
@@ -24,6 +29,12 @@ configs/dct_schur_sp_scqim.json
 configs/spatial_cd_detqr_after_abc.json
 configs/spatial_cd_detqr_after_pso.json
 configs/spatial_cd_detqr_before.json
+configs/spatial_qr_after_abc.json
+configs/spatial_qr_before.json
+configs/spatial_qr_direct_r_after_abc.json
+configs/spatial_qr_direct_r_before.json
+configs/spatial_qr_r11_qim_after_abc.json
+configs/spatial_qr_r11_qim_before.json
 data/host/Girl.bmp
 data/host/airplane.bmp
 data/host/athens.bmp
@@ -44,6 +55,7 @@ docs/ABLATION_AND_HYPERPARAMETER_FLAGS.md
 docs/ATTACKS.md
 docs/BASELINE_ID_MIGRATION.md
 docs/BASELINE_INTEGRATION.md
+docs/BA_PHUONG_PHAP_DE_XUAT_WATERMARKING_VI.md
 docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md
 docs/DCT_QR_DIRECT_R_PROPOSAL_VI.md
 docs/DCT_QR_R11_QIM_PROPOSAL_VI.md
@@ -55,6 +67,10 @@ docs/REDESIGNED_PROPOSALS_VI.md
 docs/RESULTS_PRESERVED.sha256
 docs/SCIENTIFIC_METHODS.md
 docs/SCIENTIFIC_METHODS_VI.md
+docs/SIX_QR_FAMILY_PROPOSALS.md
+docs/SPATIAL_QR_DIRECT_R_PROPOSAL_VI.md
+docs/SPATIAL_QR_PROPOSAL_VI.md
+docs/SPATIAL_QR_R11_QIM_PROPOSAL_VI.md
 docs/SUPPORTED_METHODS.md
 docs/UNIFIED_BENCHMARK.md
 docs/legacy_original/NUMERICAL_EQUIVALENCE.json
@@ -91,10 +107,7 @@ results/cd_detqr_psnr54_clean_check/summary.json
 results/cd_detqr_psnr54_clean_check/watermarked.png
 results/dct_qr_carrier_r11_13host.json
 results/dct_qr_common_3host_60attack_comparison.json
-results/dct_qr_direct_r_small_attack.json
 results/dct_qr_previous_vs_carrier_r11.json
-results/dct_qr_r11_qim_13host_clean.json
-results/dct_qr_r11_qim_small_attack.json
 results/flag_validation_summary.json
 results/improvement_validation/FINAL_IMPROVEMENT_VALIDATION.md
 results/improvement_validation/aggregate.json
@@ -130,6 +143,8 @@ results/scientific_validation/integrated_spatial_lenna/per_attack.csv
 results/scientific_validation/integrated_spatial_lenna/summary.json
 results/scientific_validation/proposal_before_after_per_host.csv
 results/scientific_validation/pytest_output.txt
+results/spatial_qr_family_clean_13host.json
+results/spatial_qr_family_lenna_15attack.json
 scripts/aggregate_unified_benchmark.py
 scripts/benchmark_before_after.py
 scripts/benchmark_schur_sp_scqim.py
@@ -267,6 +282,10 @@ src/qr64_certified/proposals/method.py
 src/qr64_certified/proposals/optimization.py
 src/qr64_certified/proposals/proposal_registry.py
 src/qr64_certified/proposals/schur_coupling_qim.py
+src/qr64_certified/proposals/spatial_qr.py
+src/qr64_certified/proposals/spatial_qr_common.py
+src/qr64_certified/proposals/spatial_qr_direct_r.py
+src/qr64_certified/proposals/spatial_qr_r11_qim.py
 tests/test_abc.py
 tests/test_attacks.py
 tests/test_baseline_integration.py
@@ -281,4 +300,5 @@ tests/test_proposal_flags.py
 tests/test_proposal_namespace.py
 tests/test_pso.py
 tests/test_qr64.py
+tests/test_spatial_qr_family.py
 tests/test_unified_benchmark.py

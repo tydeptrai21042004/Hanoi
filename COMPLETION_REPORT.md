@@ -1,5 +1,7 @@
 # Completion report
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
 > **Current Schur revision:** the former DCT–Schur formula is no longer the public method. It has been replaced by independent SP-SCQIM; see `docs/DCT_SCHUR_SP_SCQIM_REPORT.md`. The statements below describe the earlier benchmark release.
 
 ## Delivered changes
@@ -56,3 +58,17 @@ Windows PowerShell:
 ```
 
 See `docs/UNIFIED_BENCHMARK.md` for the full protocol and output schema.
+
+## Non-DCT Spatial-QR extension status
+
+Completed on 4 September 2026:
+
+- three new non-DCT proposal implementations;
+- eight-method public registry and benchmark wiring;
+- ABC dispatcher support;
+- six new proposal config files (`before`/`after_abc`);
+- full Markdown documentation synchronization;
+- dedicated clean/no-DCT tests;
+- 13-host clean validation and Lenna 15-attack evidence.
+
+Verification in this tree: `57 passed` with `tests/test_pso.py` excluded because its pre-existing legacy PSO import is unavailable; the eight-proposal smoke test passes.

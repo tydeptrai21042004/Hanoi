@@ -1,22 +1,26 @@
 # Blind-watermark research package
 
-This repository contains five 64×64 blind-watermark proposals,
-16 research baselines, and one deterministic attack library under the unified
+This repository contains **eight** public 64×64 watermarking proposals,
+including a six-method QR family with three DCT and three **non-DCT spatial** counterparts,
+plus 16 research baselines and one deterministic attack library under the unified
 `qr64_certified` package.
 
-## Validated proposal methods
+## Public proposal methods
 
-| Canonical ID | Domain constraint | Redesigned contribution |
+| Canonical ID | Domain constraint | Current role |
 |---|---|---|
-| `dct_qr` | DCT + QR | QR-conditioned pairwise coset-optimized QIM with carrier-specific `r11` gain normalization |
-| `dct_qr_direct_r` | **DCT -> QR -> direct R embedding** | direct parity-QIM on the first-row differential `(R12-R13)/2`; QR is applied to a 4×4 low-frequency DCT matrix, not to a spatial block |
-| `dct_qr_r11_qim` | **DCT -> QR -> direct R11 embedding** | direct parity-QIM on `R11`; only `R11` is explicitly modified before QR reconstruction and IDCT |
-| `dct_schur_rescue` | DCT + Schur | spectrum-preserving orthogonal strict-upper Schur coupling QIM with three interleaved payload copies |
-| `spatial_cd_detqr` | Spatial QR and `det(A) != 0` | normalized QR-residual carrier with a closed-form minimum integer update and hard determinant floor |
+| `dct_qr` | DCT differential carrier + QR certificate | pairwise coset QIM + QR reliability + gain normalization; strongest validated DCT proposal |
+| `dct_qr_direct_r` | DCT → central 4×4 QR | direct QIM on `(R12-R13)/2`; minimum-Frobenius antisymmetric R update |
+| `dct_qr_r11_qim` | DCT → central 4×4 QR | direct parity-QIM on `R11`; useful direct-R11 ablation/proposal |
+| `spatial_qr` | **Spatial luminance only; no DCT/IDCT** | directional spatial carrier + QR reliability + pairwise coset + `R11` gain normalization |
+| `spatial_qr_direct_r` | **Direct spatial 4×4 QR; no DCT/IDCT** | QIM on `(R12-R13)/2` with the same minimum-Frobenius antisymmetric update idea |
+| `spatial_qr_r11_qim` | **Direct spatial 4×4 QR; no DCT/IDCT** | direct parity-QIM on spatial-domain `R11` |
+| `dct_schur_rescue` | DCT + Schur | independent spectrum-preserving orthogonal strict-upper Schur coupling QIM |
+| `spatial_cd_detqr` | Spatial QR and `det(A) != 0` | normalized QR-residual carrier with closed-form minimum integer update and determinant floor |
 
 The old exploratory implementations are retained as `*_legacy.py` modules for
-ablation and auditability, but the public proposal registry exposes the new
-validated paths.
+ablation and auditability, but the public proposal registry exposes the current
+active paths.
 
 ## Main validation result for the previously validated three methods
 
@@ -31,8 +35,20 @@ moderate attacks, and 39 clean round-trips.
 
 The active DCT–Schur path is now mathematically independent of DCT–QR and improves mean PSNR over the former Schur-gain hybrid, but it does **not** yet improve aggregate attacked NC. Median filtering on Baboon is the present promotion blocker. See the Schur report for the full gate, proofs, and exact limitation.
 
-`dct_qr_direct_r` and `dct_qr_r11_qim` are newly added proposals and are **not** included in the
-validated three-method 13-host table above. For `dct_qr_r11_qim`, the Lenna sanity run gives
+### New non-DCT spatial QR family — current validation
+
+| Method | 13-host mean PSNR | Clean NC (13/13) | Lenna mean NC over 15 moderate attacks | Current role |
+|---|---:|---:|---:|---|
+| `spatial_qr` | **51.8110 dB** | **1.0** | **0.9141** | strongest new non-DCT counterpart |
+| `spatial_qr_direct_r` | 50.7285 dB | **1.0** | 0.8507 | mathematically clean direct-R counterpart |
+| `spatial_qr_r11_qim` | 50.5782 dB | **1.0** | 0.7059 | R11 ablation/proposal |
+
+These measurements are smoke/initial validation, not a claim that the new spatial methods match the validated robustness of `dct_qr`. Machine-readable results are in `results/spatial_qr_family_clean_13host.json` and `results/spatial_qr_family_lenna_15attack.json`.
+
+`dct_qr_direct_r`, `dct_qr_r11_qim`, `spatial_qr`, `spatial_qr_direct_r`, and
+`spatial_qr_r11_qim` are **not** part of the historical validated three-method 13-host table above.
+The three new spatial methods are smoke-validated only and must not yet be described as
+publication-validated robustness results. For `dct_qr_r11_qim`, the Lenna sanity run gives
 PSNR ≈ 50.03 dB and clean NC = 1.0; JPEG Q90 BER ≈ 0.10%, Gaussian-noise sigma=1 BER = 0%,
 resize 0.9 BER ≈ 0.29%, and Gaussian blur radius 0.5 BER ≈ 2.25%. Direct R11 QIM is weak to
 global brightness scaling: factor 0.95 gives BER ≈ 49%, which is recorded as a current limitation.
@@ -44,9 +60,12 @@ and limitations:
 - [`docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md`](docs/DCT_QR_CARRIER_SUBSPACE_PROPOSAL.md)
 - [`docs/DCT_QR_DIRECT_R_PROPOSAL_VI.md`](docs/DCT_QR_DIRECT_R_PROPOSAL_VI.md)
 - [`docs/DCT_QR_R11_QIM_PROPOSAL_VI.md`](docs/DCT_QR_R11_QIM_PROPOSAL_VI.md)
+- [`docs/SPATIAL_QR_PROPOSAL_VI.md`](docs/SPATIAL_QR_PROPOSAL_VI.md)
+- [`docs/SPATIAL_QR_DIRECT_R_PROPOSAL_VI.md`](docs/SPATIAL_QR_DIRECT_R_PROPOSAL_VI.md)
+- [`docs/SPATIAL_QR_R11_QIM_PROPOSAL_VI.md`](docs/SPATIAL_QR_R11_QIM_PROPOSAL_VI.md)
+- [`docs/SIX_QR_FAMILY_PROPOSALS.md`](docs/SIX_QR_FAMILY_PROPOSALS.md)
 - [`docs/REDESIGNED_PROPOSALS_VI.md`](docs/REDESIGNED_PROPOSALS_VI.md)
 - [`results/dct_qr_previous_vs_carrier_r11.json`](results/dct_qr_previous_vs_carrier_r11.json)
-- [`results/dct_qr_pairwise_coset_13host.json`](results/dct_qr_pairwise_coset_13host.json)
 - [`results/redesigned_comparison.json`](results/redesigned_comparison.json)
 - [`results/redesigned_13host_validation.json`](results/redesigned_13host_validation.json)
 
@@ -58,6 +77,10 @@ src/qr64_certified/
 │   ├── method.py              DCT–QR proposal
 │   ├── dct_qr_direct_r.py     direct transform-domain DCT->QR differential-R proposal
 │   ├── dct_qr_r11_qim.py      direct transform-domain DCT->QR->R11 proposal
+│   ├── spatial_qr.py           non-DCT spatial carrier + QR/coset/gain proposal
+│   ├── spatial_qr_direct_r.py  non-DCT direct spatial QR differential-R proposal
+│   ├── spatial_qr_r11_qim.py   non-DCT direct spatial QR R11 proposal
+│   ├── spatial_qr_common.py    shared spatial QR utilities (no transform)
 │   ├── schur_coupling_qim.py  independent DCT–Schur SP-SCQIM proposal
 │   ├── direct_schur_rescue.py compatibility wrapper
 │   ├── cd_detqr.py            spatial normalized-residual DetQR
@@ -109,6 +132,11 @@ recovered2 = extract_proposal(watermarked2, key2)
 # Direct transform-domain R11 proposal:
 watermarked3, key3 = embed_proposal("dct_qr_r11_qim", host, watermark)
 recovered3 = extract_proposal(watermarked3, key3)
+
+# Three non-DCT spatial QR counterparts:
+watermarked4, key4 = embed_proposal("spatial_qr", host, watermark)
+watermarked5, key5 = embed_proposal("spatial_qr_direct_r", host, watermark)
+watermarked6, key6 = embed_proposal("spatial_qr_r11_qim", host, watermark)
 ```
 
 List the proposals:
@@ -126,8 +154,7 @@ python scripts/list_baselines.py
 python scripts/list_attacks.py
 ```
 
-The proposal/baseline suite currently gives `55 passed` with
-`pytest -q --ignore=tests/test_pso.py`. The remaining `test_pso.py` collection
+Run `pytest -q` to verify the current tree. The spatial QR family has dedicated clean-round-trip and no-DCT source tests in `tests/test_spatial_qr_family.py`. The remaining `test_pso.py` collection
 error is pre-existing: it imports `particle_swarm_maximize`, which is absent
 from the supplied optimization module and is unrelated to the new QR method.
 
