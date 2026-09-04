@@ -16,8 +16,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from qr64_certified import (
     DCT_QR,
+    DCT_QR_DIRECT_R,
+    DCT_QR_R11_QIM,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
+    SPATIAL_QR,
+    SPATIAL_QR_DIRECT_R,
+    SPATIAL_QR_R11_QIM,
 )
 from qr64_certified.attacks.presets import moderate_attacks
 from qr64_certified.optimization import artificial_bee_colony_maximize
@@ -35,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Artificial Bee Colony (ABC) parameter selection for the three "
-            "proposal methods."
+            "registered proposal methods."
         )
     )
     parser.add_argument("--host", default=str(ROOT / "data" / "host" / "lenna.bmp"))
@@ -135,6 +140,36 @@ def _problem(method: str, starting):
                 step=float(position[0]),
                 map_lambda=float(position[1]),
                 gain_gamma=float(position[2]),
+                closure_rounds=max(1, int(round(float(position[3])))),
+            ).validated()
+
+    elif method in {DCT_QR_DIRECT_R, DCT_QR_R11_QIM, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM}:
+        bounds = [(4.0, 16.0), (0.25, 4.0), (1.0, 5.0)]
+        initial = [starting.step, starting.regularization, float(starting.closure_rounds)]
+
+        def make(position: np.ndarray):
+            return replace(
+                starting,
+                step=float(position[0]),
+                regularization=float(position[1]),
+                closure_rounds=max(1, int(round(float(position[2])))),
+            ).validated()
+
+    elif method == SPATIAL_QR:
+        bounds = [(4.0, 14.0), (0.70, 1.20), (0.25, 4.0), (1.0, 5.0)]
+        initial = [
+            starting.step,
+            starting.gain_gamma,
+            starting.regularization,
+            float(starting.closure_rounds),
+        ]
+
+        def make(position: np.ndarray):
+            return replace(
+                starting,
+                step=float(position[0]),
+                gain_gamma=float(position[1]),
+                regularization=float(position[2]),
                 closure_rounds=max(1, int(round(float(position[3])))),
             ).validated()
 
