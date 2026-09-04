@@ -1,4 +1,6 @@
-# Trình bày khoa học của ba phương pháp đề xuất
+# Trình bày khoa học các phương pháp đề xuất
+
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
 
 Tài liệu này chỉ giữ các thành phần có vai trò toán học rõ ràng. Mỗi thành phần phải trả lời được: đại lượng nào được xây dựng, vì sao đại lượng đó phù hợp, quy tắc quyết định là gì và tiêu chuẩn nào dùng để chấp nhận kết quả.
 
@@ -187,3 +189,13 @@ S(T^*)\geq0.50.
 3. Kênh cứu hộ phải được kiểm tra độc lập trước khi hợp nhất.
 4. Đồng bộ chỉ được dùng pilot, không được dùng ảnh gốc hoặc watermark gốc.
 5. Kết quả chi tiết nằm trong `results/scientific_validation/`.
+
+## Các mở rộng Spatial-QR không DCT hiện tại
+
+Registry hiện tại bổ sung ba phương pháp đối chứng không thực hiện DCT/IDCT:
+
+1. `spatial_qr`: \(v=(Y[1,2]-Y[2,1])/2\), QR reliability, pairwise coset và chuẩn hóa gain bằng `R11`.
+2. `spatial_qr_direct_r`: QR trực tiếp patch luminance trung tâm 4×4 và parity-QIM trên \((R_{12}-R_{13})/2\); cập nhật \((+\delta,-\delta)\) là nghiệm minimum-Frobenius trong lớp cập nhật hai phần tử.
+3. `spatial_qr_r11_qim`: parity-QIM trực tiếp trên \(R_{11}>0\) của canonical spatial QR.
+
+Xem `SPATIAL_QR_PROPOSAL_VI.md`, `SPATIAL_QR_DIRECT_R_PROPOSAL_VI.md`, `SPATIAL_QR_R11_QIM_PROPOSAL_VI.md` và `SIX_QR_FAMILY_PROPOSALS.md`.

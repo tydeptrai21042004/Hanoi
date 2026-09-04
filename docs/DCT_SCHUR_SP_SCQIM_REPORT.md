@@ -1,5 +1,7 @@
 # DCT–Schur SP-SCQIM: corrected implementation, mathematics, and validation report
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
 ## 1. Executive conclusion
 
 The former public `dct_schur_rescue` path was not an independent Schur proposal. The source file contained two public `embed()` definitions and two public `extract()` definitions. Python silently retained only the last pair, which called the DCT–QR embedding and extraction engine. The advertised spectrum-preserving direct-Schur code was therefore shadowed.
@@ -336,7 +338,7 @@ Added tests cover:
 5. minimum-projection constraint residual;
 6. clean 64×64 round trip;
 7. active step parameter;
-8. registry still exposing exactly three proposals.
+8. historical validation registry exposing exactly three core proposals at the time; the current registry now exposes eight.
 
 Smoke test on Lenna:
 

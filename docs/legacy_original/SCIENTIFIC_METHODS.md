@@ -1,5 +1,7 @@
 # Scientific formulation of the three proposal methods
 
+> **Archived historical document.** This file is retained to preserve the original three-proposal snapshot. The live repository as of 4 September 2026 exposes eight proposals, including the three new non-DCT methods `spatial_qr`, `spatial_qr_direct_r`, and `spatial_qr_r11_qim`. The historical body below is intentionally not rewritten.
+
 This document describes each method as a sequence of mathematical components. Each component has four items:
 
 1. **Object:** the quantity being modeled;

@@ -1,5 +1,7 @@
 # Proposal preservation verification
 
+> **Archived historical document.** This file is retained to preserve the original three-proposal snapshot. The live repository as of 4 September 2026 exposes eight proposals, including the three new non-DCT methods `spatial_qr`, `spatial_qr_direct_r`, and `spatial_qr_r11_qim`. The historical body below is intentionally not rewritten.
+
 The unified repository contains exactly the same three proposal methods as the
 uploaded original project:
 

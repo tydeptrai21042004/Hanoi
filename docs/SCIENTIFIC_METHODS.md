@@ -1,4 +1,6 @@
-# Scientific formulation of the three proposal methods
+# Scientific formulation of the proposal methods
+
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
 
 This document describes each method as a sequence of mathematical components. Each component has four items:
 
@@ -536,3 +538,13 @@ The measured tables are stored in:
 - `results/scientific_validation/FINAL_IMPROVEMENT_VALIDATION.md`
 - `results/scientific_validation/final_validation.json`
 - `results/scientific_validation/proposal_before_after_per_host.csv`
+
+## Current non-DCT spatial QR extensions
+
+The current registry adds three spatial QR counterparts that do not execute DCT/IDCT:
+
+1. `spatial_qr`: \(v=(Y[1,2]-Y[2,1])/2\), QR reliability scheduling, pairwise coset optimization, and `R11` gain normalization.
+2. `spatial_qr_direct_r`: direct QR of the central 4×4 spatial luminance patch and parity-QIM on \((R_{12}-R_{13})/2\). The antisymmetric update \((+\delta,-\delta)\) is the minimum-Frobenius two-entry update.
+3. `spatial_qr_r11_qim`: direct parity-QIM on canonical positive \(R_{11}\) of the spatial QR factorization.
+
+See `SPATIAL_QR_PROPOSAL_VI.md`, `SPATIAL_QR_DIRECT_R_PROPOSAL_VI.md`, `SPATIAL_QR_R11_QIM_PROPOSAL_VI.md`, and `SIX_QR_FAMILY_PROPOSALS.md` for the complete definitions.

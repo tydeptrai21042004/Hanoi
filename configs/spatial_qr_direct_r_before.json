@@ -1,0 +1,10 @@
+{
+  "seed": 2026,
+  "step": 8.0,
+  "regularization": 1.0,
+  "det_epsilon": 1e-10,
+  "closure_rounds": 3,
+  "block_size": 8,
+  "matrix_size": 4,
+  "watermark_size": 64
+}

@@ -1,4 +1,6 @@
-# TÀI LIỆU KỸ THUẬT BA PHƯƠNG PHÁP WATERMARKING ĐỀ XUẤT
+# TÀI LIỆU KỸ THUẬT BA PHƯƠNG PHÁP WATERMARKING ĐỀ XUẤT — [Historical core; xem thêm 3 proposal spatial không DCT]
+
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
 
 ## DCT–QR Pairwise Coset QIM, DCT–Schur SP-SCQIM và Spatial Normalized-Residual DetQR
 
@@ -10,7 +12,7 @@
 
 ## 1. Mục đích tài liệu
 
-Tài liệu này trình bày rõ ràng ba phương pháp được public registry của repository công bố:
+Tài liệu này trình bày rõ ràng **ba phương pháp lõi lịch sử** của repository; registry hiện tại đã mở rộng thành tám proposal như ghi ở phần cập nhật đầu tài liệu:
 
 | ID trong code | Tên phương pháp hiện tại | Miền xử lý chính |
 |---|---|---|
@@ -1930,7 +1932,7 @@ Luật này bảo đảm đồng thời signed normalized margin và nonsingular
 
 | Nội dung | File nguồn |
 |---|---|
-| Public registry ba phương pháp | `src/qr64_certified/proposals/proposal_registry.py` |
+| Public registry hiện tại (8 proposal; phần thân tài liệu này mô tả 3 proposal lõi lịch sử) | `src/qr64_certified/proposals/proposal_registry.py` |
 | DCT–QR embed/extract | `src/qr64_certified/proposals/method.py` |
 | QR certificate và gain scale | `src/qr64_certified/proposals/certificate.py` |
 | DCT–QR config | `src/qr64_certified/proposals/config.py` |

@@ -1,5 +1,7 @@
 # Trình bày khoa học của ba phương pháp đề xuất
 
+> **Archived historical document.** This file is retained to preserve the original three-proposal snapshot. The live repository as of 4 September 2026 exposes eight proposals, including the three new non-DCT methods `spatial_qr`, `spatial_qr_direct_r`, and `spatial_qr_r11_qim`. The historical body below is intentionally not rewritten.
+
 Tài liệu này chỉ giữ các thành phần có vai trò toán học rõ ràng. Mỗi thành phần phải trả lời được: đại lượng nào được xây dựng, vì sao đại lượng đó phù hợp, quy tắc quyết định là gì và tiêu chuẩn nào dùng để chấp nhận kết quả.
 
 ## 1. DCT-QR điều chỉnh cường độ theo độ ổn định

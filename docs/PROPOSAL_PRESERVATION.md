@@ -1,5 +1,7 @@
 # Historical proposal preservation verification
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
 > **Current-release notice:** this document records the earlier namespace-only
 > migration. The present release intentionally changes `proposals/method.py`,
 > `proposals/config.py`, `proposals/flags.py`, and `proposal_registry.py` for the
@@ -13,9 +15,10 @@ preserved:
 2. `dct_schur_rescue`
 3. `spatial_cd_detqr`
 
-The current repository additionally exposes `dct_qr_direct_r`. This fourth
-method is a new transform-domain DCT->QR->R proposal and is not part of the
-historical byte/numerical-preservation claim below.
+The current repository additionally exposes five methods outside that historical core:
+`dct_qr_direct_r`, `dct_qr_r11_qim`, `spatial_qr`, `spatial_qr_direct_r`, and
+`spatial_qr_r11_qim`. These additions are **not** part of the historical byte/numerical-
+preservation claim below. The three `spatial_qr*` methods explicitly remove DCT/IDCT.
 
 ## Location
 

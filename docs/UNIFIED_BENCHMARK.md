@@ -1,5 +1,7 @@
 # Unified proposal–baseline benchmark
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
 ## Purpose
 
 The unified benchmark evaluates every proposal and baseline through the same:
@@ -61,7 +63,7 @@ python scripts/run_unified_benchmark.py \
   --protocol configs/benchmark/quick.json
 ```
 
-Run all 19 methods on one host and the clean sanity case:
+Run all 24 methods on one host and the clean sanity case:
 
 ```bash
 python scripts/run_unified_benchmark.py \
@@ -86,16 +88,16 @@ The `--methods` option accepts a selector or comma-separated canonical IDs:
 
 | Selector | Included methods |
 |---|---|
-| `proposals` | Three proposal methods |
+| `proposals` | Eight proposal methods |
 | `baselines` | All 16 baselines |
-| `paper_comparison` | Three proposals plus five primary blind baselines |
+| `paper_comparison` | Eight proposals plus five primary blind baselines |
 | `primary_blind_baselines` | Five primary blind baselines |
 | `strict_blind` | All methods registered as blind |
 | `key_assisted` | Key-assisted blind methods |
 | `semi_blind` | Semi-blind methods |
 | `non_blind` | Non-blind methods |
 | `common_4096` | Methods supporting the common 64×64 payload |
-| `all` | All 19 methods |
+| `all` | All 24 methods |
 
 Examples:
 

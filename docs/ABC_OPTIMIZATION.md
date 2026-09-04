@@ -1,5 +1,7 @@
 # Artificial Bee Colony Optimization
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
 ## Purpose
 
 The proposal pipeline now uses a deterministic **Artificial Bee Colony (ABC)**
@@ -73,10 +75,17 @@ python scripts/optimize_parameters.py \
 
 | Proposal | Optimized variables |
 |---|---|
-| DCT–QR | global QIM step, MAP weight, evidence confidence exponent |
-| DCT–Schur | coupling step, MAP weight, gain exponent, closure rounds |
-| Spatial CD–DetQR | normalized target margin, boundary penalty, determinant margin, pilot margin |
+| `dct_qr` | global QIM step, QR map weight, evidence confidence exponent |
+| `dct_qr_direct_r` | QIM step, QR regularization, closure rounds |
+| `dct_qr_r11_qim` | QIM step, QR regularization, closure rounds |
+| `spatial_qr` | QIM step, gain exponent, spatial-QR regularization, closure rounds |
+| `spatial_qr_direct_r` | QIM step, spatial-QR regularization, closure rounds |
+| `spatial_qr_r11_qim` | QIM step, spatial-QR regularization, closure rounds |
+| `dct_schur_rescue` | coupling step, MAP weight, gain exponent, closure rounds |
+| `spatial_cd_detqr` | normalized target margin, boundary penalty, determinant margin, pilot margin |
 
-The spatial bounds use the active normalized-carrier scale around `0.005`.
+The three new `spatial_qr*` methods use the same deterministic ABC driver but no DCT/IDCT code path. Their checked-in `*_after_abc.json` files currently equal the smoke-validated defaults until a full multi-host ABC run is completed.
+
+The Spatial CD-DetQR bounds use the active normalized-carrier scale around `0.005`.
 This corrects the obsolete large-margin range that was incompatible with the
 validated spatial model and could severely reduce imperceptibility.

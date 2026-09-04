@@ -1,5 +1,7 @@
 # DCT–QR Pairwise Coset-Optimized Gain-Normalized QIM
 
+> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+
 ## 1. Active method
 
 The public `dct_qr` proposal is **QR-conditioned Pairwise Coset-Optimized QIM**.
