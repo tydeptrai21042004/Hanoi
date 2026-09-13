@@ -32,6 +32,12 @@ from .dct_qr_r11_qim import (
     embed as embed_dct_qr_r11_qim,
     extract as extract_dct_qr_r11_qim,
 )
+from .dct_qr_theory import (
+    DCTQRTheoryConfig,
+    DCTQRTheoryKey,
+    embed as embed_dct_qr_theory,
+    extract as extract_dct_qr_theory,
+)
 from .spatial_qr import (
     SpatialQRConfig,
     SpatialQRKey,
@@ -55,6 +61,7 @@ from .method import QR64Key, embed as embed_certified, extract as extract_certif
 DCT_QR = "dct_qr"
 DCT_QR_DIRECT_R = "dct_qr_direct_r"
 DCT_QR_R11_QIM = "dct_qr_r11_qim"
+DCT_QR_THEORY = "dct_qr_theory"
 DCT_SCHUR_RESCUE = "dct_schur_rescue"
 SPATIAL_CD_DETQR = "spatial_cd_detqr"
 SPATIAL_QR = "spatial_qr"
@@ -87,6 +94,18 @@ SUPPORTED_PROPOSAL_METHODS: dict[str, dict[str, Any]] = {
             "modifies the first-row differential (R12-R13)/2 while preserving R11 as the "
             "dominant low-frequency energy anchor. QR is therefore performed in the transform "
             "domain, not on spatial image blocks."
+        ),
+    },
+    DCT_QR_THEORY: {
+        "id": DCT_QR_THEORY,
+        "display_name": "DCT-QR Theory-Grounded Adaptive QIM",
+        "domain": "DCT-QIM with theorem-backed beta adaptation, canonical QR gain normalization, and global coset optimization",
+        "scientific_status": "new theory-grounded proposal; original dct_qr preserved",
+        "description": (
+            "Retains the DCT-QR architecture while replacing only empirically fixed red-item "
+            "choices: no weighted reliability fusion, no percentile classes, no fixed three-step "
+            "schedule, no pair-size heuristic, exact gamma=1 gain correction, and fixed-point "
+            "degree-normalized four-neighbour ICM."
         ),
     },
     DCT_QR_R11_QIM: {
@@ -164,6 +183,8 @@ METHOD_ALIASES = {
     "direct_r_qr": DCT_QR_DIRECT_R,
     "transform_qr": DCT_QR_DIRECT_R,
     "dct_qr_r11_qim": DCT_QR_R11_QIM,
+    "dct_qr_theory": DCT_QR_THEORY,
+    "theory_qr": DCT_QR_THEORY,
     "r11_qim": DCT_QR_R11_QIM,
     "direct_r11_qr": DCT_QR_R11_QIM,
     "schur": DCT_SCHUR_RESCUE,
@@ -203,6 +224,8 @@ def default_config_for_method(method_id: str):
         return DCTQRDirectRConfig().validated()
     if method == DCT_QR_R11_QIM:
         return DCTQRR11QIMConfig().validated()
+    if method == DCT_QR_THEORY:
+        return DCTQRTheoryConfig().validated()
     if method == DCT_SCHUR_RESCUE:
         return DirectSchurRescueConfig().validated()
     if method == SPATIAL_QR:
@@ -219,7 +242,7 @@ def embed_proposal(
     host_rgb: np.ndarray,
     watermark_binary: np.ndarray,
     *,
-    config: QR64Config | DCTQRDirectRConfig | DCTQRR11QIMConfig | SpatialQRConfig | SpatialQRDirectRConfig | SpatialQRR11QIMConfig | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
+    config: QR64Config | DCTQRDirectRConfig | DCTQRR11QIMConfig | DCTQRTheoryConfig | SpatialQRConfig | SpatialQRDirectRConfig | SpatialQRR11QIMConfig | DirectSchurRescueConfig | CDDetQRConfig | Mapping[str, Any] | None = None,
     return_metadata: bool = False,
 ):
     method = normalize_proposal_method_id(method_id)
@@ -256,6 +279,13 @@ def embed_proposal(
             host_rgb,
             watermark_binary,
             config=DCTQRR11QIMConfig.from_mapping(config),
+            return_metadata=return_metadata,
+        )
+    if method == DCT_QR_THEORY:
+        return embed_dct_qr_theory(
+            host_rgb,
+            watermark_binary,
+            config=DCTQRTheoryConfig.from_mapping(config),
             return_metadata=return_metadata,
         )
     if method == DCT_SCHUR_RESCUE:
@@ -302,7 +332,7 @@ def embed_proposal(
 
 def extract_proposal(
     possibly_attacked_rgb: np.ndarray,
-    key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | SpatialQRKey | SpatialQRDirectRKey | SpatialQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey,
+    key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | DCTQRTheoryKey | SpatialQRKey | SpatialQRDirectRKey | SpatialQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey,
     *,
     return_metadata: bool = False,
 ):
@@ -326,6 +356,10 @@ def extract_proposal(
         return extract_dct_qr_r11_qim(
             possibly_attacked_rgb, key, return_metadata=return_metadata
         )
+    if isinstance(key, DCTQRTheoryKey):
+        return extract_dct_qr_theory(
+            possibly_attacked_rgb, key, return_metadata=return_metadata
+        )
     if isinstance(key, DirectSchurRescueKey):
         result = extract_direct_schur_rescue(
             possibly_attacked_rgb, key, return_metadata=return_metadata
@@ -345,7 +379,7 @@ def extract_proposal(
     )
 
 
-def method_id_from_key(key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | SpatialQRKey | SpatialQRDirectRKey | SpatialQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey) -> str:
+def method_id_from_key(key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | DCTQRTheoryKey | SpatialQRKey | SpatialQRDirectRKey | SpatialQRR11QIMKey | DirectSchurRescueKey | CDDetQRKey) -> str:
     if isinstance(key, SpatialQRKey):
         return SPATIAL_QR
     if isinstance(key, SpatialQRDirectRKey):
@@ -356,6 +390,8 @@ def method_id_from_key(key: QR64Key | DCTQRDirectRKey | DCTQRR11QIMKey | Spatial
         return DCT_QR_DIRECT_R
     if isinstance(key, DCTQRR11QIMKey):
         return DCT_QR_R11_QIM
+    if isinstance(key, DCTQRTheoryKey):
+        return DCT_QR_THEORY
     if isinstance(key, DirectSchurRescueKey):
         return DCT_SCHUR_RESCUE
     if isinstance(key, CDDetQRKey):
@@ -367,6 +403,7 @@ __all__ = [
     "DCT_QR",
     "DCT_QR_DIRECT_R",
     "DCT_QR_R11_QIM",
+    "DCT_QR_THEORY",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",
     "SPATIAL_QR",

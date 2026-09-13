@@ -10,6 +10,7 @@ from qr64_certified.proposals.proposal_registry import (
     DCT_QR,
     DCT_QR_DIRECT_R,
     DCT_QR_R11_QIM,
+    DCT_QR_THEORY,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     SPATIAL_QR,
@@ -21,7 +22,7 @@ from qr64_certified.proposals.proposal_registry import (
 
 from .types import BenchmarkMethodSpec
 
-PROPOSAL_IDS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, SPATIAL_QR, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
+PROPOSAL_IDS = (DCT_QR, DCT_QR_THEORY, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, SPATIAL_QR, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
 
 def proposal_spec(method_id: str) -> BenchmarkMethodSpec:

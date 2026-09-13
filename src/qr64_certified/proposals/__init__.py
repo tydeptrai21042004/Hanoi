@@ -12,6 +12,7 @@ from .direct_schur_rescue import DirectSchurRescueConfig, DirectSchurRescueKey
 from .cd_detqr import CDDetQRConfig, CDDetQRKey, BlindCDDetQR
 from .dct_qr_direct_r import DCTQRDirectRConfig, DCTQRDirectRKey
 from .dct_qr_r11_qim import DCTQRR11QIMConfig, DCTQRR11QIMKey
+from .dct_qr_theory import DCTQRTheoryConfig, DCTQRTheoryKey
 from .spatial_qr import SpatialQRConfig, SpatialQRKey
 from .spatial_qr_direct_r import SpatialQRDirectRConfig, SpatialQRDirectRKey
 from .spatial_qr_r11_qim import SpatialQRR11QIMConfig, SpatialQRR11QIMKey
@@ -19,6 +20,7 @@ from .proposal_registry import (
     DCT_QR,
     DCT_QR_DIRECT_R,
     DCT_QR_R11_QIM,
+    DCT_QR_THEORY,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     SPATIAL_QR,
@@ -48,6 +50,8 @@ __all__ = [
     "DCTQRDirectRKey",
     "DCTQRR11QIMConfig",
     "DCTQRR11QIMKey",
+    "DCTQRTheoryConfig",
+    "DCTQRTheoryKey",
     "SpatialQRConfig",
     "SpatialQRKey",
     "SpatialQRDirectRConfig",
@@ -60,6 +64,7 @@ __all__ = [
     "DCT_QR",
     "DCT_QR_DIRECT_R",
     "DCT_QR_R11_QIM",
+    "DCT_QR_THEORY",
     "DCT_SCHUR_RESCUE",
     "SPATIAL_CD_DETQR",
     "SPATIAL_QR",

@@ -24,12 +24,13 @@ def _assets():
     return host, watermark
 
 
-def test_registry_lists_eight_nonreplacing_proposals():
+def test_registry_lists_nine_nonreplacing_proposals():
     methods = {row["id"] for row in list_supported_methods()}
     assert methods == {
         "dct_qr",
         "dct_qr_direct_r",
         "dct_qr_r11_qim",
+        "dct_qr_theory",
         "dct_schur_rescue",
         "spatial_qr",
         "spatial_qr_direct_r",

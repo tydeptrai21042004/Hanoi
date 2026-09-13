@@ -4,6 +4,7 @@ from qr64_certified import (
     DCT_QR,
     DCT_QR_DIRECT_R,
     DCT_QR_R11_QIM,
+    DCT_QR_THEORY,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     SPATIAL_QR,
@@ -23,10 +24,11 @@ from qr64_certified import direct_schur_rescue as compatibility_schur
 from qr64_certified import cd_detqr as compatibility_spatial
 
 
-def test_eight_proposals_are_visible() -> None:
+def test_nine_proposals_are_visible() -> None:
     assert [row["id"] for row in list_supported_methods()] == [
         DCT_QR,
         DCT_QR_DIRECT_R,
+        DCT_QR_THEORY,
         DCT_QR_R11_QIM,
         DCT_SCHUR_RESCUE,
         SPATIAL_QR,
