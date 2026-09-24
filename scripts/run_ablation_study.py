@@ -17,17 +17,19 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from qr64_certified import (
     DCT_QR,
+    DCT_QR_THEORY,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     embed_proposal,
     extract_proposal,
 )
 from qr64_certified.common.io import load_host_rgb, load_watermark_binary
+from qr64_certified.attacks.presets import get_attack_suite
 from qr64_certified.common.metrics import nc, psnr, ssim
 from qr64_certified.proposals.flags import ABLATION_FLAGS, apply_proposal_flags
 from three_method_utils import config_to_dict, evaluate_method, read_config
 
-METHODS = (DCT_QR, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
+METHODS = (DCT_QR, DCT_QR_THEORY, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
 
 def main() -> None:
@@ -48,6 +50,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--output-dir", type=Path, default=ROOT / "results" / "ablation"
+    )
+    parser.add_argument(
+        "--attack-suite",
+        default="common20",
+        help="Named attack suite from qr64_certified.attacks.presets (default: common20).",
     )
     parser.add_argument(
         "--clean-only",
@@ -100,7 +107,7 @@ def main() -> None:
             }
         else:
             summary, _attack_rows, _watermarked, _key, _clean = evaluate_method(
-                args.method, config, host, watermark
+                args.method, config, host, watermark, attacks=get_attack_suite(args.attack_suite)
             )
             row = {
                 "variant": label,
@@ -129,7 +136,7 @@ def main() -> None:
         "host": args.host.name,
         "watermark": args.watermark.name,
         "configuration_source": str(config_path),
-        "protocol": "clean_only" if args.clean_only else "moderate_attacks_15",
+        "protocol": "clean_only" if args.clean_only else args.attack_suite,
         "variants": rows,
     }
     (out / "ablation_summary.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")

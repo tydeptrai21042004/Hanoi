@@ -1,10 +1,11 @@
 # Supported proposal methods
 
-The public proposal registry exposes **eight scientific proposal methods**. Six of them form a directly comparable QR family: three DCT-based methods and three new non-DCT spatial counterparts.
+The public proposal registry exposes **nine scientific proposal methods**. Six methods form the directly paired QR family (three DCT-based methods and three non-DCT spatial counterparts), with `dct_qr_theory` as an additional theory-grounded DCT-QR proposal.
 
 | Method | Domain / carrier | DCT used? | Status |
 |---|---|---:|---|
 | `dct_qr` | DCT differential carrier + QR reliability + pairwise coset + gain normalization | Yes | Validated main DCT proposal |
+| `dct_qr_theory` | DCT differential carrier + derived QR certificate + beta-adaptive QIM + global coset | Yes | Theory-grounded proposal; ablation/common-20 protocol available |
 | `dct_qr_direct_r` | Direct QIM on `(R12-R13)/2` after QR of a 4×4 low-frequency DCT matrix | Yes | New proposal; smoke-validated |
 | `dct_qr_r11_qim` | Direct parity-QIM on `R11` after transform-domain QR | Yes | New proposal / ablation; smoke-validated |
 | `spatial_qr` | Spatial directional-difference carrier + central spatial QR reliability + pairwise coset + `R11` gain normalization | **No** | New non-DCT proposal; smoke-validated |

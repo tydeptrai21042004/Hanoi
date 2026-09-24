@@ -15,8 +15,9 @@ from .cd_detqr import CDDetQRConfig
 from .config import QR64Config
 from .dct_qr_direct_r import DCTQRDirectRConfig
 from .dct_qr_r11_qim import DCTQRR11QIMConfig
+from .dct_qr_theory import DCTQRTheoryConfig
 from .direct_schur_rescue import DirectSchurRescueConfig
-from .proposal_registry import DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
+from .proposal_registry import DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_QR_THEORY, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR
 
 
 ABLATION_FLAGS: dict[str, tuple[str, ...]] = {
@@ -34,6 +35,14 @@ ABLATION_FLAGS: dict[str, tuple[str, ...]] = {
     ),
     DCT_QR_R11_QIM: (
         "single_closure",
+    ),
+    DCT_QR_THEORY: (
+        "no_opponent_term",
+        "uniform_step",
+        "no_global_coset",
+        "no_gain_normalization",
+        "no_spatial_icm",
+        "no_sync_search",
     ),
     DCT_SCHUR_RESCUE: (
         "single_coupling",
@@ -68,6 +77,11 @@ HYPERPARAMETER_FLAGS: dict[str, tuple[str, ...]] = {
     ),
     DCT_QR_R11_QIM: (
         "seed", "step", "regularization", "det_epsilon", "closure_rounds",
+    ),
+    DCT_QR_THEORY: (
+        "seed", "reference_step", "pilot_count", "pilot_step", "pilot_rho_frac",
+        "use_opponent_term", "use_adaptive_beta_steps", "use_global_coset",
+        "use_gain_normalization", "use_spatial_icm", "use_sync_search",
     ),
     DCT_SCHUR_RESCUE: (
         "step", "eta", "seed", "arnold_iterations", "closure_rounds",
@@ -287,7 +301,7 @@ def _apply_qr_fields(config: QR64Config, values: Mapping[str, Any]) -> tuple[QR6
 
 def apply_proposal_flags(
     method: str,
-    config: QR64Config | DCTQRDirectRConfig | DirectSchurRescueConfig | CDDetQRConfig,
+    config: QR64Config | DCTQRDirectRConfig | DCTQRTheoryConfig | DirectSchurRescueConfig | CDDetQRConfig,
     values: Mapping[str, Any] | argparse.Namespace,
 ) -> tuple[QR64Config | DCTQRDirectRConfig | DirectSchurRescueConfig | CDDetQRConfig, dict[str, Any]]:
     """Apply method-specific ablations and hyperparameters to a config.
@@ -362,6 +376,29 @@ def apply_proposal_flags(
         for name in requested:
             if name == "single_closure":
                 config = replace(config, closure_rounds=1)
+        config = config.validated()
+
+    elif method == DCT_QR_THEORY:
+        if not isinstance(config, DCTQRTheoryConfig):
+            config = DCTQRTheoryConfig.from_mapping(config)  # type: ignore[arg-type]
+        names = HYPERPARAMETER_FLAGS[DCT_QR_THEORY]
+        updates = {name: raw[name] for name in names if _present(raw, name)}
+        overrides.update(updates)
+        if updates:
+            config = replace(config, **updates)
+        for name in requested:
+            if name == "no_opponent_term":
+                config = replace(config, use_opponent_term=False)
+            elif name == "uniform_step":
+                config = replace(config, use_adaptive_beta_steps=False)
+            elif name == "no_global_coset":
+                config = replace(config, use_global_coset=False)
+            elif name == "no_gain_normalization":
+                config = replace(config, use_gain_normalization=False)
+            elif name == "no_spatial_icm":
+                config = replace(config, use_spatial_icm=False)
+            elif name == "no_sync_search":
+                config = replace(config, use_sync_search=False)
         config = config.validated()
 
     elif method == DCT_SCHUR_RESCUE:

@@ -1,6 +1,6 @@
 # Unified attack library
 
-> **Repository update — 4 September 2026.** The current public registry contains **eight proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the new non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The independent `dct_schur_rescue` and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
+> **Repository update — 4 September 2026.** The current public registry contains **nine proposals**. The six-method QR family consists of `dct_qr`, `dct_qr_direct_r`, `dct_qr_r11_qim` and the non-DCT counterparts `spatial_qr`, `spatial_qr_direct_r`, `spatial_qr_r11_qim`. The additional theory-grounded `dct_qr_theory`, independent `dct_schur_rescue`, and `spatial_cd_detqr` proposals remain available. Historical three-method/five-method results below are preserved as historical evidence and do not describe the current registry size.
 
 All attacks are exposed from:
 
@@ -41,12 +41,18 @@ photometric 13 attacks
 occlusion    6 attacks
 combined     6 attacks
 common      60 unique attacks
+common20    20 curated paper-facing attacks (5 groups x 4)
 stress      81 unique attacks
+real_world  11 attacks
+deformation 6 attacks
+structured_loss 7 attacks
+publication 84 attacks
+extended    113 attacks
 ```
 
 The original proposal scripts still use frozen legacy 15-attack and 12-attack
 suites so the existing published result files remain reproducible. New baseline
-experiments should use `common` or `stress`.
+experiments may use `common` or `stress`; the main `dct_qr_theory` manuscript-facing comparison uses `common20` so the headline result stays balanced and interpretable.
 
 ## Run one baseline
 

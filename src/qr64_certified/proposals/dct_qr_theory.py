@@ -79,6 +79,14 @@ class DCTQRTheoryConfig:
     translation_radius: int = 8
     translation_subset: int = 96
 
+    # Scientific ablation switches. Defaults preserve the full theory method.
+    use_opponent_term: bool = True
+    use_adaptive_beta_steps: bool = True
+    use_global_coset: bool = True
+    use_gain_normalization: bool = True
+    use_spatial_icm: bool = True
+    use_sync_search: bool = True
+
     def validated(self) -> "DCTQRTheoryConfig":
         if self.watermark_size != 64:
             raise ValueError("The protocol keeps the input watermark at 64x64.")
@@ -494,7 +502,7 @@ def embed(
     if host.shape[0] % BLOCK_SIZE or host.shape[1] % BLOCK_SIZE:
         raise ValueError("Host dimensions must be divisible by 8.")
 
-    eta = derived_eta()
+    eta = derived_eta() if cfg.use_opponent_term else 0.0
     certificate = compute_theory_certificate(host, eta=eta)
     reference_step = (
         reference_qim_step(BLOCK_SIZE)
@@ -558,10 +566,26 @@ def embed(
         (wm > 127).astype(np.uint8), int(params["arnold_iter"])
     ).ravel()
     payload_beta = certificate.beta[payload_indices]
-    steps = adaptive_steps_from_beta(payload_beta, reference_step)
+    if cfg.use_adaptive_beta_steps:
+        steps = adaptive_steps_from_beta(payload_beta, reference_step)
+    else:
+        steps = np.full(payload_beta.shape, float(reference_step), dtype=np.float64)
 
     carrier = _dct_qim_carrier(output, eta)[payload_indices]
-    encoded, global_flip, coset_stats = _global_coset_optimize(carrier, scrambled, steps)
+    if cfg.use_global_coset:
+        encoded, global_flip, coset_stats = _global_coset_optimize(carrier, scrambled, steps)
+    else:
+        encoded = scrambled.copy()
+        global_flip = 0
+        _, _, full_coset_stats = _global_coset_optimize(carrier, scrambled, steps)
+        base_energy = float(full_coset_stats["original_projection_energy"])
+        coset_stats = {
+            **full_coset_stats,
+            "global_coset_flip": 0,
+            "optimized_projection_energy": base_energy,
+            "projection_energy_ratio": 1.0,
+            "ablation_global_coset_disabled": True,
+        }
 
     execution = np.argsort(payload_indices, kind="stable")
     updates, unresolved = _call_with_realtime_thread_budget(
@@ -591,24 +615,48 @@ def embed(
             "analysis_lift": float(certificate.lift),
             "analysis_lift_rule": "nextafter(max_b ||A_b^0||_F, +inf)",
             "adaptive_step_by_payload": steps.astype(float).tolist(),
-            "adaptive_step_rule": "Delta_b=Delta_0*GM(beta)/beta_b",
+            "adaptive_step_rule": (
+                "Delta_b=Delta_0*GM(beta)/beta_b"
+                if cfg.use_adaptive_beta_steps
+                else "ablation: constant Delta_b=Delta_0"
+            ),
             "reference_step": float(reference_step),
             "reference_step_rule": "N/sqrt(2) from orthonormal differential-carrier RMS geometry",
             "payload_projection": "center_qim",
             "continuous_guard_margin": "Delta_b/2",
             "global_coset_flip": int(global_flip),
             "global_coset_stats": coset_stats,
-            "coset_rule": "global argmin over s in {0,1}",
+            "coset_rule": (
+                "global argmin over s in {0,1}"
+                if cfg.use_global_coset
+                else "ablation: fixed s=0"
+            ),
             "decomposition_gain_reference": gain_reference.astype(float).tolist(),
             "decomposition_gain_gamma": 1.0,
             "decomposition_gain_clip": None,
-            "decomposition_gain_rule": "exact r11 ratio correction under positive scalar gain",
+            "decomposition_gain_rule": (
+                "exact r11 ratio correction under positive scalar gain"
+                if cfg.use_gain_normalization
+                else "ablation: no r11 gain normalization"
+            ),
             "integer_lattice_unit_updates": int(updates),
             "integer_lattice_unresolved": 0,
             "reliability_fusion": "none; beta, balance, and coupling remain separate descriptors",
             "step_partition": "none",
             "pairwise_reliability_sort": False,
-            "map_rule": "degree-normalized four-neighbour sequential ICM to fixed point",
+            "map_rule": (
+                "degree-normalized four-neighbour sequential ICM to fixed point"
+                if cfg.use_spatial_icm
+                else "ablation: direct hard QIM decisions"
+            ),
+            "ablation_switches": {
+                "use_opponent_term": bool(cfg.use_opponent_term),
+                "use_adaptive_beta_steps": bool(cfg.use_adaptive_beta_steps),
+                "use_global_coset": bool(cfg.use_global_coset),
+                "use_gain_normalization": bool(cfg.use_gain_normalization),
+                "use_spatial_icm": bool(cfg.use_spatial_icm),
+                "use_sync_search": bool(cfg.use_sync_search),
+            },
         }
     )
 
@@ -652,7 +700,11 @@ def extract(
     cfg = DCTQRTheoryConfig.from_mapping(key.config)
     params = _normalize_jilp_key(key.base_key)
     attacked = np.asarray(possibly_attacked_rgb, dtype=np.uint8)
-    aligned, sync_meta = _pilot_align(attacked, params, cfg)
+    if cfg.use_sync_search:
+        aligned, sync_meta = _pilot_align(attacked, params, cfg)
+    else:
+        aligned = attacked
+        sync_meta = {"accepted_geometric_correction": False, "ablation_sync_search_disabled": True}
 
     payload_indices, *_ = _schedules_from_key(params)
     steps = np.asarray(params["adaptive_step_by_payload"], dtype=np.float64)
@@ -664,7 +716,10 @@ def extract(
     ratio = np.maximum(ratio, tiny)
 
     carrier = _dct_qim_carrier(aligned, eta)[payload_indices]
-    corrected = carrier / ratio[payload_indices]  # gamma = 1 exactly
+    if cfg.use_gain_normalization:
+        corrected = carrier / ratio[payload_indices]  # gamma = 1 exactly
+    else:
+        corrected = carrier
     units = corrected / steps
     lattice = np.rint(units)
     scrambled_bits = (lattice.astype(np.int64) & 1).astype(np.uint8)
@@ -686,9 +741,11 @@ def extract(
     # directly; the spatial prior is only an uncertainty regularizer.
     identity_error = float(np.max(np.abs(np.log(ratio[payload_indices]))))
     machine_identity = float(np.sqrt(np.finfo(np.float64).eps))
-    if identity_error <= machine_identity:
+    if identity_error <= machine_identity or not cfg.use_spatial_icm:
         recovered = (bit_map > 0).astype(np.uint8) * 255
-        inference_path = "exact_gain_identity"
+        inference_path = (
+            "exact_gain_identity" if identity_error <= machine_identity else "hard_qim_ablation"
+        )
     else:
         recovered = _degree_normalized_icm(data)
         inference_path = "degree_normalized_icm"

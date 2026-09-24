@@ -145,6 +145,51 @@ def _deduplicate(configs: tuple[AttackConfig, ...]) -> tuple[AttackConfig, ...]:
             output.append(cfg)
     return tuple(output)
 
+
+# Curated paper-facing suite: exactly 20 common, well-known image-processing
+# attacks, grouped into five standard robustness categories (4 attacks each).
+# The suite is intentionally moderate: it is meant for the main comparison
+# table, while severe/compound/real-world attacks remain in stress/publication.
+COMMON_20 = (
+    # Compression / quantization
+    _a("common20_jpeg__q70", "jpeg", {"quality": 70}, "compression", "moderate"),
+    _a("common20_jpeg2000__layer7", "jpeg2000", {"quality_layer": 7.0}, "compression", "moderate"),
+    _a("common20_bit_depth__bits6", "bit_depth", {"bits": 6}, "compression", "moderate"),
+    _a("common20_color_quantization__colors64", "color_quantization", {"colors": 64}, "compression", "moderate"),
+
+    # Noise
+    _a("common20_gaussian_noise__sigma1", "gaussian_noise", {"sigma": 1.0, "seed": 123}, "noise", "mild"),
+    _a("common20_salt_pepper__0p005", "salt_pepper", {"amount": 0.005, "seed": 123}, "noise", "moderate"),
+    _a("common20_speckle__var0p005", "speckle_noise", {"variance": 0.005, "seed": 123}, "noise", "moderate"),
+    _a("common20_poisson__peak255", "poisson_noise", {"peak": 255.0, "seed": 123}, "noise", "mild"),
+
+    # Filtering / enhancement
+    _a("common20_median__size3", "median_filter", {"size": 3}, "filtering", "moderate"),
+    _a("common20_average__size3", "average_filter", {"size": 3}, "filtering", "moderate"),
+    _a("common20_gaussian_blur__radius1", "gaussian_blur", {"radius": 1.0}, "filtering", "moderate"),
+    _a("common20_sharpen__factor2", "sharpen", {"factor": 2.0}, "filtering", "moderate"),
+
+    # Geometric / resampling
+    _a("common20_rotation_back__deg1", "rotation_back", {"degrees": 1.0}, "geometric", "mild"),
+    _a("common20_resize__factor0p75", "resize", {"factor": 0.75}, "geometric", "moderate"),
+    _a("common20_crop_resize__keep0p9", "crop_resize", {"keep": 0.90}, "geometric", "moderate"),
+    _a("common20_translation__x4_y4", "translation", {"shift_x": 4, "shift_y": 4}, "geometric", "mild"),
+
+    # Photometric / point processing
+    _a("common20_brightness__factor0p9", "brightness", {"factor": 0.9}, "photometric", "mild"),
+    _a("common20_contrast__factor1p1", "contrast", {"factor": 1.1}, "photometric", "mild"),
+    _a("common20_gamma__1p2", "gamma", {"gamma": 1.2}, "photometric", "moderate"),
+    _a("common20_hist_equalization", "hist_equalization", {}, "photometric", "moderate"),
+)
+
+COMMON_20_GROUPS = {
+    "compression_quantization": tuple(a for a in COMMON_20 if a.category == "compression"),
+    "noise": tuple(a for a in COMMON_20 if a.category == "noise"),
+    "filtering_enhancement": tuple(a for a in COMMON_20 if a.category == "filtering"),
+    "geometric_resampling": tuple(a for a in COMMON_20 if a.category == "geometric"),
+    "photometric_point_processing": tuple(a for a in COMMON_20 if a.category == "photometric"),
+}
+
 # The common suite is intentionally broad but excludes extreme destructive tests.
 COMMON = _deduplicate(
     SANITY + COMPRESSION[:10] + NOISE[:9] + FILTERING[:9] + GEOMETRIC[:14] + PHOTOMETRIC[:11] + OCCLUSION[:4]
@@ -290,6 +335,7 @@ ATTACK_SUITES = {
     "occlusion": OCCLUSION,
     "combined": COMBINED,
     "common": COMMON,
+    "common20": COMMON_20,
     "stress": STRESS,
     "real_world": REAL_WORLD,
     "deformation": DEFORMATION,
@@ -318,6 +364,6 @@ def stress_attacks() -> list[AttackConfig]:
     return list(LEGACY_STRESS)
 
 __all__ = [
-    "ATTACK_SUITES", "get_attack_suite", "list_attack_suites",
+    "ATTACK_SUITES", "COMMON_20", "COMMON_20_GROUPS", "get_attack_suite", "list_attack_suites",
     "moderate_attacks", "stress_attacks",
 ]

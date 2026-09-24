@@ -1,6 +1,6 @@
 # Blind-watermark research package
 
-This repository contains **eight** public 64×64 watermarking proposals,
+This repository contains **nine** public 64×64 watermarking proposals,
 including a six-method QR family with three DCT and three **non-DCT spatial** counterparts,
 plus 16 research baselines and one deterministic attack library under the unified
 `qr64_certified` package.
@@ -10,6 +10,7 @@ plus 16 research baselines and one deterministic attack library under the unifie
 | Canonical ID | Domain constraint | Current role |
 |---|---|---|
 | `dct_qr` | DCT differential carrier + QR certificate | pairwise coset QIM + QR reliability + gain normalization; strongest validated DCT proposal |
+| `dct_qr_theory` | DCT differential carrier + theory-grounded QR certificate | derived opponent coefficient, Neumann-safe lift, beta-adaptive QIM, global coset, exact gain normalization |
 | `dct_qr_direct_r` | DCT → central 4×4 QR | direct QIM on `(R12-R13)/2`; minimum-Frobenius antisymmetric R update |
 | `dct_qr_r11_qim` | DCT → central 4×4 QR | direct parity-QIM on `R11`; useful direct-R11 ablation/proposal |
 | `spatial_qr` | **Spatial luminance only; no DCT/IDCT** | directional spatial carrier + QR reliability + pairwise coset + `R11` gain normalization |
@@ -331,3 +332,7 @@ recall, specificity, F1, balanced accuracy, timings, key size and payload rate.
 
 See [`docs/UNIFIED_BENCHMARK.md`](docs/UNIFIED_BENCHMARK.md) for method selectors,
 attack definitions, result schemas and interpretation rules.
+
+### DCT-QR theory ablations and common-20 benchmark
+
+See `docs/DCT_QR_THEORY_EXPERIMENT_PROTOCOL.md` for the six one-factor ablations, the grouped 20-attack suite, and numerical diagnostics.

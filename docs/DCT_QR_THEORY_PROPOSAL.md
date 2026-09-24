@@ -132,3 +132,7 @@ and updates are sequential until a fixed point. This removes `lambda_MAP=0.33`, 
 ## Extraction terminology
 
 The method requires no original host image, but its key stores adaptive steps, a global coset bit, a QR gain reference, and schedules. It is therefore described as **host-blind, key-assisted extraction**.
+
+## Reproducible ablation and common-20 protocol
+
+The executable one-factor ablations, curated 20-attack main benchmark, and numerical illustrations are documented in `docs/DCT_QR_THEORY_EXPERIMENT_PROTOCOL.md`. Use that protocol for manuscript tables rather than mixing the legacy 15-attack suite with severe stress attacks.

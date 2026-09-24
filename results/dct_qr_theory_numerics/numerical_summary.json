@@ -1,0 +1,85 @@
+{
+  "host": "lenna.bmp",
+  "watermark": "wm.png",
+  "method": "dct_qr_theory",
+  "attack_suite": "common20",
+  "attack_count": 20,
+  "eta": {
+    "derived": 0.06866666666666667,
+    "luminance_norm": 0.6685551585321887,
+    "augmented_norm": 0.6685551585321887
+  },
+  "neumann_lift": {
+    "lambda": 1012.3999282806957,
+    "max_spectral_norm_unlifted": 998.2906443174711,
+    "max_frobenius_norm_unlifted": 1012.3999282806956,
+    "spectral_ratio_max": 0.9860635272987567
+  },
+  "beta_certificate": {
+    "beta_min": 83.5513412440926,
+    "beta_median": 126.21604711165207,
+    "beta_max": 137.43993207460758,
+    "sigma_min_min": 490.05622974300803,
+    "max_beta_over_sigma_min": 0.1710981582076471,
+    "all_beta_le_sigma_min": true
+  },
+  "adaptive_steps": {
+    "reference_step": 5.65685424949238,
+    "min": 5.135626672606779,
+    "q10": 5.53132951894479,
+    "median": 5.5923172781611505,
+    "q90": 5.871334817162666,
+    "max": 8.447981451088008
+  },
+  "embedding": {
+    "psnr": 53.60354886819537,
+    "ssim": 0.9984945238348365,
+    "clean_nc": 1.0,
+    "global_coset_flip": 0,
+    "projection_energy_ratio": 1.0,
+    "integer_lattice_unit_updates": 0,
+    "payload_blocks": 4096,
+    "gain_reference_min": 0.9353187741932881,
+    "gain_reference_median": 34.01042173719243,
+    "gain_reference_max": 869.5019233654677,
+    "clean_inference_path": "exact_gain_identity"
+  },
+  "common20": {
+    "mean_nc": 0.9754823022517174,
+    "q10_nc": 0.953994636401894,
+    "min_nc": 0.7318320608521597,
+    "mean_ber": 0.02490234375,
+    "by_group": {
+      "compression_quantization": {
+        "attack_count": 4,
+        "mean_nc": 0.9926275291687556,
+        "min_nc": 0.9834020601227464,
+        "mean_ber": 0.00738525390625
+      },
+      "noise": {
+        "attack_count": 4,
+        "mean_nc": 0.9666483527996645,
+        "min_nc": 0.9335154471595974,
+        "mean_ber": 0.03314208984375
+      },
+      "filtering_enhancement": {
+        "attack_count": 4,
+        "mean_nc": 0.9888855597883861,
+        "min_nc": 0.9856692056612139,
+        "mean_ber": 0.01116943359375
+      },
+      "geometric_resampling": {
+        "attack_count": 4,
+        "mean_nc": 0.9318638472080896,
+        "min_nc": 0.7318320608521597,
+        "mean_ber": 0.0701904296875
+      },
+      "photometric_point_processing": {
+        "attack_count": 4,
+        "mean_nc": 0.9973862222936914,
+        "min_nc": 0.9902734277375501,
+        "mean_ber": 0.00262451171875
+      }
+    }
+  }
+}

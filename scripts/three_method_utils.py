@@ -13,6 +13,7 @@ from qr64_certified import (
     DCT_QR,
     DCT_QR_DIRECT_R,
     DCT_QR_R11_QIM,
+    DCT_QR_THEORY,
     DCT_SCHUR_RESCUE,
     SPATIAL_CD_DETQR,
     SPATIAL_QR,
@@ -21,6 +22,7 @@ from qr64_certified import (
     DirectSchurRescueConfig,
     DCTQRDirectRConfig,
     DCTQRR11QIMConfig,
+    DCTQRTheoryConfig,
     SpatialQRConfig,
     SpatialQRDirectRConfig,
     SpatialQRR11QIMConfig,
@@ -33,7 +35,7 @@ from qr64_certified.attacks.types import AttackConfig
 from qr64_certified.attacks import apply_attack
 from qr64_certified.common.metrics import ber, image_quality_metrics, nc, ncc, psnr, ssim, watermark_metrics
 
-METHODS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, SPATIAL_QR, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
+METHODS = (DCT_QR, DCT_QR_DIRECT_R, DCT_QR_R11_QIM, DCT_QR_THEORY, SPATIAL_QR, SPATIAL_QR_DIRECT_R, SPATIAL_QR_R11_QIM, DCT_SCHUR_RESCUE, SPATIAL_CD_DETQR)
 
 
 def config_to_dict(config: Any) -> dict[str, Any]:
@@ -51,6 +53,8 @@ def config_from_dict(method: str, values: Mapping[str, Any] | None):
         return DCTQRDirectRConfig.from_mapping(raw)
     if method == DCT_QR_R11_QIM:
         return DCTQRR11QIMConfig.from_mapping(raw)
+    if method == DCT_QR_THEORY:
+        return DCTQRTheoryConfig.from_mapping(raw)
     if method == SPATIAL_QR:
         return SpatialQRConfig.from_mapping(raw)
     if method == SPATIAL_QR_DIRECT_R:

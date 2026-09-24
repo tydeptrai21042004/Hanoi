@@ -1,0 +1,264 @@
+{
+  "method_id": "dct_qr_theory",
+  "host": "lenna.bmp",
+  "watermark": "wm.png",
+  "attack_suite": "common20",
+  "attack_count": 20,
+  "one_factor_at_a_time": true,
+  "variants": [
+    {
+      "variant": "full",
+      "ablations": [],
+      "psnr": 53.60354886819537,
+      "ssim": 0.9984945238348365,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9754823022517174,
+      "q10_nc": 0.953994636401894,
+      "min_nc": 0.7318320608521597,
+      "mean_ber": 0.02490234375,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": true,
+        "use_adaptive_beta_steps": true,
+        "use_global_coset": true,
+        "use_gain_normalization": true,
+        "use_spatial_icm": true,
+        "use_sync_search": true
+      }
+    },
+    {
+      "variant": "no_opponent_term",
+      "ablations": [
+        "no_opponent_term"
+      ],
+      "psnr": 53.67623698405373,
+      "ssim": 0.9985256242059816,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9751538126701099,
+      "q10_nc": 0.9612461746852021,
+      "min_nc": 0.7164035925712081,
+      "mean_ber": 0.0249755859375,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [
+          "no_opponent_term"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": false,
+        "use_adaptive_beta_steps": true,
+        "use_global_coset": true,
+        "use_gain_normalization": true,
+        "use_spatial_icm": true,
+        "use_sync_search": true
+      }
+    },
+    {
+      "variant": "uniform_step",
+      "ablations": [
+        "uniform_step"
+      ],
+      "psnr": 53.665795116104604,
+      "ssim": 0.9984831808281771,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9748249304915128,
+      "q10_nc": 0.9541232627452331,
+      "min_nc": 0.7179895150279701,
+      "mean_ber": 0.0252685546875,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [
+          "uniform_step"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": true,
+        "use_adaptive_beta_steps": false,
+        "use_global_coset": true,
+        "use_gain_normalization": true,
+        "use_spatial_icm": true,
+        "use_sync_search": true
+      }
+    },
+    {
+      "variant": "no_global_coset",
+      "ablations": [
+        "no_global_coset"
+      ],
+      "psnr": 53.60354886819537,
+      "ssim": 0.9984945238348365,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9754823022517174,
+      "q10_nc": 0.953994636401894,
+      "min_nc": 0.7318320608521597,
+      "mean_ber": 0.02490234375,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": true,
+        "use_adaptive_beta_steps": true,
+        "use_global_coset": true,
+        "use_gain_normalization": true,
+        "use_spatial_icm": true,
+        "use_sync_search": true
+      },
+      "note": "Lenna selected global_coset_flip=0 in the full method; this ablation is exactly inactive on this host."
+    },
+    {
+      "variant": "no_gain_normalization",
+      "ablations": [
+        "no_gain_normalization"
+      ],
+      "psnr": 53.60354886819537,
+      "ssim": 0.9984945238348365,
+      "clean_nc": 1.0,
+      "mean_nc": 0.8642490205411189,
+      "q10_nc": 0.6146174788004984,
+      "min_nc": 0.49094748287526446,
+      "mean_ber": 0.13135986328125,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [
+          "no_gain_normalization"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": true,
+        "use_adaptive_beta_steps": true,
+        "use_global_coset": true,
+        "use_gain_normalization": false,
+        "use_spatial_icm": true,
+        "use_sync_search": true
+      }
+    },
+    {
+      "variant": "no_spatial_icm",
+      "ablations": [
+        "no_spatial_icm"
+      ],
+      "psnr": 53.60354886819537,
+      "ssim": 0.9984945238348365,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9312510999567684,
+      "q10_nc": 0.8400851348635382,
+      "min_nc": 0.6391541234024982,
+      "mean_ber": 0.06912841796875,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [
+          "no_spatial_icm"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": true,
+        "use_adaptive_beta_steps": true,
+        "use_global_coset": true,
+        "use_gain_normalization": true,
+        "use_spatial_icm": false,
+        "use_sync_search": true
+      }
+    },
+    {
+      "variant": "no_sync_search",
+      "ablations": [
+        "no_sync_search"
+      ],
+      "psnr": 53.60354886819537,
+      "ssim": 0.9984945238348365,
+      "clean_nc": 1.0,
+      "mean_nc": 0.9649520946272989,
+      "q10_nc": 0.9185009800461815,
+      "min_nc": 0.7371283577972448,
+      "mean_ber": 0.035302734375,
+      "flag_report": {
+        "method_id": "dct_qr_theory",
+        "ablations": [
+          "no_sync_search"
+        ],
+        "hyperparameter_overrides": {}
+      },
+      "configuration": {
+        "seed": 2026,
+        "reference_step": null,
+        "pilot_count": 128,
+        "pilot_step": 6.0,
+        "pilot_rho_frac": 0.49,
+        "watermark_size": 64,
+        "sync_quick_accept": 0.72,
+        "translation_radius": 8,
+        "translation_subset": 96,
+        "use_opponent_term": true,
+        "use_adaptive_beta_steps": true,
+        "use_global_coset": true,
+        "use_gain_normalization": true,
+        "use_spatial_icm": true,
+        "use_sync_search": false
+      }
+    }
+  ]
+}
